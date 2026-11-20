@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Method &amp; Data Sources — Arena Leaderboard Value Analyzer</title>
+<meta name="description" content="How the cost-quality Pareto frontier is computed from arena.ai WebDev leaderboards: data sources, price verification, peak/off-peak rules, cache model, and limitations.">
+<link rel="canonical" href="https://modelprice.damolabs.dev/method.html">
+<style>
+:root{
+  --bg:#0b0e14; --panel:#121722; --panel2:#0f141d; --line:#222b3a; --line2:#2e3a4d;
+  --text:#e6edf7; --dim:#93a1b8; --dim2:#67748b;
+  --accent:#4cc9f0; --good:#3ddc97; --warn:#ffd166; --bad:#ff6b6b; --gold:#f5c542;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",Roboto,sans-serif;
+  font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+.wrap{max-width:1320px;margin:0 auto;padding:20px 18px 80px}
+header.top{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;justify-content:space-between;
+  border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:16px}
+h1{font-size:21px;margin:0 0 4px;letter-spacing:.2px}
+h1 .sub{color:var(--dim);font-weight:400;font-size:14px}
+.tagline{color:var(--dim);font-size:12.5px;max-width:760px}
+.pill{display:inline-block;padding:2px 8px;border:1px solid var(--line2);border-radius:999px;
+  font-size:11px;color:var(--dim);background:var(--panel2);white-space:nowrap}
+.pill.gold{color:var(--gold);border-color:#5a4a1c}
+.pill.good{color:var(--good);border-color:#1d5540}
+.pill.warn{color:var(--warn);border-color:#5c4c1e}
+.pill.bad{color:var(--bad);border-color:#5c2b2b}
+.grid{display:grid;grid-template-columns:340px 1fr;gap:16px;align-items:start}
+@media(max-width:1080px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}
+.panel h2{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--dim2);
+  margin:0 0 10px;font-weight:600}
+.panel h2:not(:first-child){margin-top:18px}
+label.fld{display:block;font-size:12px;color:var(--dim);margin:0 0 5px}
+select,input[type=number],input[type=text],textarea{width:100%;background:var(--panel2);color:var(--text);
+  border:1px solid var(--line2);border-radius:8px;padding:7px 9px;font-size:13px;font-family:inherit}
+select:focus,input:focus,textarea:focus{outline:none;border-color:var(--accent)}
+textarea{font-family:var(--mono);font-size:11px;line-height:1.45;resize:vertical;min-height:74px}
+.row{display:flex;gap:8px;align-items:center}
+.row>*{min-width:0}
+.seg{display:flex;background:var(--panel2);border:1px solid var(--line2);border-radius:8px;padding:2px;gap:2px}
+.seg button{flex:1;background:transparent;border:0;color:var(--dim);padding:6px 8px;border-radius:6px;
+  cursor:pointer;font-size:12px;font-family:inherit;white-space:nowrap}
+.seg button.on{background:var(--line2);color:var(--text)}
+.seg button:hover:not(.on){color:var(--text)}
+.btn{background:var(--panel2);border:1px solid var(--line2);color:var(--text);padding:7px 12px;
+  border-radius:8px;cursor:pointer;font-size:12.5px;font-family:inherit;white-space:nowrap}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:#123a4a;border-color:#1d5f77;color:#a9e9ff}
+.btn.primary:hover{background:#164a5e;color:#fff}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.hint{font-size:11.5px;color:var(--dim2);margin-top:6px;line-height:1.5}
+.hint b{color:var(--dim);font-weight:600}
+/* range slider */
+.rng{position:relative;height:34px;margin:6px 0 2px;touch-action:none}
+.rng .track{position:absolute;left:0;right:0;top:15px;height:4px;background:var(--line2);border-radius:2px}
+.rng .fill{position:absolute;top:15px;height:4px;background:linear-gradient(90deg,#2b7f9c,var(--accent));border-radius:2px}
+.rng .hi{position:absolute;top:15px;height:4px;background:rgba(245,197,66,.35);border-radius:2px}
+.rng .h{position:absolute;top:8px;width:18px;height:18px;margin-left:-9px;border-radius:50%;
+  background:#fff;border:3px solid var(--accent);cursor:grab;box-shadow:0 1px 6px rgba(0,0,0,.6)}
+.rng .h:active{cursor:grabbing;transform:scale(1.08)}
+.rng .h.max{border-color:var(--gold)}
+.rng .lab{position:absolute;top:-11px;transform:translateX(-50%);font-size:10.5px;color:var(--dim);
+  font-family:var(--mono);white-space:nowrap;pointer-events:none}
+/* winner card */
+.win{background:linear-gradient(180deg,#131b28,#0f141d);border:1px solid var(--line2);border-radius:12px;
+  padding:16px;position:relative;overflow:hidden}
+.win:before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--gold)}
+.win .k{font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--dim2);margin-bottom:8px}
+.win .nm{font-size:22px;font-weight:650;letter-spacing:-.2px;line-height:1.25}
+.win .nm .rank{color:var(--gold);font-family:var(--mono);font-size:15px;margin-right:8px}
+.win .by{color:var(--dim);font-size:12.5px;margin-top:3px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:10px;margin-top:14px}
+.kpi{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:9px 10px}
+.kpi .t{font-size:10.5px;color:var(--dim2);letter-spacing:.04em}
+.kpi .v{font-size:17px;font-family:var(--mono);font-weight:600;margin-top:2px}
+.kpi .v small{font-size:11px;color:var(--dim);font-weight:400}
+.kpi.good .v{color:var(--good)} .kpi.gold .v{color:var(--gold)} .kpi.accent .v{color:var(--accent)}
+.verdict{margin-top:13px;padding:11px 12px;background:var(--panel2);border:1px solid var(--line);
+  border-radius:9px;font-size:12.8px;color:var(--dim);line-height:1.65}
+.verdict b{color:var(--text);font-weight:600}
+.verdict .em{color:var(--good);font-weight:600}
+.verdict .warn{color:var(--warn);font-weight:600}
+/* charts */
+.chart{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:8px 6px 2px}
+.chart .ttl{font-size:12px;color:var(--dim);padding:2px 6px 6px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.chart .ttl .lg{font-size:11px;color:var(--dim2)}
+svg{display:block;width:100%;height:auto;overflow:visible}
+svg text{font-family:var(--mono);font-size:9.5px;fill:var(--dim2)}
+svg .lbl{font-size:10px;fill:var(--dim)}
+svg .lblw{font-size:10.5px;fill:#fff;font-weight:600}
+svg .grid-l{stroke:var(--line);stroke-width:1}
+svg .ax{stroke:var(--line2);stroke-width:1}
+svg .dot{cursor:pointer}
+svg .dot:hover circle{stroke:#fff;stroke-width:2}
+svg .frontier{fill:none;stroke:var(--good);stroke-width:1.8;stroke-dasharray:4 3;opacity:.85}
+svg .band{fill:rgba(76,201,240,.09);stroke:rgba(76,201,240,.4);stroke-width:1;stroke-dasharray:3 3}
+svg .tline{stroke:var(--gold);stroke-width:1.5;stroke-dasharray:5 3}
+svg .stepline{fill:none;stroke:var(--accent);stroke-width:2}
+svg .stepfill{fill:rgba(76,201,240,.10);stroke:none}
+svg .seg-hit{cursor:ew-resize;stroke:transparent;stroke-width:16;fill:none}
+svg .seg-hit:hover{stroke:rgba(245,197,66,.25)}
+svg .ci{stroke-width:1.4;opacity:.55}
+/* table */
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th,td{padding:7px 9px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--dim2);font-weight:600;
+  cursor:pointer;user-select:none;position:sticky;top:0;background:var(--panel);z-index:2}
+th:hover{color:var(--text)}
+th .ar{opacity:.5;font-size:9px}
+td.num,th.num{text-align:right;font-family:var(--mono)}
+tbody tr{transition:background .1s}
+tbody tr:hover{background:#161d2a}
+tbody tr.in{opacity:1}
+tbody tr.out{opacity:.28}
+tbody tr.winner{background:rgba(245,197,66,.10);box-shadow:inset 3px 0 0 var(--gold)}
+tbody tr.pareto td.nm:after{content:"◆";color:var(--good);margin-left:6px;font-size:9px}
+td.nm{max-width:290px;overflow:hidden;text-overflow:ellipsis}
+td.nm .lab{color:var(--dim2);font-size:11px}
+.scroll{max-height:520px;overflow:auto;border:1px solid var(--line);border-radius:10px}
+details{border:1px solid var(--line);border-radius:10px;background:var(--panel);margin-top:16px}
+details summary{cursor:pointer;padding:11px 14px;font-size:12.5px;color:var(--dim);list-style:none}
+details summary::-webkit-details-marker{display:none}
+details summary:before{content:"▸ ";color:var(--dim2)}
+details[open] summary:before{content:"▾ "}
+details .bd{padding:0 14px 14px;border-top:1px solid var(--line)}
+.note{font-size:12.2px;color:var(--dim);line-height:1.7}
+.note b{color:var(--text)}
+.note code{font-family:var(--mono);font-size:11.5px;background:var(--panel2);padding:1px 5px;border-radius:4px;color:var(--accent)}
+.note ol,.note ul{padding-left:20px;margin:8px 0}
+.note li{margin:5px 0}
+.mono{font-family:var(--mono)}
+.footer{margin-top:22px;color:var(--dim2);font-size:11.5px;border-top:1px solid var(--line);padding-top:12px}
+.badge-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.empty{padding:26px;text-align:center;color:var(--dim2);font-size:13px}
+.playbar{display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap}
+input[type=range].spd{width:110px;accent-color:var(--accent)}
+.tierstable td{font-size:12px}
+.tierstable tr:first-child td{color:var(--dim2)}
+</style>
+</head>
+<body><div class="wrap" style="max-width:860px">
+
+<h1>Method &amp; data sources</h1>
+<p class="tagline">How the frontier is computed, where every number comes from, and what this tool deliberately does <i>not</i> claim.</p>
+
+<h2>The question</h2>
+<p>Comparison sites show prices; leaderboards show scores. This tool joins them and answers a decision-grade question: <b>given the minimum Arena Score you can accept (threshold T), which model has the lowest measured cost per task?</b> Formally <code>C(T) = min{cost : score &ge; T}</code>. Sweeping T downward yields the cost-quality Pareto frontier &mdash; a staircase where each flat segment is the score range one model rules. The table also reports the <b>marginal price</b> of moving up one tier (&Delta;cost/&Delta;score in $/point), which is the number purchasing decisions actually turn on.</p>
+
+<h2>Three definitions of &ldquo;best value&rdquo;</h2>
+<ul>
+<li><b>Threshold</b> (default): cheapest model with score &ge; T. The only definition that is correct constrained optimization.</li>
+<li><b>Score per $</b>: strongly biased toward cheap models because Arena&rsquo;s Bradley-Terry scores carry a ~1200 baseline offset.</li>
+<li><b>Excess score per $</b>: subtracts the 1200 floor first; closer to marginal value, still biased.</li>
+</ul>
+
+<h2>Data sources &amp; snapshot dates</h2>
+<ul>
+<li>Scores and Cost/Task: the public <a href="https://arena.ai/leaderboard/code/webdev">arena.ai WebDev leaderboards</a> and sub-boards, snapshot <b>2026-11-11</b> (scraped 2026-11-14). For automated refresh prefer the official machine-readable mirror: <a href="https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset">lmarena-ai/leaderboard-dataset on Hugging Face</a>.</li>
+<li>Prices: each vendor&rsquo;s first-party API list price (input/output per $1M tokens), verified item-by-item against <a href="https://benchr.org/pricing">benchr.org/pricing</a> (2026-09-11 snapshot). Open models are listed at their vendor-hosted API price, not self-hosting cost.</li>
+<li>Cost/Task (P50) = median measured token usage of an Arena task &times; list price &mdash; a cache-miss basis. P50 hides the tail (P95 can be 5&ndash;10&times;) and covers token spend only.</li>
+</ul>
+
+<h2>Price as a function of time</h2>
+<p>List prices change by hour and by calendar. Verified rules applied by default: <b>DeepSeek peak/off-peak</b> (peak = weekdays 01:00&ndash;04:00 &amp; 06:00&ndash;10:00 UTC, 2&times;; otherwise &frac12;&times;) &mdash; the board itself mixes peak-priced and off-peak-priced rows of the same family; <b>GLM-5.3-Flash promo expiry</b> (2026-09-09: $0.05/$0.18 &rarr; $0.15/$0.50); <b>Gemini 4 Carbon/Argon hike on 2026-12-01</b> ($2/$10 &rarr; $4/$20). Uncertain rules (DeepSeek V4-Flash peak split; two models 2&times; off vs a third-party index) are included but off by default.</p>
+
+<h2>Cache model</h2>
+<p>Leaderboard costs assume 0% cache hits, which systematically overestimates agent workloads. Effective input price = <code>(1&minus;h)&middot;pin&middot;wm + h&middot;pin&middot;ratio</code>; output is never discounted. Cache read prices are stored as a ratio of list input price (DeepSeek 2&ndash;3.3%, MiMo 0.8&ndash;2%, Kimi 10&ndash;20%, GLM 18&ndash;20%, Hy3/Grok 25%, Anthropic 2.5&ndash;10%, OpenAI 5&ndash;10%, Gemini 5%, Mistral 10.3%; unknown &rarr; 10% estimate, labeled). Write multiplier <code>wm</code> = 1.25&times; for Anthropic/OpenAI (model names starting Claude/GPT-), else 1.0&times;. At h=95% top models drop 59&ndash;79% in effective cost and the frontier itself re-orders.</p>
+
+<h2>Strict CI mode</h2>
+<p>Adjacent tiers whose 95% CIs overlap are merged (cheaper model kept) so you don&rsquo;t pay for statistical noise. Note this is a conservative <i>overlap screen</i>, not a formal test of score differences.</p>
+
+<h2>Limitations</h2>
+<ul>
+<li>Scores are a snapshot; capability drifts as boards update. Prices drift weekly.</li>
+<li>P50 task cost is a workload mix; your workload differs. Use the paste-to-extend feature with your own bills.</li>
+<li>The all-license board covers only its top 41 rows; the open-source boards are complete.</li>
+<li>Confidence: every number here traces to a public page; corrections carry per-rule sources in the tool.</li>
+</ul>
+
+<h2>Attribution &amp; compliance</h2>
+<p>Leaderboard data &copy; LMArena (arena.ai). This is an independent analysis of publicly listed numbers; no affiliation with arena.ai. Don&rsquo;t scrape arena.ai at high frequency &mdash; use the Hugging Face dataset for automation. If you publish derived conclusions, attribute the source and snapshot dates.</p>
+<p><a href="/">← Back to the tool</a> · <a href="/data/v1/all.json">JSON export</a> · <a href="/llms.txt">llms.txt</a></p>
+
+</div></body></html>
