@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://modelprice.damolabs.dev/sitemap.xml
+Sitemap: https://modelprice.damolabs.app/sitemap.xml

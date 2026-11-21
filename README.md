@@ -4,7 +4,7 @@ Public, static, single-page tool answering one question with arena.ai (LMArena) 
 
 > **Given the minimum Arena Score I can accept, which model is the cheapest that clears it — and how much does the next tier cost per point?**
 
-Interactive: https://modelprice.damolabs.dev (planned) · Method: `/method.html` · Machine-readable export for AI agents: `/data/v1/all.json` + `/llms.txt`
+Interactive: https://modelprice.damolabs.app · Method: `/method.html` · Machine-readable export for AI agents: `/data/v1/all.json` + `/llms.txt`
 
 ## What it computes
 
@@ -32,7 +32,7 @@ Interactive: https://modelprice.damolabs.dev (planned) · Method: `/method.html`
 # 2. Re-parse + reinject into index.html:
 python3 parse.py
 # 3. Rebuild site artifacts (pass the live domain so llms.txt/sitemap get absolute URLs):
-python3 build_site.py https://modelprice.damolabs.dev
+python3 build_site.py https://modelprice.damolabs.app
 # 4. Regression suite (builds test/run.js from the served HTML first):
 python3 test/build.py && node --max-old-space-size=4096 test/run.js
 ```

@@ -2,8 +2,8 @@
 > Answers one question with arena.ai (LMArena) WebDev leaderboard data: given a minimum acceptable Arena Score T, which model has the lowest real cost per task? Includes a threshold-based Pareto frontier ("tier ladder"), marginal $/point between tiers, peak/off-peak and promo price corrections, and a cache-hit cost model.
 
 ## Data (machine-readable)
-- [All data, JSON v1](https://modelprice.damolabs.dev/data/v1/all.json): 7 leaderboards, 338 model rows, computed Pareto frontiers with score ranges and marginal prices, price-event rules, cache ratios. `leaderboards[].frontier` = the tier ladder; `leaderboards[].models` = raw rows.
+- [All data, JSON v1](https://modelprice.damolabs.app/data/v1/all.json): 7 leaderboards, 338 model rows, computed Pareto frontiers with score ranges and marginal prices, price-event rules, cache ratios. `leaderboards[].frontier` = the tier ladder; `leaderboards[].models` = raw rows.
 
 ## Pages
-- [Interactive tool](https://modelprice.damolabs.dev/): drag the score threshold, toggle price scenarios and cache hit rate, strict CI mode.
-- [Method & data sources](https://modelprice.damolabs.dev/method.html): definitions, formulas, price verification, limitations.
+- [Interactive tool](https://modelprice.damolabs.app/): drag the score threshold, toggle price scenarios and cache hit rate, strict CI mode.
+- [Method & data sources](https://modelprice.damolabs.app/method.html): definitions, formulas, price verification, limitations.
