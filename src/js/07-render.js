@@ -120,6 +120,17 @@ const mk=(t,a)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAt
 const tx=(x,y,str,cls,anchor,fs)=>{const t=mk('text',{x,y,class:cls||'','text-anchor':anchor||'start'});t.textContent=str;if(fs)t.setAttribute('font-size',fs);return t;};
 /* 图表字号三元组：FS 基准 / LFS 标签 / WFS 白色高亮标签 */
 function chartFS(w){ const FS=w<620?12.5:9.5; return {FS,LFS:FS+0.5,WFS:FS+1}; }
+/* 安全测宽：clientWidth 与父容器 content 宽取小者。首渲发生在布局稳定前时（fresh navigation
+   预布局期），clientWidth 可能读到异常大值并经 viewBox 回写形成自锁反馈环 —— 用父容器宽钳住。 */
+function chartW(svg,fallback){
+  const p=svg.parentElement, cw=svg.clientWidth||0;
+  let pc=0;
+  if(p&&p.clientWidth&&typeof getComputedStyle==='function'){
+    const cs=getComputedStyle(p);
+    pc=p.clientWidth-parseFloat(cs.paddingLeft||'0')-parseFloat(cs.paddingRight||'0');
+  }
+  return Math.max(340,Math.round(Math.min(cw||fallback, pc||cw||fallback)));
+}
 function logScale(v,lo,hi){ const a=Math.log10(lo),b=Math.log10(hi); return (Math.log10(v)-a)/(b-a); }
 function niceTicks(lo,hi){
   const out=[]; const e0=Math.floor(Math.log10(lo)), e1=Math.ceil(Math.log10(hi));
@@ -131,7 +142,7 @@ function renderScatter(){
   const svg=$('#scat'); svg.innerHTML='';
   const pts=cur.filter(m=>m.c!=null&&m.c>0);
   if(pts.length<2){ svg.appendChild(tx(20,40,'Need at least 2 models with cost data','lbl','start',12)); return; }
-  const w=Math.max(340,Math.round(svg.clientWidth||LX.w)), h=LX.h, m=LX.m, {FS,LFS,WFS}=chartFS(w);
+  const w=chartW(svg,LX.w), h=LX.h, m=LX.m, {FS,LFS,WFS}=chartFS(w);
   svg.setAttribute('viewBox',`0 0 ${w} ${h}`);   // viewBox 跟随容器宽，否则画布坐标与视口错位
   const narrow=w<620;
   const x0=m.l, x1=w-m.r, y0=h-m.b, y1=m.t;
@@ -224,7 +235,7 @@ function renderSteps(){
     svg.appendChild(tx(20,40,'The step chart only exists in ① Threshold mode — it is exactly the curve "threshold T → cheapest model of that tier"','lbl','start',12));
     return;
   }
-  const w=Math.max(340,Math.round(svg.clientWidth||900)),h=250,m={t:20,r:16,b:42,l:60};
+  const w=chartW(svg,900),h=250,m={t:20,r:16,b:42,l:60};
   svg.setAttribute('viewBox',`0 0 ${w} ${h}`);   // viewBox 跟随容器宽，否则画布坐标与视口错位
   const {FS,LFS,WFS}=chartFS(w); const narrow=w<620;
   const x0=m.l,x1=w-m.r,y0=h-m.b,y1=m.t;

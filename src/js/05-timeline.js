@@ -39,7 +39,7 @@ function renderTimeline(){
     svg.appendChild(tx(20,40,'No model qualifies at the current threshold','lbl','start',12)); return;
   }
   const baseC=baselineCostAt(T,models,S.hour,S.dow,S.dateISO);
-  const W=Math.max(340,Math.round(svg.clientWidth||900)),H=300,g={t:18,r:20,b:48,l:66};
+  const W=chartW(svg,900),H=300,g={t:18,r:20,b:48,l:66};
   svg.setAttribute('viewBox',`0 0 ${W} ${H}`);   // viewBox 跟随容器宽，否则画布坐标与视口错位
   const {FS,LFS,WFS}=chartFS(W); const narrow=W<620;
   const x0=g.l,x1=W-g.r,y0=H-g.b,y1=g.t;

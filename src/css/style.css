@@ -31,12 +31,16 @@ h1 .sub{color:var(--dim);font-weight:400;font-size:14px}
 .intro p{margin:0;color:var(--dim);font-size:13px}
 .intro .lnk{color:var(--dim2);font-size:12px;margin-top:4px}
 
-.grid{display:grid;grid-template-columns:372px minmax(0,1fr);gap:18px;align-items:start}
-/* min-width:0 = grid item 经典坑：不设的话表格（nowrap 列很宽）的 min-content 会把
-   单列轨道撑到 ~1400px，手机直接出现 body 级横向滚动 */
-.grid>.ctrl,.grid>.res{min-width:0}
+.grid{display:grid;gap:18px;align-items:start}
+/* 三层防横滚（2026-11-22 双端实测复发的纵深修复）：
+   ① minmax(0,1fr)：1fr 的下限是 auto（=min-content），nowrap 表格/图表固有宽会顶大轨道 → 显式 min 0；
+   ② item min-width:0：grid item 的 automatic minimum size 归零；
+   ③ overflow-x:clip：即便以上都失效，子内容的 layout 溢出也不再进页面滚动区域
+     （clip 而非 hidden —— hidden 会把 overflow-y 配对成 auto 产生意外竖滚条） */
+.grid{grid-template-columns:372px minmax(0,1fr)}
+.grid>.ctrl,.grid>.res{min-width:0;overflow-x:clip}
 @media(max-width:1240px){.grid{grid-template-columns:minmax(300px,340px) minmax(0,1fr)}}
-@media(max-width:940px){.grid{grid-template-columns:1fr}}
+@media(max-width:940px){.grid{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:720px){
   /* 手机：答案区提前，控制台整块沉底（分组收起，需要时展开） */
   .grid>.ctrl{order:2}
@@ -117,7 +121,9 @@ textarea{font-family:var(--mono);font-size:11px;line-height:1.45;resize:vertical
 .verdict .warn{color:var(--warn);font-weight:600}
 
 /* charts（SVG 宽度由 JS 按容器写入 viewBox，文字字号同步自适应） */
-.chart{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:8px 6px 2px}
+.chart{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:8px 6px 2px;
+  overflow:hidden}   /* 裁 SVG ink 溢出（长标签/阈值线），任何情况下不外溢 */
+svg{display:block;width:100%;max-width:100%;height:auto;overflow:visible}
 .chart .ttl{font-size:12px;color:var(--dim);padding:2px 6px 6px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .chart .ttl .lg{font-size:11px;color:var(--dim2)}
 svg{display:block;width:100%;height:auto;overflow:visible}

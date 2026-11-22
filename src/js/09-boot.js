@@ -142,7 +142,18 @@ Kimi K3.1 Pro <span class="mono">$2/$10</span>, Kimi K3 <span class="mono">$3/$1
     PRICE_EVENTS.forEach(e=>{ S.evState[e.id]=on.has(e.id); }); }
   syncPriceUI();
   if(p.get('lo')&&p.get('hi')){ S.lo=+p.get('lo'); S.hi=+p.get('hi'); }
-  recompute();
+  /* 首渲延到首帧（布局稳定后再量容器宽）：fresh navigation 下同步首渲会在预布局期量错宽度。
+     图表宽渲染在 render 内部，recompute 的数据计算不依赖布局，rAF 只挪渲染时机。 */
+  const onResize=()=>{
+    if(typeof window==='undefined'||!window.addEventListener) return;
+    let t=null;
+    window.addEventListener('resize',()=>{ clearTimeout(t); t=setTimeout(()=>{ if(cur)render(); },180); });
+  };
+  if(typeof requestAnimationFrame==='function')
+    requestAnimationFrame(()=>{ recompute(); onResize(); });   // 首帧后再渲：布局稳定，量宽不再错
+  else{
+    recompute(); onResize();
+  }
 })();
 
 /* ---------- responsive boot ----------
@@ -164,8 +175,4 @@ Kimi K3.1 Pro <span class="mono">$2/$10</span>, Kimi K3 <span class="mono">$3/$1
   if(mq.addEventListener) mq.addEventListener('change',apply);
   else if(mq.addListener) mq.addListener(apply);
 })();
-/* 图表按容器宽度渲染 → 窗口尺寸变化后重画一次（防抖）。 */
-if(typeof window!=='undefined'&&window.addEventListener){
-  let rT=null;
-  window.addEventListener('resize',()=>{ clearTimeout(rT); rT=setTimeout(()=>{ if(cur)render(); },180); });
-}
+
