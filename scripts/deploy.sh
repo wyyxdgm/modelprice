@@ -79,7 +79,7 @@ echo "$csp" | grep -q "script-src 'self'" || { echo "❌ CSP 缺 script-src 'sel
 ss=$(echo "$csp" | sed -n 's/.*script-src \([^;]*\).*/\1/p')
 [[ "$ss" == *'unsafe-inline'* ]] && { echo "❌ script-src 仍含 unsafe-inline: $csp"; fail=1; } || true
 
-# ④ all.json 可解析且 boards=7、models>=330（榜单新增模型是常态, 2026-11-22 刷新 338→340; 下限防数据丢失）
+# ④ all.json 可解析且 boards=8、models>=420（榜单新增模型是常态; 下限防数据丢失；2026-11-22 起含 t2i）
 js=$(smoke_curl -s --max-time 20 "$B/data/v1/all.json")
 echo "$js" | python3 -c "
 import json,sys
@@ -87,9 +87,10 @@ d=json.load(sys.stdin)
 bs=d['leaderboards'] if 'leaderboards' in d else d.get('boards',[])
 n=len(bs)
 m=sum(len(b.get('models',[])) for b in bs)
-print(f'  all.json: boards={n} models={m}')
-sys.exit(0 if n==7 and m>=330 else 1)
-" || { echo "❌ all.json 解析/计数不符（期望 boards=7 models>=330）"; fail=1; }
+units={b['id']:b.get('unit','task') for b in bs}
+print(f'  all.json: boards={n} models={m} t2i_unit={units.get(\"t2i\")}')
+sys.exit(0 if n==8 and m>=420 and units.get('t2i')=='image' else 1)
+" || { echo "❌ all.json 解析/计数不符（期望 boards=8 models>=420 且 t2i unit=image）"; fail=1; }
 
 # ⑤ 证书链无告警（curl -v 无 SSL error 即通过，--fail 挂了会非零）
 smoke_curl -s --max-time 20 -o /dev/null "$B/" || { echo "❌ TLS/请求失败"; fail=1; }
