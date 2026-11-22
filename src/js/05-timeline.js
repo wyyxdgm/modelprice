@@ -3,7 +3,7 @@
 /* ==================== ③ 一周 168 小时价格时间轴 ====================
    横轴 = Mon 00:00 → Sun 23:00（UTC），纵轴 = 该时刻满足门槛 T 的最低成本 C(T)。
    因为 DeepSeek 的峰谷价按「工作日 + 小时」循环，一周正好能画出完整的节律。 */
-const DOWS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const DOWS=T('dows').split(',');
 function peakAtAny(hour,dow){
   return PRICE_EVENTS.some(ev=> ev.kind==='tod' && S.evState[ev.id] && isPeakAt(ev,hour,dow));
 }
@@ -31,14 +31,15 @@ function baselineCostAt(T,models,hour,dow,dateISO){
 }
 function renderTimeline(){
   const svg=$('#tl'), note=$('#tlNote'); svg.innerHTML='';
-  const models=cur||[], T=S.hi;
-  const pts=weekCurve(T,models);
+  /* ⚠️ 局部门槛值命名 TH 而非 T —— T 是全局 i18n 取词函数，不能被遮蔽 */
+  const models=cur||[], TH=S.hi;
+  const pts=weekCurve(TH,models);
   const cs=pts.filter(p=>p.c!=null).map(p=>p.c);
   if(!cs.length){
-    note.textContent=`No model qualifies at threshold T=${T} (filtered out, or no cost data above this score). Lower the threshold or relax the filters.`;
-    svg.appendChild(tx(20,40,'No model qualifies at the current threshold','lbl','start',12)); return;
+    note.textContent=TF('tl.noQualifies',{t:TH});
+    svg.appendChild(tx(20,40,T('tl.noQualifiesChart'),'lbl','start',12)); return;
   }
-  const baseC=baselineCostAt(T,models,S.hour,S.dow,S.dateISO);
+  const baseC=baselineCostAt(TH,models,S.hour,S.dow,S.dateISO);
   const W=chartW(svg,900),H=300,g={t:18,r:20,b:48,l:66};
   svg.setAttribute('viewBox',`0 0 ${W} ${H}`);   // viewBox 跟随容器宽，否则画布坐标与视口错位
   const {FS,LFS,WFS}=chartFS(W); const narrow=W<620;
@@ -64,12 +65,12 @@ function renderTimeline(){
     svg.appendChild(mk('line',{x1:x0,y1:sy(v),x2:x1,y2:sy(v),stroke:'rgba(255,255,255,0.07)','stroke-width':1}));
     svg.appendChild(tx(x0-8,sy(v)+4,fmt$(v),'lbl','end',FS));
   });
-  svg.appendChild(tx(x0-8,y1-8,'/task','lbl','end',FS));
-  if(!narrow) svg.appendChild(tx(x0,y0+36,'Peak windows = weekdays 01:00–04:00 & 06:00–10:00 UTC (gray); weekends are all off-peak','lbl','start',FS));
+  svg.appendChild(tx(x0-8,y1-8,T('tl.perTask'),'lbl','end',FS));
+  if(!narrow) svg.appendChild(tx(x0,y0+36,T('tl.peakLegend'),'lbl','start',FS));
 
   if(baseC!=null){
     svg.appendChild(mk('line',{x1:x0,y1:sy(baseC),x2:x1,y2:sy(baseC),stroke:'rgba(255,255,255,0.38)','stroke-width':1.2,'stroke-dasharray':'5 4'}));
-    svg.appendChild(tx(x1-2,sy(baseC)-6,'List price '+fmt$(baseC),'lbl','end',LFS));
+    svg.appendChild(tx(x1-2,sy(baseC)-6,T('tl.listPrice')+fmt$(baseC),'lbl','end',LFS));
   }
   let dstr='';
   pts.forEach(p=>{ if(p.c==null)return; const Y=sy(p.c);
@@ -87,7 +88,7 @@ function renderTimeline(){
   const nowI=idxOf(S.dow,S.hour), nowP=pts[nowI];
   svg.appendChild(mk('line',{x1:sx(nowI),y1:y1,x2:sx(nowI),y2:y0,stroke:'var(--gold)','stroke-width':1.6}));
   if(nowP&&nowP.c!=null) svg.appendChild(mk('circle',{cx:sx(nowI),cy:sy(nowP.c),r:4.2,fill:'var(--gold)'}));
-  svg.appendChild(narrow ? tx(Math.min(sx(nowI),W-30),y1-8,'now','lbl','end',LFS) : tx(sx(nowI),y1-8,'now','lbl','middle',LFS));
+  svg.appendChild(narrow ? tx(Math.min(sx(nowI),W-30),y1-8,T('tl.now'),'lbl','end',LFS) : tx(sx(nowI),y1-8,T('tl.now'),'lbl','middle',LFS));
 
   const hit=mk('rect',{x:x0,y:y1,width:x1-x0,height:y0-y1,fill:'transparent',style:'cursor:crosshair'});
   hit.addEventListener('pointerdown',e=>{
@@ -99,10 +100,12 @@ function renderTimeline(){
 
   const uniq={}; pts.forEach(p=>{ if(p.c==null)return; if(!uniq[p.n])uniq[p.n]={h:0,c:p.c}; uniq[p.n].h++; });
   const peakH=pts.filter(p=>p.peak).length;
-  const parts=Object.entries(uniq).sort((a,b)=>a[1].c-b[1].c).map(([n,v])=>`${n} <b class="mono">${fmt$(v.c)}</b>（${v.h} h）`).join(' · ');
-  const diff=(baseC!=null&&nowP&&nowP.c!=null)?`(list price ${fmt$(baseC)}, ${nowP.c>baseC?'pricier':'cheaper'} by ${Math.round(Math.abs(nowP.c/baseC-1)*100)}%)`:'(same as list price)';
-  note.innerHTML=`Threshold <b class="mono">T=${T}</b> · <b>${peakH}</b> peak hours per 168-hour week · `+
-    `Now ${DOWS[S.dow]} ${String(S.hour).padStart(2,'0')}:00 UTC → <b style="color:var(--accent)">${nowP&&nowP.c!=null?fmt$(nowP.c):'—'}</b>, champion <b>${nowP&&nowP.n?nowP.n:'—'}</b>${diff}<br>`+
-    `C(T) over the week: ${parts}`+
-    (S.cacheSrc!=='off'?`<br><span style="color:var(--dim2)">Cache discount on (hit ${Math.round(S.cacheHit*100)}%): cache applies to input tokens only, compressing both absolute levels and peak/off-peak amplitude.</span>`:'');
+  const parts=Object.entries(uniq).sort((a,b)=>a[1].c-b[1].c).map(([n,v])=>`${n} <b class="mono">${fmt$(v.c)}</b>（${v.h}${T('tl.hourSuffix')}）`).join(' · ');
+  const diff=(baseC!=null&&nowP&&nowP.c!=null)
+    ? TF(nowP.c>baseC?'tl.diffPricier':'tl.diffCheaper',{base:fmt$(baseC),pct:Math.round(Math.abs(nowP.c/baseC-1)*100)})
+    : T('tl.diffSame');
+  note.innerHTML=TF('tl.noteHead',{t:TH,peakH,dow:DOWS[S.dow],hr:String(S.hour).padStart(2,'0'),
+    c:nowP&&nowP.c!=null?fmt$(nowP.c):'—',champ:nowP&&nowP.n?nowP.n:'—',diff})+
+    T('tl.weekParts')+parts+
+    (S.cacheSrc!=='off'?TF('tl.cacheOn',{h:Math.round(S.cacheHit*100)}):'');
 }

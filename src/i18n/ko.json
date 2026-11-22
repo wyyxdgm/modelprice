@@ -1,0 +1,381 @@
+{
+  "meta": {
+    "lang": "ko",
+    "locale_tag": "ko-KR",
+    "title": "Arena 리더보드 가성비 분석기 · 점수 범위 → 범위 내 최고 가성비 모델",
+    "desc": "당신의 품질 기준에서 가장 저렴한 AI 모델은? Arena(LMArena) WebDev 점수 × 실제 태스크당 비용의 인터랙티브 파레토 사다리 —— 피크/비피크 가격, 캐시 히트 할인, 엄격 CI 병합 지원. 무료, 가입 불필요.",
+    "ogTitle": "모든 품질 구간에서 가장 저렴한 AI 모델 — Arena 점수 vs 실제 태스크당 비용",
+    "ogDesc": "수용 가능한 최소 Arena 점수를 설정하면 그 기준을 넘는 최저가 모델, 다음 티어로 올라가는 점수당 비용, 피크/비피크와 캐시 가격이 답을 어떻게 바꾸는지 볼 수 있습니다."
+  },
+  "dows": "일,월,화,수,목,금,토",
+  "header": {
+    "h1": "Arena 리더보드 가성비 분석기",
+    "sub": "점수 범위 → 범위 내 최고 가성비 모델",
+    "tagline": "능력 임계값을 최고에서 최저로 드래그하면 각 티어의 승자가 실시간으로 갱신됩니다. 이것이 바로 <b style=\"color:var(--good)\">하한 포락선 / 파레토 경계선（lower envelope / Pareto frontier）</b>입니다 —— 「모든 능력 티어에는 가성비 최고 모델이 존재한다」는 당신의 직관은 수학적으로 옳지만, 올바른 정의가 필요합니다(아래 참조). 데이터: <a href=\"https://arena.ai/leaderboard/code/webdev\" target=\"_blank\" rel=\"noopener\">arena.ai/leaderboard</a>, 수집일 <span class=\"mono\" id=\"scraped\"></span> (리더보드 날짜 <span class=\"mono\" id=\"captured\"></span>)."
+  },
+  "intro": {
+    "h2": "모든 품질 구간에서 가장 저렴한 AI 모델 — Arena 점수 vs 실제 태스크당 비용",
+    "p1": "<b style=\"color:var(--text)\">수용 가능한 최소 Arena 점수를 설정하면 그 선을 넘는 최저가 모델이 바로 나타납니다</b>—— 다음 티어까지의 한계 $/포인트에 더해, DeepSeek 피크/비피크 가격, 만료된 프로모션, 캐시 미스 편향까지 보정되어 있습니다. 금색 임계선을 드래그(또는 ▶ Play 클릭)하면 모든 티어의 승자가 실시간 갱신됩니다.",
+    "lnk": "「최고 가성비」의 세 가지 정의 · 엄격 95% CI 모드 · 주 168시간 가격 모델링 · <a href=\"%METHOD%\">방법론 및 데이터 출처</a> · <a href=\"/data/v1/all.json\">JSON(AI 가독)</a> · <a href=\"/llms.txt\">llms.txt</a>"
+  },
+  "grp": {
+    "ds": {
+      "summary": "데이터셋과 정의",
+      "h2": "리더보드 데이터셋",
+      "licHint": "<b>「오픈소스 전용」과「전체 라이선스」는 서로 다른 리더보드이며 점수를 직접 비교할 수 없습니다.</b>오픈소스 보드(<span class=\"mono\">?license=open-source</span>)는 최고 <b class=\"mono\">1687</b>(Kimi K3.1 Pro); 전체 라이선스 보드는 최고 <b class=\"mono\">1838</b>(Claude Fable 5.2 xHigh, $11.04/태스크) —— Claude Opus 5.5 1815, Sonnet 5.5 1772, Gemini 4 Carbon 1768, GPT-6 Astra 1764는 모두 전체 라이선스 보드에 있습니다. 데이터셋을 <b>전체 라이선스(All-license)</b> 항목으로 전환하세요.<br><span style=\"color:var(--dim2)\">참고: 전체 라이선스 보드는 상위 41위(점수 1590–1838)만 수집되었으며, 41위 이후의 롱테일이 누락되었습니다. 고득점 구간의 경계선은 영향받지 않지만, 「전체 최저가」와「초과 점수/$」기준선에는 왜곡이 생깁니다.</span>"
+    },
+    "mode": {
+      "h2": "「최고 가성비」의 정의",
+      "b1": "① 임계값",
+      "b1t": "점수 ≥ T 모델 중 최저가(= 하한 포락선, 당신의 원래 아이디어)",
+      "b2": "② 점수/$",
+      "b2t": "최대 점수 ÷ 비용",
+      "b3": "③ 초과 점수/$",
+      "b3t": "최대 (점수 − 1200) ÷ 비용"
+    },
+    "ci": {
+      "h2": "유의성 모드",
+      "point": "점 추정",
+      "strict": "엄격(95% CI가 겹치지 않을 때만 승리)",
+      "hint": "엄격 모드는 「A의 CI 하한 &gt; B의 CI 상한」인 격차만 받아들여, 노이즈가 결론이 되는 일이 없습니다. 저득표 <span class=\"pill warn\" style=\"padding:0 5px\">Preliminary(임시)</span> 모델의 CI는 ±20–55에 이르는 경우가 흔합니다."
+    },
+    "rng": {
+      "summary": "점수 범위와 스윕",
+      "h2": "점수 범위(능력 수용 기준선)",
+      "lo": "하한 lo",
+      "hi": "상한 hi",
+      "pFull": "전체 범위 [min, max]",
+      "pSweep": "[T, max] 스윕",
+      "pTop10": "Top10 티어",
+      "pMid": "중간 밴드 1400–1550",
+      "play": "▶ Play: 임계값을 최고에서 최저로 스윕",
+      "speed": "속도",
+      "stop": "정지"
+    },
+    "price": {
+      "summary": "가격 시나리오와 캐시",
+      "h2": "가격 시나리오: 정가를 <b>시간의 함수</b>로 만들기",
+      "tz": "표시 시간대",
+      "tz0": "UTC ±0",
+      "tz1": "CET +1",
+      "tz2": "EET +2",
+      "tz8": "베이징 +8",
+      "tz9": "도쿄 +9",
+      "tzM5": "미 동부 −5",
+      "tzM8": "미 서부 −8",
+      "dow": "요일(UTC)",
+      "d1": "월",
+      "d2": "화",
+      "d3": "수",
+      "d4": "목",
+      "d5": "금",
+      "d6": "토",
+      "d0": "일",
+      "utcHour": "UTC 시",
+      "localTime": "· 현지 시간은",
+      "now": "현재",
+      "peak": "가장 비싼 시간대",
+      "off": "가장 저렴한 시간대",
+      "sat": "토요일(전체 비피크)",
+      "board": "게재 그대로(전체 끔)",
+      "all": "전체 활성화(불확실 항목 포함)",
+      "date": "가격 기준일",
+      "outShare": "출력 토큰 비율",
+      "cacheH2": "캐시 히트율",
+      "exact": "정확한 %",
+      "c0": "0%(게재 가격)",
+      "c50": "50%",
+      "c85": "85%",
+      "c95": "95%(기본값)",
+      "c99": "99%",
+      "cacheSrc": "캐시 읽기 가격 출처",
+      "srcPub": "공표된 캐시 가격(없으면 입력 가격의 10%로 추정)",
+      "srcFlat": "전 모델 일괄 입력 가격의 10%(통일 보수 기준)",
+      "srcOff": "캐시 할인 끔(= Arena 게재 가격)"
+    },
+    "filters": {
+      "summary": "필터",
+      "h2": "필터",
+      "minVotes": "최소 득표 ≥",
+      "exPrelim": "Preliminary(임시) 제외",
+      "exAuto": "AutoEval(자동 평가) 제외",
+      "onlyCost": "Cost/Task 있는 모델만",
+      "costCap": "Cost/Task 상한 ≤ $<span class=\"mono\" id=\"cLab\">∞</span>(예산 상한)",
+      "capHint": "예산 상한 + 점수 임계값 = 서로 독립적인 두 현실 제약. 최대로 하면 무제한."
+    },
+    "export": {
+      "summary": "내보내기와 데이터 확장",
+      "h2": "내보내기 / 데이터 확장",
+      "csv": "CSV 내보내기(현재 표)",
+      "tiers": "티어 사다리 CSV 내보내기",
+      "copyLink": "상태 링크 복사",
+      "hint": "다른 리더보드를 추가하려면(예: <span class=\"mono\">code/terminal</span>, <span class=\"mono\">text</span>, <span class=\"mono\">vision</span>): arena.ai의 해당 보드 페이지를 열고, 표를 선택·복사한 뒤 아래에 붙여넣으세요(열 자동 인식).",
+      "pastePh": "arena.ai 리더보드의 markdown / 표 텍스트를 붙여넣기…",
+      "namePh": "새 데이터셋 이름(선택)",
+      "add": "추가"
+    }
+  },
+  "charts": {
+    "steps": {
+      "ttl": "① 계단 차트: 임계값 T → T를 넘는 최저가 모델(당신이 물었던 「각 티어의 승자」)",
+      "lg": "각 단 = 그 점수 범위를 지배하는 모델 · 아무 단이나 클릭해 이동"
+    },
+    "scat": {
+      "ttl": "② 산점도: 점수(x) × Cost/Task(y, 로그)",
+      "lg": "◆ 파레토 경계선 · 회색 점 = 지배됨 · 세로선 = CI · 음영 = 현재 점수 밴드 · 금색 점선 = 임계값 T(드래그 가능)"
+    },
+    "tl": {
+      "ttl": "③ 주 168시간: 임계값 T에서의 최저 비용 <span class=\"mono\">C(T)</span> 시간 변화",
+      "lg": "회색 = 피크 시간대 · 꺾은선 급변 = 챔피언 교체 · 금색 점선 = 선택한 시각 · 아무 곳이나 클릭해 해당 시각으로 이동"
+    }
+  },
+  "tables": {
+    "tier": {
+      "h2": "티어 사다리",
+      "c1": "#",
+      "c2": "점수 범위",
+      "c3": "범위 내 승자",
+      "c4": "점수",
+      "c5": "Cost/Task",
+      "c6": "↑ 다음 티어의 한계 비용($/pt)",
+      "c7": "득표",
+      "c8": "비고"
+    },
+    "model": {
+      "h2": "모델 전체 표",
+      "boardNo": "보드 내 #",
+      "overallNo": "전체 #",
+      "model": "모델",
+      "score": "점수",
+      "ci": "±CI",
+      "cost": "Cost/Task",
+      "pts": "pt/$",
+      "excess": "초과 점수/$",
+      "votes": "득표",
+      "pin": "$/M 입력",
+      "pout": "$/M 출력",
+      "ctx": "컨텍스트",
+      "lic": "라이선스"
+    }
+  },
+  "bottom": {
+    "method": "방법론: 이 접근이 성립하는가?(결론: 성립 — 단 5가지 보정 필요)",
+    "sources": "데이터 출처, 방법론 및 면책 조항"
+  },
+  "footer": {
+    "html": "정적 빌드 · 런타임 의존성 없음 · 데이터는 빌드 시점에 arena.ai 스냅샷에서 내장(<span class=\"mono\">/api/*</span> 엔드포인트는 403을 반환하여 실시간 조회 불가 —— 이것은 <b>시점 스냅샷</b>입니다). Arena 공식 파레토 보기: <a href=\"https://arena.ai/leaderboard/code/webdev/pareto\" target=\"_blank\" rel=\"noopener\">arena.ai/leaderboard/code/webdev/pareto</a>.<br>리더보드 데이터 © LMArena (arena.ai), 스냅샷 2026-11-11 · 가격은 벤더 가격 페이지 기준, 2026-11-14 확인 · <a href=\"%METHOD%\">방법론</a> · <a href=\"/data/v1/all.json\">JSON</a> · <a href=\"/llms.txt\">llms.txt</a> · <a href=\"/sitemap.xml\">사이트맵</a>"
+  },
+  "data": {
+    "licAll": "전체 라이선스 · ",
+    "licOS": "오픈소스 전용 · ",
+    "optTail": "개 모델 · 점수 ",
+    "dsNote": "{meta} · <b style=\"color:var(--dim)\">{note}</b><br>점수 범위 <span class=\"mono\">{min}–{max}</span> · Cost/Task <span class=\"mono\">{cmin}–{cmax}</span> · 비용 데이터 있음 <span class=\"mono\">{wc}/{n}</span>",
+    "emptyNoCost": "이 보드에는 Cost/Task 데이터가 없습니다 —— 비용 열이 통째로 비어 있으면 가성비 분석이 불가능합니다(arena.ai의 WebDev · HTML 보드가 바로 그렇습니다). 비용 열이 있는 보드를 선택하세요.",
+    "emptyFiltered": "현재 필터를 통과하는 모델이 없습니다 —— 「최소 득표」「Cost/Task 상한」「Preliminary 제외」를 완화하세요."
+  },
+  "badges": {
+    "models": "개 모델",
+    "withCost": " Cost/Task 있음",
+    "inRange": " 범위 내",
+    "frontier": "파레토 경계선: ",
+    "frontierTiers": " 티어",
+    "peak": "피크",
+    "offpeak": "비피크",
+    "timeAdj": "시간 보정된 가격: ",
+    "timeAdjTail": "개 모델",
+    "listPrice": "정가(시간 보정 없음)",
+    "cacheOff": "캐시 할인: 끔",
+    "cacheHit": "캐시 히트 ",
+    "strict": "엄격 CI 모드"
+  },
+  "winner": {
+    "modeName": {
+      "pareto": "임계값: 점수 ≥ T 중 최저가 모델",
+      "ratio": "최대 점수/$",
+      "baseline": "최대 초과 점수/$"
+    },
+    "currentMode": "현재 기준 · ",
+    "strictCI": "엄격 CI",
+    "pointEst": "점 추정",
+    "licUnknown": "라이선스 미상",
+    "preliminary": "Preliminary(임시)",
+    "autoEval": "AutoEval(자동 평가)",
+    "pareto": "파레토 경계선",
+    "dominated": "지배됨",
+    "kpiScore": "Arena 점수",
+    "kpiCost": "Cost / Task (P50)",
+    "kpiRatio": "점수 / $",
+    "kpiExcess": "초과 점수 / $",
+    "kpiBaseline": "기준선 ",
+    "kpiVotes": "득표",
+    "kpiApi": "API 단가 $/M",
+    "kpiEffPin": "실효 입력 가격(히트 ",
+    "kpiEffPinMid": "%",
+    "kpiEst": "·추정",
+    "kpiList": ") · 정가 ",
+    "kpiInOut": "입력 / 출력",
+    "kpiCtx": "컨텍스트",
+    "kpiRank": "전체 순위",
+    "listNoAdj": "정가(시간/캐시 보정 없음)",
+    "ptsPerDollar": "pt/$",
+    "verdict": "<b>결론:</b> 임계값 <span class=\"mono\">T = {hi}</span>(범위 <span class=\"mono\">[{lo}, {hi}]</span>) 이하에서, <span class=\"em\">{name}</span>이(가) <b>능력 기준선을 넘는 최저가 모델</b>입니다.<br>점수 범위 <span class=\"mono\">[{cov0}, {cov1}]</span>을(를) 지배 —— 이 범위 내에서 더 높은 점수의 모델은 모두 더 비싸고, 더 저렴한 모델은 모두 더 낮은 점수입니다(서로 지배하지 않음).<br>",
+    "degraded": "<span class=\"warn\">⚠ 임계값 {hi}은(는) 이 데이터셋 최고 점수 {smax}을(를) 초과합니다. 조건을 충족하는 모델이 없습니다 —— 아래는 가장 강한(상대적으로 최저가) 모델입니다.</span><br>",
+    "bandNotOk": "<span class=\"warn\">⚠ 점수 {s}이(가) 하한 {lo}보다 낮습니다: [{lo}, {hi}]에는 파레토 최적 모델이 존재하지 않습니다. 더 강한 티어는 더 비싸고 더 저렴한 티어는 더 낮은 점수이기 때문입니다. 이는 범위형 질문의 사각지대 —— 임계값 모드에는 T 하나만 필요합니다.</span><br>",
+    "swing": "<b>주간 가격 변동:</b> 이 챔피언 자체의 비용은 {loDow} {loHr}:00 UTC에 <span class=\"mono\">{lo}</span>까지 내려가고 {hiDow} {hiHr}:00 UTC에 <span class=\"mono\">{hi}</span>까지 올라갑니다(차이 {spread}×). 태스크를 비피크 시간대에 배치하면 이 임계값에서 공짜로 <b>{pct}%</b> 할인입니다.<br>",
+    "nextUp": "<b>↑ 한 티어 위:</b> {name}({pts} pt, {cost}) → <b class=\"mono\">{dc}</b> 추가 지불로 <b class=\"mono\">+{ds}</b> pt 획득; 한계 단가 <span class=\"mono\">{per}/pt</span>.",
+    "nextUpExpensive": " <span class=\"warn\">이 티어는 비쌉니다 —— 정말로 그 능력이 필요할 때만 가치가 있습니다.</span>",
+    "nextUpBargain": " <span class=\"em\">이 업그레이드는 매우 저렴합니다.</span>",
+    "nextUpNormal": " —— 정상 범위입니다.",
+    "nextUpNone": "<b>↑ 한 티어 위:</b> 없음 —— 이미 이 데이터셋의 능력 천장입니다.<br>",
+    "downOne": "<b>↓ 한 티어 아래:</b> {name}({pts} pt, {cost}) → <span class=\"mono\">{dc}</span> 절약하지만 <span class=\"mono\">{ds}</span> pt 손실; 즉 1달러 절약당 <span class=\"mono\">{per}</span> pt 포기.",
+    "downTooMuch": " <span class=\"warn\">포기하는 능력이 너무 큽니다 —— 이 정도 절약의 가치가 없습니다.</span>",
+    "downAcceptable": " 예산이 빠듯하다면 이 티어는 수용 가능합니다.",
+    "verdictRatio": "<b>결론:</b> 점수 범위 <span class=\"mono\">[{lo}, {hi}]</span> 내({n}개 모델 범위 내), {basis} 순위에서 1위는 <span class=\"em\">{name}</span> = <b class=\"mono\">{val}</b>.",
+    "basisRatio": "점수÷비용",
+    "basisBaseline": "(점수−{base})÷비용",
+    "noInBand": " <span class=\"warn\">참고: 범위 내 적합 모델 없음. 이 결과는 전체 범위에서 나온 것입니다.</span>",
+    "butNote": "<b>하지만 주의:</b> {name}은(는) 더 높은 점수({s})에 한계 가격이 <span class=\"mono\">{per}/pt</span>에 불과합니다. 「달러당 점수」 1위 모델이 꼭 사용해야 할 모델은 아닙니다 —— 포인트당 최저가일 뿐, 절대 능력이 부족할 수 있습니다.<br>",
+    "biasedWarn": "<span class=\"warn\">⚠ 방식 ②③은 체계적 편향이 있습니다:</span> Arena 점수는 Bradley-Terry 방식 평가로 ~1000+ 기준선 오프셋을 가져, ② 「달러당 점수」는 거의 항상 저렴한 모델을 고릅니다; ③은 실용적 1200 하한을 빼서 오프셋을 상쇄, 진짜 한계 가치에 가까워집니다.",
+    "reliability": "<br><b>신뢰도:</b> <span class=\"{cl}\">{rel}</span>({votes}표, CI ±{ci}).",
+    "rel_low": "낮음",
+    "rel_mid": "중간",
+    "rel_high": "높음",
+    "lowSampleWarn": " <span class=\"warn\">표본이 너무 작습니다 —— 이 「가성비 챔피언」은 순수한 노이즈일 수 있습니다. 구매 결정에 사용하지 마세요.</span>",
+    "costMissing": "<br><span class=\"warn\">Cost/Task 없음</span> —— Arena가 이 모델의 태스크 중위 비용을 공표하지 않아 가성비 비교에 참여할 수 없습니다."
+  },
+  "scatter": {
+    "needTwo": "비용 데이터가 있는 모델이 최소 2개 필요합니다",
+    "yAxis": "Cost / Task (P50) · 로그 축",
+    "xAxis": "Arena 점수(강할수록 → 오른쪽)",
+    "dotTitle": "{name}\n점수 {s} (+{u}/-{d})\nCost/Task {c}\n득표 {v}\nAPI {api}\n{pareto}\n클릭 = 점수 범위 상한을 이 모델로 설정",
+    "dotPareto": "◆ 파레토 경계선(비지배)",
+    "dotDominated": "지배됨: 더 높은 점수에 더 저렴한 모델이 존재",
+    "dotApiNA": "N/A"
+  },
+  "steps": {
+    "modeOnly": "계단 차트는 ① 임계값 모드에서만 존재합니다 —— 바로 「임계값 T → 해당 티어의 최저가 모델」 곡선입니다",
+    "noCost": "경계선에 비용 데이터가 있는 모델이 없습니다",
+    "xAxisNarrow": "임계값 T → 최저 Cost/Task",
+    "xAxis": "임계값 T(「최소한 이만큼 강함」) → T를 넘는 최저가 모델의 Cost/Task",
+    "yAxis": "Cost / Task · 로그",
+    "segTitle": "점수 범위 [{lo}, {up}]\n승자: {name}\n점수 {s} (+{u}/-{d})\nCost/Task {c} · {v}표\n클릭 = 점수 범위를 이 티어로 설정"
+  },
+  "tiers": {
+    "count": "{n} 티어 · 임계값 경계선{strict}",
+    "countStrict": " · 엄격 CI",
+    "modeOnly": "(① 임계값 모드에서만 구축)",
+    "modeOnlyCell": "① 임계값 모드로 전환하면 전체 사다리가 보입니다: 임계값을 높은 곳에서 낮은 곳으로 드래그하면 승자가 바로 이 모델들입니다",
+    "notesPre": "Preliminary(임시) ",
+    "notesLow": "저표본 ",
+    "notesFrontier": "◆경계선",
+    "rowTitle": "클릭 = 점수 범위를 이 티어로 설정"
+  },
+  "table": {
+    "count": "{n} / {total} 모델 · 헤더 클릭으로 정렬 · 흐린 행 = 범위 외"
+  },
+  "tl": {
+    "noQualifies": "임계값 T={t}에서 적합한 모델이 없습니다(필터링됨, 또는 이 점수 이상에 비용 데이터 없음). 임계값을 낮추거나 필터를 완화하세요.",
+    "noQualifiesChart": "현재 임계값에서 적합 모델 없음",
+    "perTask": "/태스크",
+    "peakLegend": "피크 시간대 = 평일 01:00–04:00 및 06:00–10:00 UTC(회색); 주말은 전체 비피크",
+    "listPrice": "정가 ",
+    "now": "현재",
+    "noteHead": "임계값 <b class=\"mono\">T={t}</b> · 주 168시간 중 <b>{peakH}</b>시간 피크 · 현재 {dow} {hr}:00 UTC → <b style=\"color:var(--accent)\">{c}</b>, 챔피언 <b>{champ}</b>{diff}<br>",
+    "hourSuffix": "시간",
+    "diffPricier": "(정가 {base}, {pct}% 비쌈)",
+    "diffCheaper": "(정가 {base}, {pct}% 쌈)",
+    "diffSame": "(정가와 동일)",
+    "weekParts": "한 주의 C(T): ",
+    "cacheOn": "<br><span style=\"color:var(--dim2)\">캐시 할인 켜짐(히트 {h}%): 캐시는 입력 토큰에만 적용되어 절대 수준과 피크/비피크 진폭이 모두 압축됩니다.</span>"
+  },
+  "cache": {
+    "off": "끔 → 모든 입력 토큰이 <b>캐시 미스 가격</b>으로 청구됩니다 —— 바로 <b>Arena 리더보드 Cost/Task 기준</b>입니다.",
+    "hitHead": "히트율 <b class=\"mono\">{h}%</b>: 입력 토큰의 {h}%는 캐시 읽기 가격, {m}%는 (쓰기 배율 포함) 미스 가격으로 청구; <b>출력 토큰은 절대 할인되지 않으므로</b> 100% 히트여도 0이 될 수 없습니다.",
+    "srcCounts": "후보 집합에서 {pub}개 모델은 공표된 캐시 가격 사용, {est}개는 10%로 추정{na}.",
+    "srcNa": ", {na}개는 공표 가격 없음(N/A)",
+    "wmNote": "Anthropic / OpenAI는 캐시 쓰기를 별도 청구(= 입력 가격의 1.25×)하며 미스 분은 쓰기 가격으로 지불; 다른 벤더는 쓰기 요금이 없습니다.",
+    "missBasis": "<br><b>참고</b>: Arena의 Cost/Task는 <b>캐시 미스 가격</b>으로 계산됩니다(Agent 보드에서 역산된 $4/$20 정가가 증거). 따라서 캐시 할인을 켜는 것은 가설 —— 「당신의 워크로드가 정말 이 빈도로 히트한다면」 —— 이지 보드 본래의 의미가 아닙니다.",
+    "pillPeak": "피크(2×)",
+    "pillOff": "비피크(½ 가격)",
+    "pillOff2": "끔",
+    "osHintHead": "출력 비율은 「단가 변화」가 「Cost/Task 변화」로 어떻게 환산되는지 결정합니다. 기본값 <b class=\"mono\">8%</b> = 입력:출력 11:1, 14개 Agent 보드 모델의 실측 추론 기반(비율 3.8–17.9×).",
+    "osHintOff": "캐시 할인이 꺼져 있을 때, DeepSeek의 피크/비피크는 입출력에 <b>비례적으로</b> 작용하여 이 슬라이더는 <b>효과가 없습니다</b>; GLM 입력 ×3 / 출력 ×2.8 같은 보정에만 의미가 있습니다.",
+    "osHintOn": "<b>캐시 할인이 켜지면 이 슬라이더가 핵심이 됩니다</b>: 캐시는 입력만 할인하므로 출력 비율이 높을수록 할인이 얇아집니다. 같은 95% 히트율에서 DeepSeek-20261017은 w=2%에서 86%, w=8%(기본값)에서 68%, w=15%에서 55%, w=25%에서 40%, w=40%에서 겨우 25% 절약.",
+    "adjAllOff": "<span style=\"color:var(--dim2)\">모든 보정 꺼짐 → 게재 그대로. 위 규칙을 체크하면 시간 효과를 볼 수 있습니다.</span>",
+    "adjNone": "현재 후보 집합에 활성화된 보정의 영향을 받는 모델이 없습니다({rules}).",
+    "adjHead": "<b>{peak} · {dow} {hr}:00 UTC</b>: 후보 집합의 <b>{n}</b>개 모델이 재작성됨 → ",
+    "evModels": "개 모델",
+    "evSource": "출처: ",
+    "verified": "검증됨",
+    "uncertain": "불확실",
+    "costCellTitle": "정가 {raw} → 현재 시나리오 {cur}",
+    "costCellWhy": "캐시 히트 {h}%: 읽기 가격 {pc}/M({src}), 쓰기 배율 {wm}×",
+    "costCellSrcEst": "입력 가격의 10% 추정",
+    "costCellSrcPub": "공표 가격",
+    "costCellTotal": "합계 ×{scale}",
+    "listPrice": "정가"
+  },
+  "ev": {
+    "ds_tod": {
+      "name": "DeepSeek 피크/비피크 가격",
+      "desc": "피크 = 평일 01:00–04:00 및 06:00–10:00 UTC; 나머지 시간대(주말 포함)는 반값. 보드는 20261017을 비피크, 20260910과 V4-Pro 계열을 피크로 게재 —— 같은 계열에 두 기준이 한 표에 혼재.",
+      "src": "DeepSeek 공식 가격 페이지; datacamp / justinmckelvey / felloai / okamomedia 등 4개 독립 소스로 확인"
+    },
+    "glm_promo": {
+      "name": "GLM-5.3-Flash 출시 프로모션 만료",
+      "desc": "출시 프로모션이 2026-09-09 종료: $0.05/$0.18 → $0.15/$0.50. 보드(11-11 스냅샷)는 여전히 프로모 가격이라 그 $0.15 Cost/Task은 실제로 약 $0.44.",
+      "src": "benchr.org/pricing (2026-09-11 스냅샷, 프로모 종료일 명시)"
+    },
+    "gem_dec1": {
+      "name": "Gemini 4 Carbon/Argon 12-01 인상(발표됨)",
+      "desc": "introductory 가격 $2/$10은 2026-11-30 종료; 12-01부터 $4/$20, 캐시 읽기 가격 $0.10 → $0.20. 보드(11-11 스냅샷)는 여전히 introductory 가격. 가격 기준일을 12월로 드래그하면 Carbon이 그날 overall_all 경계선에서 빠지는 것을 볼 수 있습니다.",
+      "src": "Google Gemini API 가격 페이지 (benchlm.ai / munderdiffl.in / datastudios.org 3개 소스 일치; 2026-11-12/13 확인)"
+    },
+    "ds_v4flash": {
+      "name": "DeepSeek V4-Flash도 피크/비피크로 나뉘는가?(불확실)",
+      "desc": "V4-Flash는 단종됨; 공개 소스가 확인한 것은 V4.1-Flash와 V4-Pro의 피크/비피크뿐. 기본 꺼짐 —— 민감도 분석 전용.",
+      "src": "증거 불충분"
+    },
+    "suspect2x": {
+      "name": "제3자 인덱스와 2× 차이, 프로모션 설명 없음(불확실)",
+      "desc": "Mistral Medium 3.5($0.75/$3.75 vs 인덱스 $1.50/$7.50)와 GPT-6 Sol($1/$5 vs $2/$10)은 어떤 제3자 인덱스의 정확히 절반으로 게재됨. 프로모션일 수도, 인덱스가 오래됐을 수도. 기본 꺼짐.",
+      "src": "benchr.org/pricing 비교"
+    }
+  },
+  "peakTag": {
+    "peak": "피크",
+    "off": "비피크",
+    "afterPromo": "프로모션 후",
+    "promo": "프로모션 기간",
+    "inEffect": "발효",
+    "notYet": "미발효"
+  },
+  "interact": {
+    "play": "▶ Play: 임계값을 최고에서 최저로 스윕",
+    "pause": "⏸ 일시정지",
+    "stop": "정지",
+    "sweeping": "스윕 중",
+    "modeHintPareto": "<b>당신의 원래 아이디어.</b> 임계값 T를 고정하고 점수 ≥ T 중 최저가 모델을 취합니다. T를 아래로 스윕하면 승자 열이 <b>파레토 하한 포락선</b>이 됩니다. 수학적으로 자기무모순인 유일한 정의(= 비용 제약 하의 능력 최대화).",
+    "modeHintRatio": "<b>점수 ÷ 비용.</b> Arena 점수는 ~1200 기준선 오프셋을 가져(분자가 인위적으로 부풀려짐), 저렴한 모델에 크게 편향됩니다. 대략적 비교 전용.",
+    "modeHintBaseline": "<b>(점수 − 1200) ÷ 비용.</b> Arena BT 점수에는 ~1200의 실용적 하한이 있습니다(그 아래 ≈ 무작위); 이를 빼면 「1달러로 얼마나 많은 실질 능력 향상을 살 수 있는가」가 됩니다. 여전히 저렴한 모델에 편향 —— 그렇기에 임계값 모드가 의사결정 등급의 정의입니다.",
+    "alertTiers": "먼저 ① 임계값 모드로 전환하세요",
+    "copied": "✓ 복사됨",
+    "copyLink": "상태 링크 복사",
+    "promptCopy": "수동으로 복사하세요: ",
+    "pasteFirst": "<span style=\"color:var(--bad)\">먼저 표 텍스트를 붙여넣으세요</span>",
+    "tooFewRows": "<span style=\"color:var(--bad)\">{n}행만 파싱되었습니다 —— arena.ai 리더보드 표가 맞는지 확인하세요(점수 / Cost/Task 열 필요)</span>",
+    "customBoard": "자작 보드",
+    "userPaste": "개 모델 · 사용자 붙여넣기",
+    "customNote": "이 세션에서 붙여넣은 데이터에서",
+    "noCostParsed": "<span style=\"color:var(--bad)\">⚠ {n}개 모델을 파싱했지만 Cost/Task 열이 통째로 비어 있습니다</span> —— 비용이 없으면 가성비 분석이 불가능합니다(arena.ai의 WebDev · HTML 보드가 바로 그렇습니다). 데이터셋은 추가되었습니다: 점수 순위는 볼 수 있지만 경계선은 비어 있습니다.",
+    "addedOk": "<span style=\"color:var(--good)\">✓ {n}개 모델 추가됨</span>({wc}개에 비용 데이터 있음). 자작 데이터셋은 새로고침 시 사라집니다 —— 「CSV 내보내기」로 저장하세요."
+  },
+  "method": {
+    "title": "방법론 및 데이터 출처 — Arena 리더보드 가성비 분석기",
+    "desc": "arena.ai WebDev 리더보드에서 비용-품질 파레토 경계선을 계산하는 방법: 데이터 출처, 가격 검증, 피크/비피크 규칙, 캐시 모델 및 한계."
+  },
+  "boot": {
+    "methodBody": "PLACEHOLDER_BOOT",
+    "sourceBody": "PLACEHOLDER_BOOT"
+  }
+}

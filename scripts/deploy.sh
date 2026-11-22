@@ -43,6 +43,7 @@ check() { local code; code=$(smoke_curl -s -o /dev/null -w '%{http_code}' --max-
 B=https://modelprice.damolabs.app
 
 # ① 验收清单：首页 / assets / method / all.json / llms.txt / robots.txt / sitemap 全 200
+#    + i18n：每个 locale 的首页与 method 页全 200（en = 根，其余 /<lc>/ 子目录）
 check "$B/" 200 home
 check "$B/assets/style.css" 200 css
 check "$B/assets/js/01-util.js" 200 js-first
@@ -52,6 +53,10 @@ check "$B/data/v1/all.json" 200 alljson
 check "$B/llms.txt" 200 llms
 check "$B/robots.txt" 200 robots
 check "$B/sitemap.xml" 200 sitemap
+for LC in zh ja ko fr; do
+  check "$B/$LC/" 200 "home-$LC"
+  check "$B/$LC/method.html" 200 "method-$LC"
+done
 
 # ② 首页 title + 新工程结构确认（外链 assets；DATA JSON 内嵌）
 home=$(smoke_curl -s --max-time 20 "$B/")
@@ -86,5 +91,14 @@ smoke_curl -s --max-time 20 -o /dev/null "$B/" || { echo "❌ TLS/请求失败";
 # ⑥ 产物内绝对 URL 指向最终域名（防 build 带错域名上线）
 u=$(smoke_curl -s --max-time 20 "$B/sitemap.xml" | grep -c 'https://modelprice.damolabs.app' || true)
 [[ "$u" -ge 3 ]] || { echo "❌ sitemap.xml 绝对 URL 数异常: $u"; fail=1; }
+
+# ⑦ i18n 抽检：zh 首页 title 为中文 + hreflang 互指完整（5 语言 + x-default = 6 条）+ 切换器在位
+zhhome=$(smoke_curl -s --max-time 20 "$B/zh/")
+echo "$zhhome" | grep -o '<title>[^<]*</title>' | head -1 | grep -q '性价比\|分析器' \
+  || { echo "❌ /zh/ title 非中文"; fail=1; }
+n_hf=$(echo "$zhhome" | grep -c 'rel="alternate" hreflang=' || true)
+[[ "$n_hf" -ge 6 ]] || { echo "❌ /zh/ hreflang 条数异常: $n_hf (期望 ≥6，5 语言 + x-default)"; fail=1; }
+echo "$zhhome" | grep -q 'id="langNav"' || { echo "❌ /zh/ 缺语言切换器"; fail=1; }
+echo "$zhhome" | grep -q '<html lang="zh">' || { echo "❌ /zh/ html lang 非 zh"; fail=1; }
 
 [[ $fail -eq 0 ]] && echo "🎉 冒烟全过" || { echo "💥 冒烟有失败项"; exit 1; }

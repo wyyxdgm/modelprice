@@ -1,0 +1,32 @@
+<p><b>출처:</b> <a href="https://arena.ai/leaderboard/code/webdev" target="_blank" rel="noopener">arena.ai/leaderboard/code/webdev</a> 및 그 하위 보드(frontend / fullstack), 수집일 <span class="mono">%SCRAPED%</span>; 리더보드 데이터 날짜 <span class="mono">%CAPTURED%</span>.</p>
+<p><b>가용성:</b> 페이지는 공개되어 읽기·수집 가능; 그러나 <span class="mono">arena.ai/api/*</span>와 <span class="mono">api.arena.ai/*</span>는 403을 반환(Cloudflare + 라이트 화이트리스트) —— <b>공개 JSON API 없음</b>. 따라서 이 도구는 「내장 스냅샷 + 붙여넣기 확장」 설계를 채택하고 실시간 요청은 하지 않습니다.</p>
+<p><b>필드 의미:</b></p>
+<ul>
+<li><b>Score(점수)</b>: Arena의 Bradley-Terry 방식 레이팅; <span class="mono">+u/−d</span>는 부트스트랩 95% 신뢰구간.</li>
+<li><b>Cost/Task (P50)</b>: Arena 태스크 하나를 완료하는 <b>중위</b> 달러 비용 = 실측 토큰 사용량 × 아래 API 가격. <span class="mono">N/A</span> = 미공표 —— 해당 모델은 기본 제외(전환 가능).</li>
+<li><b>Price $/M</b>: <b>벤더 1차 API 정가</b>(입력 / 출력 백만 토큰당) —— Arena가 통일 설정한 가격도 아니고 셀프호스팅의 상각 비용도 아님. 주의: Cost/Task가 낮다고 단가가 낮은 것은 아닙니다(모델이 출력한 토큰 양에도 좌우됨).</li>
+</ul>
+<p><b>이 가격은 대체 누구의 가격인가?(항목별 확인 완료)</b></p>
+<p>독립 가격 인덱스 <a href="https://benchr.org/pricing" target="_blank" rel="noopener">benchr.org/pricing</a>(2026-09-11 스냅샷)와 항목별로 대조한 결과, Arena의 <span class="mono">Price $/M</span>은 각 벤더의 <b>공식 API 정가</b>와 일치합니다:
+Kimi K3.1 Pro <span class="mono">$2/$10</span>, Kimi K3 <span class="mono">$3/$15</span>(Moonshot); GLM-5.2 / 5.3 <span class="mono">$1.40/$4.40</span>(Z.ai); Claude Opus 5.5 <span class="mono">$4/$20</span>, Sonnet 5.5 <span class="mono">$2/$10</span>, Haiku 5.5 <span class="mono">$0.10/$0.50</span>(Anthropic); GPT-6.1 Sol <span class="mono">$2/$10</span>, Terra <span class="mono">$1/$5</span>, GPT-6 Astra <span class="mono">$10/$50</span>(OpenAI); Grok 4.7 <span class="mono">$2/$6</span>, Gemini 4 Argon <span class="mono">$2/$10</span>; Mistral Large 4 <span class="mono">$0.70/$2.10</span>; MiniMax M3 <span class="mono">$0.30/$1.20</span>; DeepSeek V4-Pro <span class="mono">$1.32/$3.96</span>.</p>
+<p><b>오픈소스 모델도 API 가격으로 게재 —— 셀프호스팅에 지불할 금액이 아닙니다.</b> Gemma 4 31B <span class="mono">$0.16/$0.47</span>, Granite 4.1 8B <span class="mono">$0.05/$0.10</span>, Hy3 <span class="mono">$0.13/$0.53</span>, Qwen3.8-27B <span class="mono">$0.40/$3</span>, MiMo-V2.6-Flash <span class="mono">$0.14/$0.28</span> —— 이들은 Google / IBM / Tencent / Alibaba / Xiaomi의 <b>자사 호스팅 엔드포인트</b> 견적입니다(보드의 각 모델 링크는 해당 API 문서를 가리킴). 오픈 웨이트 ≠ 무료 추론: 셀프호스팅 비용은 GPU 상각 + 전력 + 운영이며, 토큰당 정가와의 환산 관계가 없습니다.</p>
+<p><b>Cost/Task는 실측 사용량에서 계산됩니다 —— 세 가지 내부 증거:</b></p>
+<ul>
+<li>같은 모델의 <span class="mono">Price $/M</span>은 이 도구의 전체 7개 보드에서 <b>완전히 동일</b> → 단가는 모델 수준 상수;</li>
+<li>같은 모델의 <span class="mono">Cost/Task</span>는 다섯 WebDev 하위 보드(Overall / Frontend / React / Reference-based / Fullstack)에서 <b>완전히 동일</b>하지만 Image-to-WebDev에서는 다릅니다(예: DeepSeek-V4.1-Flash-20261017: $0.12 vs $0.10) → 사용량은 <b>태스크 카테고리</b>별로 집계되지 하위 보드별이 아님;</li>
+<li>Agent 보드는 <span class="mono">Output Tokens/Task</span>도 공표하여 입력량을 역산할 수 있음: 14개 모델은 125K–1.27M 입력 토큰, 입력/출력 비 3.8–17.9×로 역산 —— 정확히 멀티턴 도구 호출 부하의 특징. 그리고 <span class="mono">(Max)/(High)/(xHigh)</span> 티어는 <b>같은 단가</b>를 공유하면서 Cost는 2–4× 차이(Claude Opus 5.5: $5.66 vs $2.13) —— 전적으로 토큰 사용량 차이입니다.</li>
+</ul>
+<p><b>결론을 낙관 쪽으로 기울게 하는 세 가지 가격 함정:</b></p>
+<ul>
+<li><b>DeepSeek 피크/비피크.</b> 보드는 20261017 버전을 <b>비피크</b> <span class="mono">$0.15/$0.60</span>로, 20260910 버전을 <b>피크</b> <span class="mono">$0.30/$1.20</span>로 게재. 피크 = 평일 01:00–04:00 및 06:00–10:00 UTC; 나머지 시간대는 반값. 워크로드를 비피크에 배치할 수 없다면 20261017의 $0.12/태스크는 ~$0.24로 두 배: 여전히 1664 티어를 지키지만(구조 불변), 「1638→1664」 한계 가격은 $0.0027/pt에서 $0.0073/pt로 상승하고 「1664→1687」은 $0.0343에서 $0.0291로 하락 —— 무릎점 점프가 12.8×에서 4.0×로 축소되어 거기서 멈춰야 할 긴급성이 약화됩니다.</li>
+<li><b>GLM-5.3-Flash는 만료된 출시 프로모션 가격 사용</b> <span class="mono">$0.05/$0.18</span>; 프로모션은 2026-09-09 종료, 현재 가격 <span class="mono">$0.15/$0.50</span>(3×), 그래서 그 $0.15/태스크는 실제로 약 $0.45. 본래 경계선에 없었지만, 비슷한 오래된 프로모션 가격이 다른 모델을 부풀리고 있을 수 있습니다.</li>
+<li><b>캐시 할인 없음.</b> DeepSeek 캐시 히트 입력 <span class="mono">$0.006</span>(피크) / <span class="mono">$0.003</span>(비피크); Anthropic 캐시 입력 <span class="mono">$0.10–$1.00</span>. 멀티턴 agent 워크로드는 캐시에 자주 히트; 실제 청구서는 「정가 × 토큰」을 크게 밑돌 수 있습니다.</li>
+</ul>
+<p><b>자신의 비용 기준을 쓰고 싶은가?</b> 아래 붙여넣기 상자에서 <span class="mono">Cost/Task</span> 열을 당신의 실측 청구서나 셀프호스팅 상각 비용으로 교체하세요 —— 파서는 <b>열 이름</b>을 읽으며 숫자의 출처는 상관하지 않습니다. 얻는 경계선은 <b>당신의</b> 경계선입니다.</p>
+<ul>
+<li><b>Rank vs Overall Rank</b>: 전자는 이 하위 보드/라이선스 필터 내 순위; 후자는 전체 모델 종합 순위.</li>
+<li><b>Preliminary(임시)</b>: 득표가 안정성 임계값에 미달; CI는 보통 넓음.</li>
+<li><b>AutoEval(자동 평가)</b>: 점수가 인간 대전이 아닌 자동 평가에서 나옴 —— 인간 투표 점수와 직접 비교 불가 → 기본 제외.</li>
+</ul>
+<p><b>이 도구의 한계:</b> 데이터는 스냅샷이지 실시간이 아님; 비용은 토큰 비용만 커버; 「가성비」의 정의는 당신이 선택하며 정의에 따라 다른 챔피언이 나옴; 통계적 유의성은 엄격 모드에서만 강제됨.</p>
+<p><b>컴플라이언스:</b> 데이터는 공개 페이지에서 나오며 개인 분석에 사용됩니다. arena.ai를 고빈도로 수집하지 마세요. 파생 결론을 게시할 때는 데이터 출처와 수집 날짜를 명시하세요.</p>

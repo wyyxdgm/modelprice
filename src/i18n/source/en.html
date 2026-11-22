@@ -1,0 +1,32 @@
+<p><b>Source:</b> <a href="https://arena.ai/leaderboard/code/webdev" target="_blank" rel="noopener">arena.ai/leaderboard/code/webdev</a> and its sub-boards (frontend / fullstack), scraped <span class="mono">%SCRAPED%</span>; leaderboard data dated <span class="mono">%CAPTURED%</span>.</p>
+<p><b>Availability:</b> pages are publicly readable and scrapeable; but <span class="mono">arena.ai/api/*</span> and <span class="mono">api.arena.ai/*</span> return 403 (Cloudflare + route allowlist) — <b>no public JSON API</b>. So this tool uses an "embedded snapshot + paste-to-extend" design instead of live requests.</p>
+<p><b>Field semantics:</b></p>
+<ul>
+<li><b>Score</b>: Arena's Bradley-Terry-style rating; <span class="mono">+u/−d</span> is the bootstrap 95% confidence interval.</li>
+<li><b>Cost/Task (P50)</b>: the <b>median</b> dollar cost of completing one Arena task = measured token usage × the API prices below. <span class="mono">N/A</span> = not published — such models are excluded by default (toggleable).</li>
+<li><b>Price $/M</b>: the <b>vendor's first-party API list price</b> (input / output per million tokens) — not a unified Arena-set price, and not the amortized cost of self-hosting. Note: a low Cost/Task doesn't mean a low unit price (it also depends on how many tokens the model emitted).</li>
+</ul>
+<p><b>Whose prices are these, exactly? (checked item by item)</b></p>
+<p>Compared one-by-one against the independent pricing index <a href="https://benchr.org/pricing" target="_blank" rel="noopener">benchr.org/pricing</a> (2026-09-11 snapshot), Arena's <span class="mono">Price $/M</span> equals each vendor's <b>official API list price</b>:
+Kimi K3.1 Pro <span class="mono">$2/$10</span>, Kimi K3 <span class="mono">$3/$15</span> (Moonshot); GLM-5.2 / 5.3 <span class="mono">$1.40/$4.40</span> (Z.ai); Claude Opus 5.5 <span class="mono">$4/$20</span>, Sonnet 5.5 <span class="mono">$2/$10</span>, Haiku 5.5 <span class="mono">$0.10/$0.50</span> (Anthropic); GPT-6.1 Sol <span class="mono">$2/$10</span>, Terra <span class="mono">$1/$5</span>, GPT-6 Astra <span class="mono">$10/$50</span> (OpenAI); Grok 4.7 <span class="mono">$2/$6</span>, Gemini 4 Argon <span class="mono">$2/$10</span>; Mistral Large 4 <span class="mono">$0.70/$2.10</span>; MiniMax M3 <span class="mono">$0.30/$1.20</span>; DeepSeek V4-Pro <span class="mono">$1.32/$3.96</span>.</p>
+<p><b>Open-source models are also listed at API prices — not what you'd pay self-hosting.</b> Gemma 4 31B <span class="mono">$0.16/$0.47</span>, Granite 4.1 8B <span class="mono">$0.05/$0.10</span>, Hy3 <span class="mono">$0.13/$0.53</span>, Qwen3.8-27B <span class="mono">$0.40/$3</span>, MiMo-V2.6-Flash <span class="mono">$0.14/$0.28</span> — these are the quotes of Google / IBM / Tencent / Alibaba / Xiaomi's <b>own hosted endpoints</b> (each model's link on the board points to those API docs). Open weights ≠ free inference: self-hosting costs are GPU amortization + power + ops, with no mapping to per-token list prices.</p>
+<p><b>Cost/Task is computed from measured usage — three internal proofs:</b></p>
+<ul>
+<li>A model's <span class="mono">Price $/M</span> is <b>identical across all 7 boards</b> in this tool → unit price is a model-level constant;</li>
+<li>A model's <span class="mono">Cost/Task</span> is <b>identical across the five WebDev sub-boards</b> (Overall / Frontend / React / Reference-based / Fullstack) but differs on Image-to-WebDev (e.g. DeepSeek-V4.1-Flash-20261017: $0.12 vs $0.10) → usage is aggregated per <b>task category</b>, not per sub-board;</li>
+<li>The Agent board also publishes <span class="mono">Output Tokens/Task</span>, from which input volume can be inferred: 14 models infer to 125K–1.27M input tokens, input/output ratios 3.8–17.9× — exactly a multi-turn tool-calling load signature. And <span class="mono">(Max)/(High)/(xHigh)</span> tiers share the <b>same unit price</b> while Cost differs 2–4× (Claude Opus 5.5: $5.66 vs $2.13) — entirely a token-usage difference.</li>
+</ul>
+<p><b>Three price traps that make conclusions optimistic:</b></p>
+<ul>
+<li><b>DeepSeek peak/off-peak.</b> The board lists the 20261017 version at <b>off-peak</b> <span class="mono">$0.15/$0.60</span> and the 20260910 version at <b>peak</b> <span class="mono">$0.30/$1.20</span>. Peak = weekdays 01:00–04:00 and 06:00–10:00 UTC; other hours are half price. If your workload can't be scheduled into off-peak, 20261017's $0.12/task doubles to ~$0.24: it still holds the 1664 tier (structure unchanged), but the "1638→1664" marginal price rises from $0.0027/pt to $0.0073/pt while "1664→1687" falls from $0.0343 to $0.0291 — the knee jump shrinks from 12.8× to 4.0×, weakening the urgency to stop there.</li>
+<li><b>GLM-5.3-Flash uses an expired launch-promo price</b> <span class="mono">$0.05/$0.18</span>; the promo ended 2026-09-09, current price <span class="mono">$0.15/$0.50</span> (3×), so its $0.15/task is really ~$0.45. It wasn't on the frontier anyway, but similar stale promo prices may inflate other models.</li>
+<li><b>No cache discount.</b> DeepSeek cache-hit input <span class="mono">$0.006</span> (peak) / <span class="mono">$0.003</span> (off-peak); Anthropic cache input <span class="mono">$0.10–$1.00</span>. Multi-turn agent workloads hit cache often; real bills can be well below "list × tokens".</li>
+</ul>
+<p><b>Want your own cost basis?</b> Use the paste box below and replace the <span class="mono">Cost/Task</span> column with your measured bills or self-hosted amortized costs — the parser reads <b>column names</b> and doesn't care where the numbers come from. The frontier you get is <b>yours</b>.</p>
+<ul>
+<li><b>Rank vs Overall Rank</b>: the former is the rank within this sub-board/license filter; the latter is the all-models overall rank.</li>
+<li><b>Preliminary</b>: votes haven't reached the stability threshold; CIs are usually wide.</li>
+<li><b>AutoEval</b>: score from automated evaluation rather than human battles — not directly comparable with human-vote scores → excluded by default.</li>
+</ul>
+<p><b>Limitations of this tool:</b> data is a snapshot, not live; cost covers token spend only; the definition of "value" is yours to choose and different definitions crown different champions; statistical significance is only enforced in strict mode.</p>
+<p><b>Compliance:</b> data comes from public pages and is used for personal analysis. Don't scrape at high frequency. If you publish derived conclusions, attribute the data source and scrape date.</p>

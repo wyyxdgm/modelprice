@@ -6,107 +6,102 @@ function renderBadges(){
   const d=DATASETS[S.ds];
   $('#topBadges').innerHTML='';
   const add=(t,c)=>$('#topBadges').appendChild(el('span','pill '+ (c||''),t));
-  add(`${d.stats.n} models`); add(`${d.stats.with_cost} with Cost/Task`,'good');
-  add(`${cur.filter(inBand).length} in range`,'gold');
-  add(`Pareto frontier: ${frontier.length} tiers`,'good');
+  add(`${fmtN(d.stats.n)}${T('badges.models')}`); add(`${fmtN(d.stats.with_cost)}${T('badges.withCost')}`,'good');
+  add(`${fmtN(cur.filter(inBand).length)}${T('badges.inRange')}`,'gold');
+  add(T('badges.frontier')+`${frontier.length}${T('badges.frontierTiers')}`,'good');
   const onEv=PRICE_EVENTS.filter(e=>S.evState[e.id]);
   if(onEv.length){
     const pk=peakAtAny(S.hour,S.dow);
-    add(`${pk?'Peak':'Off-peak'} · ${DOWS[S.dow]} ${String(S.hour).padStart(2,'0')}:00 UTC`, pk?'warn':'');
+    add(`${pk?T('badges.peak'):T('badges.offpeak')} · ${DOWS[S.dow]} ${String(S.hour).padStart(2,'0')}:00 UTC`, pk?'warn':'');
     const nAdj=(cur||[]).filter(m=>m.adj).length;
-    if(nAdj) add(`Prices time-adjusted: ${nAdj} models`,'gold');
-  } else add('List price (no time adjustment)');
-  add(S.cacheSrc==='off'?'Cache discount: off':`Cache hit ${Math.round(S.cacheHit*100)}%`, S.cacheSrc==='off'?'':'good');
-  if(S.ci==='strict') add('Strict CI mode','warn');
+    if(nAdj) add(T('badges.timeAdj')+`${nAdj}${T('badges.timeAdjTail')}`,'gold');
+  } else add(T('badges.listPrice'));
+  add(S.cacheSrc==='off'?T('badges.cacheOff'):T('badges.cacheHit')+Math.round(S.cacheHit*100)+'%', S.cacheSrc==='off'?'':'good');
+  if(S.ci==='strict') add(T('badges.strict'),'warn');
 }
 function renderWinner(){
   const c=$('#winCard'); c.innerHTML='';
   if(!view){
     const d0=DATASETS[S.ds];
     c.appendChild(el('div','empty', d0.stats.with_cost===0
-      ? 'This board has no Cost/Task data — an entirely empty cost column cannot support value analysis (the WebDev · HTML board on arena.ai is exactly like this). Pick a board with a cost column.'
-      : 'No model passes the current filters — relax "Min votes", "Cost/Task cap", or "Exclude Preliminary".'));
+      ? T('data.emptyNoCost')
+      : T('data.emptyFiltered')));
     return;
   }
   const m=view.w;
-  const modeName={pareto:'Threshold: cheapest model with score ≥ T',ratio:'max Score/$',baseline:'max excess score/$'}[view.mode];
-  c.appendChild(el('div','k', `Current mode · ${modeName} · ${S.ci==='strict'?'strict CI':'point estimate'}`));
+  const modeName=T('winner.modeName.'+view.mode);
+  c.appendChild(el('div','k', `${T('winner.currentMode')}${modeName} · ${S.ci==='strict'?T('winner.strictCI'):T('winner.pointEst')}`));
   const nm=el('div','nm');
   nm.innerHTML=`<span class="rank">#${m.r!=null?m.r:'—'}</span>${m.n}`;
   c.appendChild(nm);
-  c.appendChild(el('div','by', `${m.lab?m.lab+' · ':''}<span class="mono">${m.lic||'license unknown'}</span>${m.pre?' · <span class="pill warn" style="padding:0 5px">Preliminary</span>':''}${m.ae?' · <span class="pill bad" style="padding:0 5px">AutoEval</span>':''}${m.pareto?' · <span class="pill good" style="padding:0 5px">Pareto frontier</span>':' <span class="pill" style="padding:0 5px">dominated</span>'}`));
+  c.appendChild(el('div','by', `${m.lab?m.lab+' · ':''}<span class="mono">${m.lic||T('winner.licUnknown')}</span>${m.pre?' · <span class="pill warn" style="padding:0 5px">'+T('winner.preliminary')+'</span>':''}${m.ae?' · <span class="pill bad" style="padding:0 5px">'+T('winner.autoEval')+'</span>':''}${m.pareto?' · <span class="pill good" style="padding:0 5px">'+T('winner.pareto')+'</span>':' <span class="pill" style="padding:0 5px">'+T('winner.dominated')+'</span>'}`));
 
   const k=el('div','kpis');
   const kpi=(t,v,cl,s)=>{const d=el('div','kpi '+(cl||''));d.innerHTML=`<div class="t">${t}</div><div class="v">${v}${s?` <small>${s}</small>`:''}</div>`;k.appendChild(d);};
-  kpi('Arena Score', m.s, 'gold', `+${m.u95}/−${m.d95}`);
-  kpi('Cost / Task (P50)', m.adj?`${fmt$(m.c)}<small style="color:var(--dim2);text-decoration:line-through">${fmt$(m.cRaw)}</small>`:fmt$(m.c), 'accent',
-      m.adj?adjLabel(m):'List price (no time/cache adjustment)');
-  kpi('Score / $', fmtR(m.ratio,0), '', 'pts/$');
-  if(view.mode==='baseline') kpi('Excess score / $', fmtR(m.baseRatio,1),'good', `Baseline ${view.base}`);
-  kpi('Votes', fmtN(m.v));
+  kpi(T('winner.kpiScore'), m.s, 'gold', `+${m.u95}/−${m.d95}`);
+  kpi(T('winner.kpiCost'), m.adj?`${fmt$(m.c)}<small style="color:var(--dim2);text-decoration:line-through">${fmt$(m.cRaw)}</small>`:fmt$(m.c), 'accent',
+      m.adj?adjLabel(m):T('winner.listNoAdj'));
+  kpi(T('winner.kpiRatio'), fmtR(m.ratio,0), '', T('winner.ptsPerDollar'));
+  if(view.mode==='baseline') kpi(T('winner.kpiExcess'), fmtR(m.baseRatio,1),'good', T('winner.kpiBaseline')+view.base);
+  kpi(T('winner.kpiVotes'), fmtN(m.v));
   if(m.pin!=null && m.adj && m.adj.cache){
     const cc=m.adj.cache, eff=(1-cc.h)*cc.pin*cc.wm + cc.h*cc.pc;
-    kpi('API price $/M', `${fmt$(eff)} / ${fmt$(m.pout)}`, 'good',
-        `Effective input price (hit ${Math.round(cc.h*100)}%${cc.est?'·est.':''}) · list ${fmt$(cc.pin)}`);
-  } else kpi('API price $/M', m.pin!=null?`${fmt$(m.pin)} / ${fmt$(m.pout)}`:'N/A','', 'in / out');
-  kpi('Context', m.ctx||'N/A');
-  kpi('Overall rank', m.or!=null?`#${m.or}`:'—');
+    kpi(T('winner.kpiApi'), `${fmt$(eff)} / ${fmt$(m.pout)}`, 'good',
+        T('winner.kpiEffPin')+Math.round(cc.h*100)+(cc.est?T('winner.kpiEst'):'')+T('winner.kpiList')+fmt$(cc.pin));
+  } else kpi(T('winner.kpiApi'), m.pin!=null?`${fmt$(m.pin)} / ${fmt$(m.pout)}`:'N/A','', T('winner.kpiInOut'));
+  kpi(T('winner.kpiCtx'), m.ctx||'N/A');
+  kpi(T('winner.kpiRank'), m.or!=null?`#${m.or}`:'—');
   c.appendChild(k);
 
   const v=el('div','verdict');
   let html='';
   if(view.mode==='pareto'){
     const cov=view.covers.map(Math.round);
-    html+=`<b>Verdict:</b> below the threshold <span class="mono">T = ${S.hi}</span> (range <span class="mono">[${S.lo}, ${S.hi}]</span>),`+
-      `<span class="em">${m.n}</span> is <b>the cheapest model that clears the capability bar</b>.<br>`+
-      `It rules the score range <span class="mono">[${cov[0]}, ${cov[1]}]</span> — within it, every higher-scoring model costs more and every cheaper model scores lower (mutually undominated).<br>`;
+    html+=TF('winner.verdict',{hi:S.hi,lo:S.lo,name:m.n,cov0:cov[0],cov1:cov[1]});
     if(view.degraded)
-      html+=`<span class="warn">⚠ Your threshold ${S.hi} exceeds this dataset's top score ${DATASETS[S.ds].stats.score_max}; no model qualifies — what follows is the strongest, relatively cheapest one.</span><br>`;
+      html+=TF('winner.degraded',{hi:S.hi,smax:DATASETS[S.ds].stats.score_max});
     if(!view.bandOk)
-      html+=`<span class="warn">⚠ Its score ${m.s} is below your lower bound ${S.lo}: no Pareto-optimal model exists in [${S.lo}, ${S.hi}] because the stronger tier costs more and the cheaper tier scores lower. This is a blind spot of range-style questions — threshold mode only needs one T.</span><br>`;
+      html+=TF('winner.bandNotOk',{s:m.s,lo:S.lo,hi:S.hi});
     const ws=weekSpan(m);
     if(ws && ws.spread>1.0001){
-      html+=`<b>Weekly price swing:</b> this champion's own cost bottoms at <span class="mono">${fmt$(ws.lo)}</span> on ${DOWS[ws.loAt.dow]} ${String(ws.loAt.hour).padStart(2,'0')}:00 UTC and`+
-        `peaks at <span class="mono">${fmt$(ws.hi)}</span> on ${DOWS[ws.hiAt.dow]} ${String(ws.hiAt.hour).padStart(2,'0')}:00 UTC (${ws.spread.toFixed(2)}× apart).`+
-        `Scheduling tasks into off-peak windows is a free <b>${Math.round((1-ws.lo/ws.hi)*100)}%</b> discount at this threshold.<br>`;
+      html+=TF('winner.swing',{lo:fmt$(ws.lo),loDow:DOWS[ws.loAt.dow],loHr:String(ws.loAt.hour).padStart(2,'0'),
+        hi:fmt$(ws.hi),hiDow:DOWS[ws.hiAt.dow],hiHr:String(ws.hiAt.hour).padStart(2,'0'),
+        spread:ws.spread.toFixed(2),pct:Math.round((1-ws.lo/ws.hi)*100)});
     }
     if(view.marginal){
       const g=view.marginal;
-      html+=`<b>↑ Next tier up:</b> ${g.model.n} (${g.model.s} pts, ${fmt$(g.model.c)}) → pay <b class="mono">${fmt$(g.dc)}</b> more for <b class="mono">+${g.ds}</b> pts;`+
-        `marginal price <span class="mono">${fmt$(g.per)}/pt</span>.`;
-      html+= g.per>2 ? ` <span class="warn">This tier is expensive — only worth it if you truly need the capability.</span>`
-                     : g.per<0.15 ? ` <span class="em">The upgrade is a bargain.</span>` : ` — a normal range.`;
+      html+=TF('winner.nextUp',{name:g.model.n,pts:g.model.s,cost:fmt$(g.model.c),dc:fmt$(g.dc),ds:g.ds,per:fmt$(g.per)});
+      html+= g.per>2 ? T('winner.nextUpExpensive')
+                     : g.per<0.15 ? T('winner.nextUpBargain') : T('winner.nextUpNormal');
       html+=`<br>`;
     } else {
-      html+=`<b>↑ Next tier up:</b> none — it's already this dataset's capability ceiling.<br>`;
+      html+=T('winner.nextUpNone');
     }
     if(view.downStat){
       const g=view.downStat;
-      html+=`<b>↓ One tier down:</b> ${g.model.n} (${g.model.s} pts, ${fmt$(g.model.c)}) → save <span class="mono">${fmt$(g.dc)}</span> but lose <span class="mono">${g.ds}</span> pts;`+
-        `i.e. giving up <span class="mono">${fmtR(1/g.per,1)}</span> pts per dollar saved.`;
-      html+= (1/g.per)>15 ? ` <span class="warn">Too much capability given up — the saving isn't worth it.</span>` : ` If budget is tight, this tier is acceptable.`;
+      html+=TF('winner.downOne',{name:g.model.n,pts:g.model.s,cost:fmt$(g.model.c),dc:fmt$(g.dc),ds:g.ds,per:fmtR(1/g.per,1)});
+      html+= (1/g.per)>15 ? T('winner.downTooMuch') : T('winner.downAcceptable');
     }
   } else {
-    html+=`<b>Verdict:</b> within the score range <span class="mono">[${S.lo}, ${S.hi}]</span> (${cur.filter(inBand).length} models in range),`+
-      `ranked by ${view.mode==='ratio'?'Score÷Cost':'(Score−'+view.base+')÷Cost'}, the top model is <span class="em">${m.n}</span> = <b class="mono">${fmtR(view.val,1)}</b>.`;
-    if(!view.inBand) html+=` <span class="warn">Note: no qualifying model in range; this result is from the full domain.</span>`;
+    html+=TF('winner.verdictRatio',{lo:S.lo,hi:S.hi,n:cur.filter(inBand).length,
+      basis:view.mode==='ratio'?T('winner.basisRatio'):TF('winner.basisBaseline',{base:view.base}),
+      name:m.n,val:fmtR(view.val,1)});
+    if(!view.inBand) html+=T('winner.noInBand');
     html+=`<br>`;
     if(view.marginal){
       const g=view.marginal;
-      html+=`<b>But note:</b> ${g.model.n} scores higher (${g.model.s}) at a marginal price of <span class="mono">${fmt$(g.per)}/pt</span>.`+
-        `The top "score per $" model is often not the one you should use — it's just the cheapest per point, and may lack absolute capability.<br>`;
+      html+=TF('winner.butNote',{name:g.model.n,s:g.model.s,per:fmt$(g.per)});
     }
-    html+=`<span class="warn">⚠ Modes ② and ③ are systematically biased:</span> Arena Score is a Bradley-Terry-style rating with a ~1000+ baseline offset,`+
-      `so ② "score per $" almost always picks cheap models; ③ subtracts the practical 1200 floor to cancel the offset, getting closer to true marginal value.`;
+    html+=T('winner.biasedWarn');
   }
   // 统计可靠性
   const rel = m.v==null ? null : (m.v<1000?'low':m.v<5000?'mid':'high');
   if(rel){
     const cl = rel==='low'?'warn':rel==='mid'?'':'em';
-    html+=`<br><b>Reliability:</b> <span class="${cl}">${rel}</span> (${fmtN(m.v)} votes, CI ±${Math.max(m.u95,m.d95)}).`;
-    if(rel==='low') html+=` <span class="warn">Sample too small — this "value champion" may be pure noise. Don't make purchasing decisions on it.</span>`;
+    html+=TF('winner.reliability',{cl,rel:T('winner.rel_'+rel),votes:fmtN(m.v),ci:Math.max(m.u95,m.d95)});
+    if(rel==='low') html+=T('winner.lowSampleWarn');
   }
-  if(m.c==null) html+=`<br><span class="warn">Cost/Task missing</span> — Arena doesn't publish this model's median task cost, so it can't take part in value comparisons.`;
+  if(m.c==null) html+=T('winner.costMissing');
   v.innerHTML=html; c.appendChild(v);
 }
 
@@ -141,7 +136,7 @@ let scatGeo=null;
 function renderScatter(){
   const svg=$('#scat'); svg.innerHTML='';
   const pts=cur.filter(m=>m.c!=null&&m.c>0);
-  if(pts.length<2){ svg.appendChild(tx(20,40,'Need at least 2 models with cost data','lbl','start',12)); return; }
+  if(pts.length<2){ svg.appendChild(tx(20,40,T('scatter.needTwo'),'lbl','start',12)); return; }
   const w=chartW(svg,LX.w), h=LX.h, m=LX.m, {FS,LFS,WFS}=chartFS(w);
   svg.setAttribute('viewBox',`0 0 ${w} ${h}`);   // viewBox 跟随容器宽，否则画布坐标与视口错位
   const narrow=w<620;
@@ -169,9 +164,9 @@ function renderScatter(){
     svg.appendChild(tx(x,y0+17,String(t),'','middle',FS));
   }
   svg.appendChild(mk('line',{x1:x0,x2:x1,y1:y0,y2:y0,class:'ax'}));
-  const yl=tx(16,(y0+y1)/2,'Cost / Task (P50) · log axis','','middle',LFS);
+  const yl=tx(16,(y0+y1)/2,T('scatter.yAxis'),'','middle',LFS);
   yl.setAttribute('transform',`rotate(-90 16 ${(y0+y1)/2})`); svg.appendChild(yl);
-  svg.appendChild(tx((x0+x1)/2,h-3,'Arena Score (stronger → right)','','middle',FS));
+  svg.appendChild(tx((x0+x1)/2,h-3,T('scatter.xAxis'),'','middle',FS));
 
   // Pareto 前沿（阶梯折线）
   if(frontier.length>1){
@@ -216,7 +211,10 @@ function renderScatter(){
       const dx = anchor==='end'? -10 : 9;
       g.appendChild(tx(sx(mm.s)+dx, sy(mm.c)+3.5, mm.n.length>(narrow?18:28)?mm.n.slice(0,(narrow?17:27))+'…':mm.n, isW?'lblw':'lbl', anchor, isW?WFS:LFS));
     }
-    const t=mk('title'); t.textContent=`${mm.n}\nScore ${mm.s} (+${mm.u95}/-${mm.d95})\nCost/Task ${fmt$(mm.c)}\nVotes ${fmtN(mm.v)}\nAPI ${mm.pin!=null?fmt$(mm.pin)+' / '+fmt$(mm.pout)+' $/M':'N/A'}\n${mm.pareto?'◆ Pareto frontier (undominated)':'Dominated: a higher-scoring, cheaper model exists'}\nclick = set the score range's upper bound to this model`; g.appendChild(t);
+    const t=mk('title'); t.textContent=TF('scatter.dotTitle',{name:mm.n,s:mm.s,u:mm.u95,d:mm.d95,
+      c:fmt$(mm.c),v:fmtN(mm.v),
+      api:mm.pin!=null?fmt$(mm.pin)+' / '+fmt$(mm.pout)+' $/M':T('scatter.dotApiNA'),
+      pareto:mm.pareto?T('scatter.dotPareto'):T('scatter.dotDominated')}); g.appendChild(t);
     g.addEventListener('click',()=>{ S.hi=mm.s; if(S.lo>mm.s)S.lo=mm.s; stopPlay(); recompute(); });
     svg.appendChild(g);
   });
@@ -232,7 +230,7 @@ function renderScatter(){
 function renderSteps(){
   const svg=$('#steps'); svg.innerHTML='';
   if(!tiers.length){
-    svg.appendChild(tx(20,40,'The step chart only exists in ① Threshold mode — it is exactly the curve "threshold T → cheapest model of that tier"','lbl','start',12));
+    svg.appendChild(tx(20,40,T('steps.modeOnly'),'lbl','start',12));
     return;
   }
   const w=chartW(svg,900),h=250,m={t:20,r:16,b:42,l:60};
@@ -243,7 +241,7 @@ function renderSteps(){
   const fr=[...tiers].sort((a,b)=>a.model.s-b.model.s);
   const sLo=Math.min(...fr.map(t=>t.model.s))-10, sHi=Math.max(sTop, Math.max(...fr.map(t=>t.upper||t.model.s)))+10;
   const cs=fr.map(t=>t.model.c).filter(c=>c>0);
-  if(!cs.length){ svg.appendChild(tx(20,40,'No model with cost data on the frontier','lbl','start',12)); return; }
+  if(!cs.length){ svg.appendChild(tx(20,40,T('steps.noCost'),'lbl','start',12)); return; }
   const cMin=Math.min(...cs)*0.72, cMax=Math.max(...cs)*1.45;
   const sx=v=>x0+(v-sLo)/(sHi-sLo)*(x1-x0);
   const sy=v=>y0-logScale(clamp(v,cMin,cMax),cMin,cMax)*(y0-y1);
@@ -259,8 +257,8 @@ function renderSteps(){
     svg.appendChild(tx(x,y0+17,String(t),'','middle',FS));
   }
   svg.appendChild(mk('line',{x1:x0,x2:x1,y1:y0,y2:y0,class:'ax'}));
-  svg.appendChild(tx((x0+x1)/2,h-4,narrow?'Threshold T → cheapest Cost/Task':'Threshold T ("at least this strong") → Cost/Task of the cheapest model clearing T','','middle',FS));
-  const yl=tx(16,(y0+y1)/2,'Cost / Task · log','','middle',LFS);
+  svg.appendChild(tx((x0+x1)/2,h-4,narrow?T('steps.xAxisNarrow'):T('steps.xAxis'),'','middle',FS));
+  const yl=tx(16,(y0+y1)/2,T('steps.yAxis'),'','middle',LFS);
   yl.setAttribute('transform',`rotate(-90 16 ${(y0+y1)/2})`); svg.appendChild(yl);
   svg.appendChild(mk('rect',{x:sx(S.lo),y:y1,width:Math.max(1,sx(S.hi)-sx(S.lo)),height:y0-y1,class:'band'}));
 
@@ -283,7 +281,8 @@ function renderSteps(){
     const up = t.upper==null? sHi : t.upper;
     const seg=mk('line',{x1:xa,x2:Math.max(xa+2,xb),y1:y,y2:y,class:'seg-hit'});
     const tt=mk('title');
-    tt.textContent=`Score range [${Math.round(t.lower)}, ${Math.round(up)}]\nwinner: ${t.model.n}\nScore ${t.model.s} (+${t.model.u95}/-${t.model.d95})\nCost/Task ${fmt$(t.model.c)} · ${fmtN(t.model.v)} votes\nclick = set the score range to this tier`;
+    tt.textContent=TF('steps.segTitle',{lo:Math.round(t.lower),up:Math.round(up),name:t.model.n,
+      s:t.model.s,u:t.model.u95,d:t.model.d95,c:fmt$(t.model.c),v:fmtN(t.model.v)});
     seg.appendChild(tt);
     seg.addEventListener('click',()=>{ S.lo=Math.round(t.lower); S.hi=Math.round(up); stopPlay(); recompute(); });
     svg.appendChild(seg);
@@ -306,8 +305,8 @@ function renderSteps(){
 /* ---------- render: tier table ---------- */
 function renderTiers(){
   const tb=$('#tiersT tbody'); tb.innerHTML='';
-  $('#tierCount').textContent = tiers.length? `${tiers.length} tiers · threshold frontier${S.ci==='strict'?' · strict CI':''}` : '(only built in ① Threshold mode)';
-  if(!tiers.length){ tb.appendChild(el('tr',null,'<td colspan="8" class="empty">Switch to ① Threshold mode to see the full ladder: drag the threshold from high to low and the winners are these models</td>')); return; }
+  $('#tierCount').textContent = tiers.length? TF('tiers.count',{n:tiers.length,strict:S.ci==='strict'?T('tiers.countStrict'):''}) : T('tiers.modeOnly');
+  if(!tiers.length){ tb.appendChild(el('tr',null,'<td colspan="8" class="empty">'+T('tiers.modeOnlyCell')+'</td>')); return; }
   const fr=[...tiers]; // tiers[0] = 最强
   const sMax=DATASETS[S.ds].stats.score_max;
   const wn = view&&view.w?view.w.n:null;
@@ -330,9 +329,9 @@ function renderTiers(){
       <td class="num" style="color:var(--accent)">${costCell(m)}</td>
       <td class="num" ${style}>${marg}</td>
       <td class="num">${fmtN(m.v)}</td>
-      <td style="color:var(--dim2);font-size:11.5px">${m.pre?'Preliminary ':''}${m.v!=null&&m.v<1000?'low-sample ':''}◆frontier</td>`;
+      <td style="color:var(--dim2);font-size:11.5px">${m.pre?T('tiers.notesPre'):''}${m.v!=null&&m.v<1000?T('tiers.notesLow'):''}${T('tiers.notesFrontier')}</td>`;
     tr.style.cursor='pointer';
-    tr.title='click = set the score range to this tier';
+    tr.title=T('tiers.rowTitle');
     tr.addEventListener('click',()=>{ S.lo=lo; S.hi=up; stopPlay(); recompute(); });
     tb.appendChild(tr);
   });
@@ -349,7 +348,7 @@ function renderTable(){
     const A=COLS[S.sortKey](a),B=COLS[S.sortKey](b);
     return (typeof A==='string'? A.localeCompare(B) : A-B)*S.sortDir;
   });
-  $('#tblCount').textContent=`${cur.length} / ${DATASETS[S.ds].stats.n} models · click headers to sort · dim rows = out of range`;
+  $('#tblCount').textContent=TF('table.count',{n:cur.length,total:DATASETS[S.ds].stats.n});
   const wn = view&&view.w?view.w.n:null;
   rows.forEach(m=>{
     const tr=el('tr',(inBand(m)?'in':'out')+(m.n===wn?' winner':'')+(m.pareto?' pareto':''));

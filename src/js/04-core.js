@@ -6,8 +6,8 @@ Object.keys(DATASETS).forEach(k=>{
   const o=document.createElement('option');
   o.value=k;
   /* License口径写在最前面 —— 「仅开源」和「含闭源」两张榜的最高分差 150 分，混看会误判 */
-  const lic = d.license==='all' ? 'All-license · ' : 'Open-source · ';
-  o.textContent=`${lic} ${d.label} · ${d.stats.n} models · Score ${d.stats.score_min}–${d.stats.score_max}`;
+  const lic = d.license==='all' ? T('data.licAll') : T('data.licOS');
+  o.textContent=`${lic} ${d.label} · ${d.stats.n}${T('data.optTail')}${d.stats.score_min}–${d.stats.score_max}`;
   dsSel.appendChild(o);
 });
 dsSel.value=S.ds;
@@ -22,10 +22,10 @@ function loadDataset(resetRange=true){
   if(resetRange){ const [mn,mx]=scoreExtent(); S.lo=mn; S.hi=mx; }
   S.lo=clamp(S.lo, ...scoreExtent()); S.hi=clamp(S.hi, ...scoreExtent());
   if(S.lo>S.hi)[S.lo,S.hi]=[S.hi,S.lo];
-  $('#dsNote').innerHTML=`${d.meta} · <b style="color:var(--dim)">${d.note}</b><br>`+
-    `Score range <span class="mono">${d.stats.score_min}–${d.stats.score_max}</span> · `+
-    `Cost/Task <span class="mono">${fmt$(d.stats.cost_min)}–${fmt$(d.stats.cost_max)}</span> · `+
-    `with cost data <span class="mono">${d.stats.with_cost}/${d.stats.n}</span>`;
+  $('#dsNote').innerHTML=TF('data.dsNote',{meta:d.meta,note:d.note,
+    min:d.stats.score_min,max:d.stats.score_max,
+    cmin:fmt$(d.stats.cost_min),cmax:fmt$(d.stats.cost_max),
+    wc:d.stats.with_cost,n:d.stats.n});
   const [mn,mx]=scoreExtent();
   $('#inLo').min=mn; $('#inLo').max=mx; $('#inHi').min=mn; $('#inHi').max=mx;
   const cs=d.models.filter(m=>m.c!=null).map(m=>m.c);

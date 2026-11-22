@@ -1,7 +1,7 @@
 /* 回归测试：直接验证 index.html 里内嵌的那份数据与脚本。
    用法： python3 test/build.py && node --max-old-space-size=4096 test/run.js   */
 const out=[]; const W=s=>require('fs').writeSync(1,s+'\n');
-function T(name,fn){ const t0=Date.now();
+function TC(name,fn){ const t0=Date.now();
   try{ const r=fn(); out.push([name,'OK',r,Date.now()-t0]); }
   catch(e){ out.push([name,'FAIL',e.message,Date.now()-t0]); } }
 /* 价格情景固定为「榜面快照」（全部修正关闭），让下面 33 条已记录的结论保持可复现；
@@ -41,19 +41,19 @@ function sweep(dsKey, step){
 reset();
 const D=()=>DATASETS[S.ds];
 
-T('数据集载入', ()=>`overall_os: ${D().models.length} 个模型，Score ${D().stats.score_min}–${D().stats.score_max}，${tiers.length} 档前沿`);
-T('前沿：分数越高成本越高（单调）', ()=>{
+TC('数据集载入', ()=>`overall_os: ${D().models.length} 个模型，Score ${D().stats.score_min}–${D().stats.score_max}，${tiers.length} 档前沿`);
+TC('前沿：分数越高成本越高（单调）', ()=>{
   const asc=[...tiers].sort((a,b)=>a.model.s-b.model.s);
   for(let i=1;i<asc.length;i++){ if(!(asc[i].model.c>asc[i-1].model.c)) throw new Error('成本未随分数递增 @'+asc[i].model.n);
     if(!(asc[i].model.s>asc[i-1].model.s)) throw new Error('分数未递增'); }
   return `${tiers.length} 档：$${asc[0].model.c}@${asc[0].model.s} → $${asc[asc.length-1].model.c}@${asc[asc.length-1].model.s}`;
 });
-T('前沿：没有任何模型能支配前沿成员', ()=>{
+TC('前沿：没有任何模型能支配前沿成员', ()=>{
   for(const f of frontier) for(const m of cur){ if(m.n===f.n)continue;
     if(m.s>f.s && m.c<f.c) throw new Error(`${m.n} 支配了 ${f.n}`); }
   return `${frontier.length} 个前沿成员全部不被支配`;
 });
-T('各档门槛区间无缝无叠、完整覆盖', ()=>{
+TC('各档门槛区间无缝无叠、完整覆盖', ()=>{
   const d=tiers, mx=D().stats.score_max;
   if(Math.round(d[0].upper)!==mx) throw new Error(`顶档上界 ${d[0].upper} != 最高分 ${mx}`);
   for(let i=1;i<d.length;i++) if(Math.round(d[i].upper)+1!==Math.round(d[i-1].lower)) throw new Error(`档 ${i-1} 与 ${i} 之间断裂`);
@@ -66,7 +66,7 @@ T('各档门槛区间无缝无叠、完整覆盖', ()=>{
   }
   return d.map(t=>`${t.model.n.slice(0,24)}:[${Math.round(t.lower)},${Math.round(t.upper)}]`).join('\n     ');
 });
-T('暴力校验：每个门槛 T 的赢家 == min{cost | score>=T}', ()=>{
+TC('暴力校验：每个门槛 T 的赢家 == min{cost | score>=T}', ()=>{
   const mx=D().stats.score_max, mn=D().stats.score_min; const bad=[]; let n=0;
   for(let t=mx;t>=mn;t--){ if(++n>3000) throw new Error('guard'); S.hi=t; recompute();
     const b=brute(t);
@@ -77,7 +77,7 @@ T('暴力校验：每个门槛 T 的赢家 == min{cost | score>=T}', ()=>{
   if(bad.length) throw new Error(bad.length+' 处不一致：'+bad.slice(0,3).join(' | '));
   return `${n} 个门槛全部与暴力解一致（0 处偏差）`;
 });
-T('拖动分数线的赢家序列 == 前沿顺序', ()=>{
+TC('拖动分数线的赢家序列 == 前沿顺序', ()=>{
   const mx=D().stats.score_max, mn=D().stats.score_min; const seen=[]; let n=0;
   for(let t=mx;t>=mn;t--){ if(++n>3000) throw new Error('guard'); S.hi=t; recompute(); if(seen[seen.length-1]!==view.w.n) seen.push(view.w.n); }
   const exp=tiers.map(x=>x.model.n);
@@ -85,23 +85,23 @@ T('拖动分数线的赢家序列 == 前沿顺序', ()=>{
   S.hi=mx; recompute();
   return `${seen.length} 档，从高到低依次：\n     `+seen.join('\n     → ');
 });
-T('T=最高分 → 最强模型', ()=>{ S.hi=D().stats.score_max; recompute(); if(view.w.s!==D().stats.score_max) throw new Error(view.w.n); return `${view.w.n} | ${view.w.s} | $${view.w.c} | ↑ 无（天花板）`; });
-T('T=1660 → DeepSeek-V4.1-Flash $0.12（而非 Kimi $0.91）', ()=>{ S.hi=1660; recompute();
+TC('T=最高分 → 最强模型', ()=>{ S.hi=D().stats.score_max; recompute(); if(view.w.s!==D().stats.score_max) throw new Error(view.w.n); return `${view.w.n} | ${view.w.s} | $${view.w.c} | ↑ 无（天花板）`; });
+TC('T=1660 → DeepSeek-V4.1-Flash $0.12（而非 Kimi $0.91）', ()=>{ S.hi=1660; recompute();
   if(view.w.n!=='DeepSeek-V4.1-Flash-20261017 (Max)') throw new Error('实际 '+view.w.n);
   const r=`${view.w.n} | ${view.w.s} | $${view.w.c} | 统治门槛区间 [${view.covers.map(Math.round)}]\n     ↑ 升一档：${view.nxt.n} +${view.marginal.ds} 分 / +$${view.marginal.dc.toFixed(2)} = $${view.marginal.per.toFixed(4)} 每分`;
   S.hi=D().stats.score_max; recompute(); return r; });
-T('T=1500 → Hy3 $0.04（Muse Spark Open 被支配故出局）', ()=>{ S.hi=1500; recompute();
+TC('T=1500 → Hy3 $0.04（Muse Spark Open 被支配故出局）', ()=>{ S.hi=1500; recompute();
   if(view.w.n!=='Hy3') throw new Error('实际 '+view.w.n);
   const muse=cur.find(m=>m.n==='Muse Spark Open (Max)'), dom=cur.find(m=>m.s>muse.s&&m.c<muse.c);
   const r=`${view.w.n} | ${view.w.s} | $${view.w.c}\n     Muse Spark Open (${muse.s}/$${muse.c}) 被 ${dom.n} (${dom.s}/$${dom.c}) 支配 → 不在前沿`;
   S.hi=D().stats.score_max; recompute(); return r; });
-T('每一档的「↑升一档 边际单价」', ()=>{
+TC('每一档的「↑升一档 边际单价」', ()=>{
   const rows=[];
   for(let i=tiers.length-1;i>=0;i--){ S.hi=tiers[i].lower; recompute();
     rows.push(`${String(view.w.s).padEnd(5)} $${String(view.w.c).padEnd(8)} ${view.w.n.slice(0,30).padEnd(30)} ↑ ${view.marginal?('$/分 '+view.marginal.per.toPrecision(3)+' → '+view.marginal.model.n.slice(0,22)):'天花板'}`); }
   S.hi=D().stats.score_max; recompute(); return rows.join('\n     ');
 });
-T('标注区间 == 实际统治区间（全数据集逐个门槛暴力核对）', ()=>{
+TC('标注区间 == 实际统治区间（全数据集逐个门槛暴力核对）', ()=>{
   let tot=0, bad=[];
   for(const ds of ['overall_os','frontend_os','fullstack_os','react_os','reference_os','img2webdev_os','overall_all']){
     offTime(); S.ds=ds; S.mode='pareto'; S.ci='point'; loadDataset(true);
@@ -121,7 +121,7 @@ T('标注区间 == 实际统治区间（全数据集逐个门槛暴力核对）'
   if(bad.length) throw new Error(bad.slice(0,4).join(' | ')+(bad.length>4?` …共 ${bad.length} 处`:''));
   return `7 个数据集的全部前沿档、共 ${tot} 次门槛判定：每一档标注的区间与它实际获胜的区间**逐位相同**，且都连续`;
 });
-T('严格 CI 模式：合并统计上不可区分的档', ()=>{
+TC('严格 CI 模式：合并统计上不可区分的档', ()=>{
   const res=[];
   for(const ds of ['overall_os','frontend_os','fullstack_os','overall_all']){
     S.ds=ds; S.ci='point'; loadDataset(true); const a=tiers.length;
@@ -132,52 +132,52 @@ T('严格 CI 模式：合并统计上不可区分的档', ()=>{
   }
   S.ci='point'; reset(); return res.join(' | ');
 });
-T('最少票数过滤', ()=>{ S.minVotes=10000; recompute(); const n=cur.length,t=tiers.length; S.minVotes=0; recompute(); return `${n} 个模型 / ${t} 档（未过滤：${cur.length}/${tiers.length}）`; });
-T('排除 Preliminary', ()=>{ S.exPrelim=true; recompute(); if(frontier.some(m=>m.pre)) throw new Error('前沿上仍有 Preliminary'); const t=tiers.length; S.exPrelim=false; recompute(); return `${t} 档，前沿无 Preliminary`; });
-T('预算上限 $0.20 → 赢家被压低', ()=>{ S.maxCost=0.2; S.hi=1660; recompute();
+TC('最少票数过滤', ()=>{ S.minVotes=10000; recompute(); const n=cur.length,t=tiers.length; S.minVotes=0; recompute(); return `${n} 个模型 / ${t} 档（未过滤：${cur.length}/${tiers.length}）`; });
+TC('排除 Preliminary', ()=>{ S.exPrelim=true; recompute(); if(frontier.some(m=>m.pre)) throw new Error('前沿上仍有 Preliminary'); const t=tiers.length; S.exPrelim=false; recompute(); return `${t} 档，前沿无 Preliminary`; });
+TC('预算上限 $0.20 → 赢家被压低', ()=>{ S.maxCost=0.2; S.hi=1660; recompute();
   const r=`T=1660 且 ≤$0.20 → ${view?view.w.n+' ('+view.w.s+', $'+view.w.c+')':'无解'}`;
   S.maxCost=Infinity; S.hi=D().stats.score_max; recompute(); return r; });
-T('门槛高于最高分 → degraded 提示', ()=>{ S.hi=D().stats.score_max+50; recompute(); const ok=view.degraded===true; S.hi=D().stats.score_max; recompute(); return ok?'degraded=true，回退到最强档':'FAIL'; });
-T('无解时返回空状态', ()=>{ S.minVotes=25000; S.maxCost=0.001; recompute(); const ok=view===null; reset(); return ok?'view=null → 卡片显示空状态':'FAIL'; });
-T('口径② 分数/美元 的退化（印证文中的警告）', ()=>{ S.mode='ratio'; S.hi=D().stats.score_max; recompute(); const r=`${view.w.n}（${view.w.s} 分 / $${view.w.c}）= ${Math.round(view.val)} 分每美元 ← 荒谬，故不推荐`; S.mode='pareto'; recompute(); return r; });
-T('口径③ (Score−1200)/$', ()=>{ S.mode='baseline'; S.hi=D().stats.score_max; recompute(); const r=`${view.w.n}（${view.w.s} 分 / $${view.w.c}）= ${view.val.toFixed(0)} 超额分每美元`; S.mode='pareto'; recompute(); return r; });
+TC('门槛高于最高分 → degraded 提示', ()=>{ S.hi=D().stats.score_max+50; recompute(); const ok=view.degraded===true; S.hi=D().stats.score_max; recompute(); return ok?'degraded=true，回退到最强档':'FAIL'; });
+TC('无解时返回空状态', ()=>{ S.minVotes=25000; S.maxCost=0.001; recompute(); const ok=view===null; reset(); return ok?'view=null → 卡片显示空状态':'FAIL'; });
+TC('口径② 分数/美元 的退化（印证文中的警告）', ()=>{ S.mode='ratio'; S.hi=D().stats.score_max; recompute(); const r=`${view.w.n}（${view.w.s} 分 / $${view.w.c}）= ${Math.round(view.val)} 分每美元 ← 荒谬，故不推荐`; S.mode='pareto'; recompute(); return r; });
+TC('口径③ (Score−1200)/$', ()=>{ S.mode='baseline'; S.hi=D().stats.score_max; recompute(); const r=`${view.w.n}（${view.w.s} 分 / $${view.w.c}）= ${view.val.toFixed(0)} 超额分每美元`; S.mode='pareto'; recompute(); return r; });
 /* 其余每个数据集都逐个门槛扫一遍：工具给出的赢家必须等于暴力解 min{cost | score ≥ T} */
 ['fullstack_os','frontend_os','react_os','reference_os','img2webdev_os','overall_all'].forEach(k=>{
-  T('数据集 '+k+' 全门槛扫描', ()=>{ const r=sweep(k,1); reset();
+  TC('数据集 '+k+' 全门槛扫描', ()=>{ const r=sweep(k,1); reset();
     if(r.bad.length) throw new Error(r.bad.slice(0,3).join(' | '));
     if(!r.orderOK) throw new Error('拖动时赢家顺序与前沿顺序不一致');
     if(r.models<2) throw new Error('可用模型太少：'+r.models);
     return `${r.models} 模型 / ${r.tiers} 档 / ${r.n} 个门槛全部匹配暴力解\n     `+r.seen.join('\n     → '); });
 });
-T('渲染全链路不抛异常', ()=>{ const mx=D().stats.score_max, mn=D().stats.score_min;
+TC('渲染全链路不抛异常', ()=>{ const mx=D().stats.score_max, mn=D().stats.score_min;
   [mx,1600,1500,1400,1300,mn].forEach(t=>{S.hi=t;recompute();render();});
   S.mode='ratio'; S.hi=mx; recompute(); render();
   S.mode='baseline'; recompute(); render();
   S.ci='strict'; S.mode='pareto'; recompute(); render(); S.ci='point';
   S.hi=mx; recompute(); return '6 个门槛 × 3 种口径 × 2 种 CI 模式，scatter/steps/tiers/table 全部渲染成功'; });
-T('金额格式：极小值不被抹成 $0.0000', ()=>{
+TC('金额格式：极小值不被抹成 $0.0000', ()=>{
   const cases=[[0.0027,'$0.0027'],[0.0000274,'$2.7e-5'],[0.05,'$0.050'],[0.91,'$0.91'],[11.04,'$11.0'],[0.0001,'$1.0e-4']];
   return cases.map(([v])=>`${v} → ${fmt$(v)}`).join('  |  ');
 });
-T('粘贴解析（含 Overall Rank 列）', ()=>{
+TC('粘贴解析（含 Overall Rank 列）', ()=>{
   const smp='| Rank | Overall Rank | Model | Score | Rank Spread | Votes | Cost/Task (P50) | Price $/M | Context |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- |\n| 1 | 5 | [Test X](https://x.com)<br>LabX · MIT | 1700+5/-5 | 110 | 3,000 | $0.42 | $1 / $3 | 200K |\n| 2 | 9 | [Test Y](https://y.com)<br>LabY · Apache 2.0 | 1600+8/-8Preliminary | 520 | 900 | $0.05 | $0.2 / $0.8 | N/A |';
   const r=parsePasted(smp); if(r.length!==2) throw new Error('rows='+r.length);
   if(r[0].s!==1700||r[0].c!==0.42||r[0].lic!=='MIT') throw new Error(JSON.stringify(r[0]));
   if(!r[1].pre) throw new Error('preliminary 未识别');
   return JSON.stringify(r);
 });
-T('粘贴解析（无 Overall Rank 列）', ()=>{
+TC('粘贴解析（无 Overall Rank 列）', ()=>{
   const smp='| Rank | Rank Spread | Model | Score | Votes | Cost/Task (P50) | Price $/M | Context |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| 3 | 35 | Anthropic<br>[Claude Test 9 (xHigh)](https://a.com)<br>Anthropic · Proprietary | 1772+10/-10 | 5,895 | $3.02 | $2 / $10 | 1M |';
   const r=parsePasted(smp); if(r.length!==1||r[0].lab!=='Anthropic'||r[0].v!==5895) throw new Error(JSON.stringify(r)); return JSON.stringify(r);
 });
-T('粘贴解析（制表符分隔、列不全）', ()=>{
+TC('粘贴解析（制表符分隔、列不全）', ()=>{
   const smp='Rank\tModel\tScore\tVotes\tCost/Task (P50)\n1\t[Zed 1](https://z.com)\t1500+5/-5\t1,000\t$0.20';
   const r=parsePasted(smp);
   if(r.length!==1) throw new Error('rows='+r.length);
   if(r[0].n!=='Zed 1'||r[0].s!==1500||r[0].v!==1000||r[0].c!==0.2) throw new Error(JSON.stringify(r[0]));
   return JSON.stringify(r[0]);
 });
-T('粘贴解析：Rank Spread 不能被当成 votes / overall rank', ()=>{
+TC('粘贴解析：Rank Spread 不能被当成 votes / overall rank', ()=>{
   const smp='| Rank | Overall Rank | Model | Score | Rank Spread | Votes | Cost/Task (P50) | Price $/M | Context |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- |\n| 19 | 67 | [Kimi K2.6](https://k.com)<br>Moonshot · Modified MIT | 1509+7/-7 | 6172 | 10,005 | $0.24 | $0.95 / $4 | 262.1K |\n| 4 | 23 | Thinking Machines<br>[Inkling 2 Small](https://t.ai)<br>Thinky · Apache 2.0 | 1647+19/-19Preliminary | 1632 | 990 | $0.31 | $0.30 / $1 | N/A |';
   const r=parsePasted(smp);
   if(r.length!==2) throw new Error('rows='+r.length);
@@ -195,7 +195,7 @@ T('粘贴解析：Rank Spread 不能被当成 votes / overall rank', ()=>{
   if(ink.lab!=='Thinking Machines'||!ink.pre||ink.v!==990||ink.ctx!==null) throw new Error(JSON.stringify(ink));
   return `Kimi K2.6: rank=${k.r} orank=${k.or} votes=${k.v} cost=$${k.c} ctx=${k.ctx} lab=${k.lab}\n     Inkling 2 Small: lab=${ink.lab} pre=${ink.pre} votes=${ink.v} ctx=${ink.ctx}`;
 });
-T('粘贴解析：全部模型视图（无 Overall Rank 列，Rank Spread 在第 2 列）', ()=>{
+TC('粘贴解析：全部模型视图（无 Overall Rank 列，Rank Spread 在第 2 列）', ()=>{
   const smp='| Rank | Rank Spread | Model | Score | Votes | Cost/Task (P50) | Price $/M | Context |\n| --- | --- | --- | --- | --- | --- | --- | --- |\n| 12 | 1017 | [Kimi K3.1 Pro (Max)](https://k.ai)<br>Moonshot · Kimi K3.1 Pro License | 1687+10/-10 | 4,977 | $0.91 | $2 / $10 | 1M |\n|  | N/A | [Ernie 5.5 Flash Preview](https://e.com)<br>Baidu · Proprietary | 1668+16/-16 [AutoEval](https://arena.ai/blog/autoeval-scores) | N/A | N/A | $0.28 / $1.13 | N/A |';
   const r=parsePasted(smp);
   if(r.length!==2) throw new Error('rows='+r.length);
@@ -209,7 +209,7 @@ T('粘贴解析：全部模型视图（无 Overall Rank 列，Rank Spread 在第
 });
 /* 整列没有 Cost/Task 的榜单（arena.ai 的 WebDev · HTML 子榜就是这样）：不能崩，且必须说清原因，
    否则用户会以为是自己的过滤条件设错了。 */
-T('无成本列的榜单：不崩溃 + 明确提示原因', ()=>{
+TC('无成本列的榜单：不崩溃 + 明确提示原因', ()=>{
   const NOCOST=[
    '| Rank | Overall Rank | Model | Score | Rank Spread | Votes | Cost/Task (P50) | Price $/M | Context |',
    '| --- | --- | --- | --- | --- | --- | --- | --- | --- |',
@@ -241,7 +241,7 @@ T('无成本列的榜单：不崩溃 + 明确提示原因', ()=>{
 });
 /* 交叉校验：浏览器版 parsePasted() 解析 raw/*.md 的结果，必须与 parse.py 写出的
    data/datasets.json 逐字段一致 —— 两套独立实现互为参照，任何一方跑偏都会在这里暴露。 */
-T('交叉校验：JS parsePasted() ≡ Python parse.py（逐字段）', ()=>{
+TC('交叉校验：JS parsePasted() ≡ Python parse.py（逐字段）', ()=>{
   const fs=require('fs'), P=require('path'), ROOT=P.join(__dirname,'..');
   const ref=JSON.parse(fs.readFileSync(P.join(ROOT,'data','datasets.json'),'utf8'));
   const F=ref.fields, norm=x=>(x===''||x===undefined)?null:x;
@@ -267,7 +267,7 @@ function at(sc,T){ onTime(sc.h,sc.dow); S.ds='overall_os'; S.hi=T; recompute(); 
 function cOf(name,sc){ at(sc,S.hi); const m=cur.find(x=>x.n===name); return m?m.c:null; }
 const DS0910='DeepSeek-V4.1-Flash-20260910 (Max)', DS1017='DeepSeek-V4.1-Flash-20261017 (Max)', GLM='GLM-5.3-Flash';
 
-T('价格情景：全部关闭 = 完全还原榜面价', ()=>{
+TC('价格情景：全部关闭 = 完全还原榜面价', ()=>{
   offTime(); S.ds='overall_os'; loadDataset(true);
   const d=D().models; let bad=0;
   for(const m of d){ if(m.cRaw==null){ if(m.c!==null)bad++; continue; }
@@ -276,7 +276,7 @@ T('价格情景：全部关闭 = 完全还原榜面价', ()=>{
   if(bad) throw new Error(bad+' 个模型的成本被改写');
   return `${d.length} 个模型全部等于 cRaw；pinRaw/poutRaw 也一并保存`;
 });
-T('峰时（周三 02:00 UTC）：榜面价是谷价的 DeepSeek 成本翻倍', ()=>{
+TC('峰时（周三 02:00 UTC）：榜面价是谷价的 DeepSeek 成本翻倍', ()=>{
   offTime(); S.ds='overall_os'; loadDataset(true); const d=D().models;
   const g=n=>d.find(m=>m.n===n);
   at(PEAK,1600);
@@ -285,7 +285,7 @@ T('峰时（周三 02:00 UTC）：榜面价是谷价的 DeepSeek 成本翻倍', 
   if(Math.abs(b.c-b.cRaw)>1e-9) throw new Error('20260910 榜面本就是峰价，不该变: '+b.c);
   return `${DS1017}: 榜面 $${a.cRaw} → 峰时 $${a.c.toFixed(4)}（×${a.adj.scale.toFixed(2)}）；${DS0910}: $${b.cRaw} → $${b.c.toFixed(4)}（榜面已是峰价，不变）`;
 });
-T('谷时（周三 12:00 UTC）：榜面价是峰价的 DeepSeek 成本减半', ()=>{
+TC('谷时（周三 12:00 UTC）：榜面价是峰价的 DeepSeek 成本减半', ()=>{
   offTime(); S.ds='overall_os'; loadDataset(true); const d=D().models; const g=n=>d.find(m=>m.n===n);
   at(OFF,1600);
   const a=g(DS1017), b=g(DS0910), p=g('DeepSeek-V4-Pro');
@@ -294,12 +294,12 @@ T('谷时（周三 12:00 UTC）：榜面价是峰价的 DeepSeek 成本减半', 
   if(Math.abs(p.c-p.cRaw/2)>1e-9) throw new Error('V4-Pro 未减半');
   return `${DS0910}: $${b.cRaw} → $${b.c.toFixed(4)}；DeepSeek-V4-Pro: $${p.cRaw} → $${p.c.toFixed(4)}；${DS1017} 保持 $${a.c}（榜面已是谷价）`;
 });
-T('周末豁免：周六 02:00 仍是谷价（峰时窗口只在工作日）', ()=>{
+TC('周末豁免：周六 02:00 仍是谷价（峰时窗口只在工作日）', ()=>{
   const wk=cOf(DS0910,{h:2,dow:3}), we=cOf(DS0910,{h:2,dow:6}), su=cOf(DS0910,{h:2,dow:0});
   if(!(Math.abs(wk-we*2)<1e-9 && Math.abs(we-su)<1e-9)) throw new Error(`周三 ${wk} / 周六 ${we} / 周日 ${su}`);
   return `${DS0910}: 周三 02:00 = $${wk.toFixed(4)}，周六 02:00 = 周日 02:00 = $${we.toFixed(4)}`;
 });
-T('GLM-5.3-Flash 促销修正：日期跨过 2026-09-09 即涨价', ()=>{
+TC('GLM-5.3-Flash 促销修正：日期跨过 2026-09-09 即涨价', ()=>{
   /* 注意：每次都必须拷贝数值 —— find() 返回的是同一个对象引用，
      后一次 applyPriceScenario 会就地改写它，直接存引用会读到「最后一次」的值。 */
   const snap=d=>{ onTime(OFF.h,OFF.dow,d); S.ds='overall_os'; S.hi=1500; recompute();
@@ -313,7 +313,7 @@ T('GLM-5.3-Flash 促销修正：日期跨过 2026-09-09 即涨价', ()=>{
   if(Math.abs(m9.scale-2.9452)>1e-4) throw new Error('倍率应为 2.945，实际 '+m9.scale);
   return `促销期（09-01 = 09-08）${fmt$(m1.c)} = 榜面价 → 09-09 起 ${fmt$(m9.c)}（×${m9.scale.toFixed(3)}，此后不再变）；输入 $0.05→$0.15、输出 $0.18→$0.50，按 8% 输出占比加权`;
 });
-T('输出占比滑块只对「输入输出涨幅不同」的修正起作用', ()=>{
+TC('输出占比滑块只对「输入输出涨幅不同」的修正起作用', ()=>{
   S.outShare=0;    const ds0=cOf(DS1017,PEAK), glm0=cOf(GLM,OFF);
   S.outShare=0.5;  const ds1=cOf(DS1017,PEAK), glm1=cOf(GLM,OFF);
   S.outShare=1/12;
@@ -321,7 +321,7 @@ T('输出占比滑块只对「输入输出涨幅不同」的修正起作用', ()
   if(Math.abs(glm0-glm1)<1e-12) throw new Error('GLM 修正应随滑块变化');
   return `DeepSeek ×2 恒定（$${ds0.toFixed(4)}）；GLM 0%输出=$${glm0.toFixed(4)} → 50%输出=$${glm1.toFixed(4)}`;
 });
-T('存疑事件默认关闭，且勾选后可见（敏感性分析）', ()=>{
+TC('存疑事件默认关闭，且勾选后可见（敏感性分析）', ()=>{
   const st={}; PRICE_EVENTS.forEach(e=>st[e.id]=S.evState[e.id]);
   if(st.ds_v4flash!==false||st.suspect2x!==false) throw new Error('默认应为 false: '+JSON.stringify(st));
   if(st.ds_tod!==true||st.glm_promo!==true) throw new Error('已核实事件默认应为 true');
@@ -338,7 +338,7 @@ T('存疑事件默认关闭，且勾选后可见（敏感性分析）', ()=>{
   if(after.some(m=>!m.adj)) throw new Error('勾选后应命中: '+after.map(m=>m.n).join(','));
   S.evState.suspect2x=false; S.ds='overall_os'; return res;
 });
-T('时间变量下 C(T) 仍是单调阶梯（峰时 168 个门槛暴力对照）', ()=>{
+TC('时间变量下 C(T) 仍是单调阶梯（峰时 168 个门槛暴力对照）', ()=>{
   onTime(PEAK.h,PEAK.dow); S.ds='overall_os'; S.mode='pareto'; S.ci='point'; loadDataset(true);
   const d=D().models; let bad=0, n=0; const seen=[];
   for(let t=d.stats?0:0, th=d.length?DATASETS.overall_os.stats.score_max:0; th>=DATASETS.overall_os.stats.score_min; th--){
@@ -358,7 +358,7 @@ T('时间变量下 C(T) 仍是单调阶梯（峰时 168 个门槛暴力对照）
   S.ds='overall_os'; S.hi=DATASETS.overall_os.stats.score_max;
   return `峰时下 ${n} 个门槛全部与暴力解一致，扫描顺序 = 前沿顺序；前沿 ${fr.length} 档`;
 });
-T('前沿成员会随时刻变化：谷时 DeepSeek 老版挤掉 Hy3', ()=>{
+TC('前沿成员会随时刻变化：谷时 DeepSeek 老版挤掉 Hy3', ()=>{
   onTime(PEAK.h,PEAK.dow); S.ds='overall_os'; loadDataset(true); recompute();
   const peakFr=tiers.map(t=>t.model.n);
   onTime(SAT.h,SAT.dow); recompute();
@@ -371,7 +371,7 @@ T('前沿成员会随时刻变化：谷时 DeepSeek 老版挤掉 Hy3', ()=>{
   return `峰时 ${peakFr.length} 档 vs 周六谷时 ${offFr.length} 档；新进：${added.join('、')}｜掉出：${removed.join('、')||'无'}。`+
     `\n     T=1500 的赢家：峰时 ${wp} ${fmt$(wc)} → 周六谷时 ${wo} ${fmt$(woc)}`;
 });
-T('weekCurve 与 cheapestAt 一致，且峰时小时数 = 35', ()=>{
+TC('weekCurve 与 cheapestAt 一致，且峰时小时数 = 35', ()=>{
   onTime(PEAK.h,PEAK.dow); S.ds='overall_os'; loadDataset(true); S.hi=1600; recompute();
   const pts=weekCurve(1600,cur);
   if(pts.length!==168) throw new Error('应为 168 点');
@@ -385,7 +385,7 @@ T('weekCurve 与 cheapestAt 一致，且峰时小时数 = 35', ()=>{
   offTime(); S.ds='overall_os'; loadDataset(true);
   return `168 小时 → ${sw} 次冠军易主，C(T) 只取 ${vals.length} 个值：${vals.join(' / ')}`;
 });
-T('一键开关：「榜面原样（全关）」与「全部启用（含存疑）」', ()=>{
+TC('一键开关：「榜面原样（全关）」与「全部启用（含存疑）」', ()=>{
   onTime(PEAK.h,PEAK.dow); S.ds='overall_os'; loadDataset(true); S.hi=1500; recompute();
   SCEN_BOARD(); renderEvList(); recompute();
   const boardN=tiers.map(t=>t.model.n), boardAdj=(cur||[]).filter(m=>m.adj).length;
@@ -408,7 +408,7 @@ function expectScale(m,h,r,wm,w,pinNow,poutNow){
 }
 function G(ds,n){ return DATASETS[ds].models.find(m=>m.n===n); }
 
-T('缓存算术：与独立手算公式逐项吻合（含写入倍率）', ()=>{
+TC('缓存算术：与独立手算公式逐项吻合（含写入倍率）', ()=>{
   onTime(12,3); cacheOn(0.95); S.ds='overall_os'; loadDataset(true); S.hi=1600; recompute();
   const w=S.outShare, cases=[];
   for(const n of ['DeepSeek-V4.1-Flash-20261017 (Max)','Kimi K3.1 Pro (Max)','MiMo-V2.6-Flash','Hy3','GLM-5.3 (Max)']){
@@ -430,7 +430,7 @@ T('缓存算术：与独立手算公式逐项吻合（含写入倍率）', ()=>{
   offTime(); S.ds='overall_os'; loadDataset(true);
   return cases.join('\n     ')+`\n     Claude Opus 5.5 (Max) wm=1.25 → ×${gc.scale.toFixed(4)}（写入费吃掉一部分折扣）`;
 });
-T('命中率单调：h 越高越便宜，h=0 精确等于「关缓存」', ()=>{
+TC('命中率单调：h 越高越便宜，h=0 精确等于「关缓存」', ()=>{
   onTime(12,3); S.ds='overall_os'; loadDataset(true); S.hi=1600;
   const m=G('overall_os','Kimi K3.1 Pro (Max)');
   S.cacheSrc='off'; recompute(); const off=m.c;
@@ -446,7 +446,7 @@ T('命中率单调：h 越高越便宜，h=0 精确等于「关缓存」', ()=>{
   offTime(); S.ds='overall_os'; loadDataset(true);
   return `Kimi K3.1 Pro：关缓存 ${fmt$(off)} → ${seq.join(' → ')}；h=0 与关缓存完全相同（差 ${Math.abs(zero-off).toExponential(1)}）`;
 });
-T('输出 token 是折扣地板：h=100% 也压不到零，且余下账单几乎全是输出', ()=>{
+TC('输出 token 是折扣地板：h=100% 也压不到零，且余下账单几乎全是输出', ()=>{
   onTime(12,6); cacheOn(1); S.ds='overall_os'; loadDataset(true); S.hi=1600; recompute();
   const w=S.outShare, bad=[]; let outShareOfResidual=[];
   for(const m of cur){
@@ -470,7 +470,7 @@ T('输出 token 是折扣地板：h=100% 也压不到零，且余下账单几乎
   return `${outShareOfResidual.length} 个模型全部不低于「读取价 + 输出」地板；h=100% 时残余账单里输出 token 占比 ${(lo[1]*100).toFixed(1)}%（${lo[0]}）～ ${(hi[1]*100).toFixed(1)}%（${hi[0]}）。`+
     `\n     例：DeepSeek-20261017 h=100% → ×${floor.toFixed(4)}，${fmt$(m.cRaw)} → ${fmt$(cFloor)}，再高命中率也压不下去了`;
 });
-T('缓存 95% 是否换冠军：全门槛逐个对照 h=0', ()=>{
+TC('缓存 95% 是否换冠军：全门槛逐个对照 h=0', ()=>{
   onTime(12,6); S.ds='overall_os'; S.mode='pareto'; S.ci='point'; loadDataset(true);
   const st=DATASETS.overall_os.stats;
   const grab=()=>{ const r={}; for(let th=st.score_max; th>=st.score_min; th--){ S.hi=th; recompute();
@@ -487,7 +487,7 @@ T('缓存 95% 是否换冠军：全门槛逐个对照 h=0', ()=>{
   S.hi=st.score_max; offTime(); S.ds='overall_os'; loadDataset(true);
   return res;
 });
-T('敏感性数字锁定：面板/README 里引用的百分比必须可复现', ()=>{
+TC('敏感性数字锁定：面板/README 里引用的百分比必须可复现', ()=>{
   onTime(12,6); cacheOn(0.95); S.ds='overall_os'; loadDataset(true); S.hi=1600;
   const saveW=S.outShare;
   const pct=(n,w)=>{ S.outShare=w; const m=G('overall_os',n);
@@ -510,7 +510,7 @@ T('敏感性数字锁定：面板/README 里引用的百分比必须可复现', 
   return `DeepSeek-20261017 @h=95%：w=2%→省86% / 8%→68% / 15%→55% / 25%→40% / 40%→25%；Kimi 省 ${kimi}%、MiMo 省 ${mimo}%。`+
     `T=1600 一周振幅 ${a0.toFixed(2)}× → 缓存 95% 后 ${a95.toFixed(2)}×`;
 });
-T('缓存读取价随峰谷/促销自动缩放（存比例而非绝对值的好处）', ()=>{
+TC('缓存读取价随峰谷/促销自动缩放（存比例而非绝对值的好处）', ()=>{
   const d=G('overall_os','DeepSeek-V4.1-Flash-20261017 (Max)');
   onTime(2,3); cacheOn(0.95); S.ds='overall_os'; loadDataset(true); S.hi=1600; recompute();
   const pk=priceScale(d,2,3,S.dateISO).cache.pc;
@@ -525,7 +525,7 @@ T('缓存读取价随峰谷/促销自动缩放（存比例而非绝对值的好�
   offTime(); S.ds='overall_os'; loadDataset(true);
   return `DeepSeek-20261017：峰时 $${pk}/M、谷时 $${offp}/M（公布值 $0.006/$0.003）；GLM-5.3-Flash：促销期 $${promo}/M、促销后 $${now}/M（= 输入价的 20%）`;
 });
-T('缓存价来源三档：公布价 / 一律 10% / 关闭', ()=>{
+TC('缓存价来源三档：公布价 / 一律 10% / 关闭', ()=>{
   onTime(12,3); S.ds='overall_os'; loadDataset(true); S.hi=1600; recompute();
   const m=G('overall_os','MiMo-V2.6-Flash');       // 公布 ratio = 2%
   const f=G('overall_os','Gemma 4 31B');           // 无公布价 → 推算 10%
@@ -546,7 +546,7 @@ T('缓存价来源三档：公布价 / 一律 10% / 关闭', ()=>{
   offTime(); S.ds='overall_os'; loadDataset(true);
   return `MiMo-V2.6-Flash（公布 2%）：pub ${fmt$(mp)} / flat ${fmt$(mf)} / off ${fmt$(mo)}；Gemma 4 31B（推算 10%）：pub ${fmt$(fp)} / flat ${fmt$(ff)} / off ${fmt$(fo)}。候选集 ${pub} 个公布价、${est} 个推算`;
 });
-T('缓存 95% 下 C(T) 仍是单调阶梯（168 门槛暴力对照）', ()=>{
+TC('缓存 95% 下 C(T) 仍是单调阶梯（168 门槛暴力对照）', ()=>{
   onTime(2,3); cacheOn(0.95); S.ds='overall_os'; S.mode='pareto'; S.ci='point'; loadDataset(true);
   const st=DATASETS.overall_os.stats; let bad=0,n=0; const seen=[];
   for(let th=st.score_max; th>=st.score_min; th--){
@@ -566,7 +566,7 @@ T('缓存 95% 下 C(T) 仍是单调阶梯（168 门槛暴力对照）', ()=>{
   S.hi=st.score_max; offTime(); S.ds='overall_os'; loadDataset(true);
   return res;
 });
-T('缓存把冠军换掉：h=0 → h=95% 的前沿与门槛赢家对比', ()=>{
+TC('缓存把冠军换掉：h=0 → h=95% 的前沿与门槛赢家对比', ()=>{
   onTime(12,6); S.ds='overall_os'; loadDataset(true);
   cacheOn(0,'off'); S.hi=DATASETS.overall_os.stats.score_max; recompute();
   const f0=tiers.map(t=>`${t.model.n}@${t.model.s}`), c0={};
@@ -579,7 +579,7 @@ T('缓存把冠军换掉：h=0 → h=95% 的前沿与门槛赢家对比', ()=>{
   return `档数 ${f0.length} → ${f1.length}；冠军易主的门槛：${moved.length?moved.map(T0=>`T=${T0}（${c0[T0]} → ${c1[T0]}）`).join('；'):'无'}`+
     `\n     h=95% 各门槛：${Object.keys(c1).map(T0=>`T=${T0} ${c1[T0]}`).join(' | ')}`;
 });
-T('未来事件：Gemini 4 Carbon/Argon 2026-12-01 涨价', ()=>{
+TC('未来事件：Gemini 4 Carbon/Argon 2026-12-01 涨价', ()=>{
   onTime(12,3); cacheOn(0.95); S.ds='overall_all'; loadDataset(true); S.hi=1770;
   const c=G('overall_all','Gemini 4 Carbon (High)');
   S.dateISO='2026-11-30'; recompute(); const before={c:c.c,pin:priceScale(c,S.hour,S.dow,S.dateISO).cache.pin};
@@ -596,7 +596,7 @@ T('未来事件：Gemini 4 Carbon/Argon 2026-12-01 涨价', ()=>{
   return `Carbon：11-30 ${fmt$(before.c)} → 12-01 ${fmt$(after.c)}（输入 $2→$4、缓存 $0.10→$0.20）；overall_all 前沿 ${fr0.length} → ${fr1.length} 档`+
     (fr0.join()!==fr1.join()?`，成员变化：${fr1.filter(n=>!fr0.includes(n)).join(',')||'无'} 进 / ${fr0.filter(n=>!fr1.includes(n)).join(',')||'无'} 出`:'，成员未变');
 });
-T('渲染全链路：缓存控件 × 时刻 × 门槛不抛异常', ()=>{
+TC('渲染全链路：缓存控件 × 时刻 × 门槛不抛异常', ()=>{
   let n=0;
   for(const src of ['pub','flat','off']) for(const hh of [0,0.5,0.85,0.95,1]){
     for(const sc of [{h:2,dow:3},{h:12,dow:6}]){
@@ -612,7 +612,7 @@ T('渲染全链路：缓存控件 × 时刻 × 门槛不抛异常', ()=>{
   offTime(); S.ds='overall_os'; loadDataset(true);
   return `${n} 种（缓存来源 × 命中率 × 时刻 × 门槛 × 数据集）组合渲染通过`;
 });
-T('weekSpan：冠军自己的一周成本波动区间', ()=>{
+TC('weekSpan：冠军自己的一周成本波动区间', ()=>{
   onTime(PEAK.h,PEAK.dow); S.ds='overall_os'; loadDataset(true); S.hi=1600; recompute();
   const g=n=>DATASETS.overall_os.models.find(m=>m.n===n);
   const a=weekSpan(g(DS0910)), b=weekSpan(g(DS1017)), c=weekSpan(g('Kimi K3.1 Pro (Max)'));
@@ -625,7 +625,7 @@ T('weekSpan：冠军自己的一周成本波动区间', ()=>{
   return `${DS0910}: ${fmt$(a.lo)}（${DOWS[a.loAt.dow]} ${a.loAt.hour}:00）— ${fmt$(a.hi)}（${DOWS[a.hiAt.dow]} ${a.hiAt.hour}:00），${a.spread.toFixed(2)}×；`+
     `${DS1017}: ${fmt$(b.lo)}–${fmt$(b.hi)}；Kimi K3.1 Pro: ${fmt$(c.lo)}–${fmt$(c.hi)}（无波动）`;
 });
-T('②③ 比值口径也跟着时间变量走（ratio 必须由修正后的 c 重算）', ()=>{
+TC('②③ 比值口径也跟着时间变量走（ratio 必须由修正后的 c 重算）', ()=>{
   onTime(PEAK.h,PEAK.dow); S.ds='overall_os'; loadDataset(true);
   S.mode='ratio'; S.hi=DATASETS.overall_os.stats.score_max; recompute();
   const peakW=view.w.n, peakV=view.val;
@@ -638,7 +638,7 @@ T('②③ 比值口径也跟着时间变量走（ratio 必须由修正后的 c �
   return `峰时 ②=${peakW}(${fmtR(peakV,0)} pts/$) ③=${peakB}；周六谷时 ②=${offW}(${fmtR(offV,0)} pts/$)；`+
     `${peakW===offW?'比值口径冠军未变（它本来就不受峰谷价影响，说明退化口径对时间变量也不敏感）':'比值口径冠军已改变'}`;
 });
-T('默认状态 = 「此刻」+ 只启用已核实的修正', ()=>{
+TC('默认状态 = 「此刻」+ 只启用已核实的修正', ()=>{
   const st=INIT_EV;
   const off=PRICE_EVENTS.filter(e=>e.conf!=='official'&&st[e.id]).map(e=>e.id);
   const onBad=PRICE_EVENTS.filter(e=>e.conf==='official'&&!st[e.id]).map(e=>e.id);
@@ -653,7 +653,7 @@ T('默认状态 = 「此刻」+ 只启用已核实的修正', ()=>{
   return `${PRICE_EVENTS.length} 条规则（已核实 ${conf.official} 条默认开、存疑 ${conf.suspected} 条默认关），命中 ${nHit} 个模型条目；`+
     `初始状态 = UTC ${DOWS[INIT.dow]} ${String(INIT.hour).padStart(2,'0')}:00、计价日期 ${INIT.date}、输出占比 ${(INIT.os*100).toFixed(0)}%`;
 });
-T('idxOf/dowHourOf 往返一致 + jumpToIdx 落点正确', ()=>{
+TC('idxOf/dowHourOf 往返一致 + jumpToIdx 落点正确', ()=>{
   let bad=0;
   for(let i=0;i<168;i++){ const {dow,hour}=dowHourOf(i); if(idxOf(dow,hour)!==i) bad++; }
   if(bad) throw new Error(bad+' 个索引往返失败');
@@ -666,7 +666,7 @@ T('idxOf/dowHourOf 往返一致 + jumpToIdx 落点正确', ()=>{
   S.hour=keep.h; S.dow=keep.d; offTime(); S.ds='overall_os'; loadDataset(true);
   return '168 个索引全部往返一致；idx 0 = 周一 00:00，idx 167 = 周日 23:00';
 });
-T('渲染全链路：时间控件 + 时间轴 SVG 不抛异常', ()=>{
+TC('渲染全链路：时间控件 + 时间轴 SVG 不抛异常', ()=>{
   let n=0;
   for(const sc of [PEAK,OFF,SAT,{h:1,dow:5},{h:23,dow:0}]){
     for(const T0 of [1687,1660,1600,1500,1400]){
@@ -683,6 +683,55 @@ T('渲染全链路：时间控件 + 时间轴 SVG 不抛异常', ()=>{
   S.hi=99999; onTime(PEAK.h,PEAK.dow); S.ds='overall_os'; loadDataset(true); render(); n++;  // 门槛过高
   offTime(); S.ds='overall_os'; loadDataset(true);
   return `${n} 种（时刻 × 门槛 × 数据集）组合渲染通过，含门槛过高的空态`;
+});
+/* ==================== i18n：字典完整性 + 多 locale 渲染 ====================
+   I18N_ALL 由 test/build.py 注入（全部 locale 字典 flat JSON 的 {locale: dict}）。
+   断言三层：① key 集合全 locale 一致（缺 key = 翻译漏项）；
+             ② 渲染全程无缺失（I18N_MISSING 由 01-util 的 T() 记录）；
+             ③ 每个 locale 切字典后核心渲染一轮不抛异常、产出不含占位符残留。 */
+TC('i18n 字典完整性：全部 locale key 集合一致', ()=>{
+  if(typeof I18N_ALL==='undefined'||!I18N_ALL) throw new Error('I18N_ALL 未注入（test/build.py 版本过旧）');
+  const lcs=Object.keys(I18N_ALL);
+  if(lcs.length<2) throw new Error('至少要 2 个 locale 字典，实际 '+lcs.length);
+  const base=Object.keys(I18N_ALL[lcs[0]]).sort();
+  const bad=[];
+  for(const lc of lcs.slice(1)){
+    const ks=Object.keys(I18N_ALL[lc]).sort();
+    if(ks.length!==base.length) bad.push(`${lc}: ${ks.length} keys ≠ ${lcs[0]}: ${base.length}`);
+    const miss=base.filter(k=>!I18N_ALL[lc][k]), extra=ks.filter(k=>!I18N_ALL[lcs[0]][k]);
+    if(miss.length) bad.push(`${lc} 缺: ${miss.slice(0,6).join(',')}${miss.length>6?'…':''}`);
+    if(extra.length) bad.push(`${lc} 多: ${extra.slice(0,6).join(',')}${extra.length>6?'…':''}`);
+  }
+  if(bad.length) throw new Error(bad.slice(0,4).join(' | '));
+  return `${lcs.length} locale（${lcs.join('/')}）各自 ${base.length} keys，集合完全一致`;
+});
+TC('i18n 渲染无缺失：全链路跑完 I18N_MISSING 为空', ()=>{
+  const mx=D().stats.score_max, mn=D().stats.score_min;
+  I18N_MISSING.length=0;
+  [mx,1600,1500,mn].forEach(t=>{S.hi=t;recompute();});
+  S.mode='ratio'; recompute(); render();
+  S.mode='baseline'; recompute(); render();
+  S.hi=mx; recompute();
+  if(I18N_MISSING.length) throw new Error('T() 缺 key: '+[...new Set(I18N_MISSING)].slice(0,8).join(','));
+  return `en 全链路（${[mx,1600,1500,mn].length} 门槛 × 3 口径 × 2 CI）T() 调用零缺失`;
+});
+TC('i18n 多 locale 渲染：切字典后核心链路 + 占位符残留检查', ()=>{
+  if(typeof I18N_ALL==='undefined'||!I18N_ALL) throw new Error('I18N_ALL 未注入');
+  const save=JSON.parse(JSON.stringify(I18N)); const results=[];
+  for(const lc of Object.keys(I18N_ALL)){
+    for(const k of Object.keys(I18N)) delete I18N[k];
+    Object.assign(I18N, I18N_ALL[lc]);
+    S.hi=1600; recompute(); render();
+    const card=$('#winCard').children.map(c=>c.textContent||c.innerHTML||'').join(' ');
+    if(!card||card.length<40) throw new Error(lc+': winCard 空');
+    const blob=$('#dsNote').innerHTML+card+($('#tlNote').innerHTML||'');
+    if(/undefined|\{\{|%METHOD%|%ROOT%/.test(blob)) throw new Error(lc+': 产出含占位符残留');
+    results.push(`${lc}✓`);
+  }
+  for(const k of Object.keys(I18N)) delete I18N[k];
+  Object.assign(I18N, save);
+  S.hi=D().stats.score_max; recompute();
+  return results.join(' ')+' — 每 locale 渲染一轮（winCard/dsNote/tlNote）无残留';
 });
 let fail=0;
 for(const [n,st,r,ms] of out){ if(st!=='OK')fail++; W((st==='OK'?'✓ ':'✗ ')+n+`  [${ms}ms]\n     `+String(r).slice(0,1500)); }

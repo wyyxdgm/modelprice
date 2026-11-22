@@ -1,0 +1,40 @@
+<h1>方法与数据来源</h1>
+<p class="tagline">前沿怎么算出来、每个数字从哪来，以及本工具刻意<b>不</b>声称什么。</p>
+
+<h2>要回答的问题</h2>
+<p>比价站给你价格；榜单给你分数。本工具把两者接起来，回答一个决策级问题：<b>给定你能接受的最低 Arena 分数（门槛 T），哪个模型的实测单任务成本最低？</b>形式化为 <code>C(T) = min{cost : score &ge; T}</code>。把 T 从高往下扫，得到成本-质量 Pareto 前沿 —— 一条阶梯，每段平台是一个模型统治的分数区间。表里还给出升一档的<b>边际价格</b>（&Delta;cost/&Delta;score，$/分），采购决策真正取决于这个数。</p>
+
+<h2>「最优性价比」的三种定义</h2>
+<ul>
+<li><b>门槛制（Threshold）</b>（默认）：分数 &ge; T 的最便宜模型。唯一在约束优化意义上正确的定义。</li>
+<li><b>每美元分数</b>：强烈偏向便宜模型，因为 Arena 的 Bradley-Terry 分数带 ~1200 基线偏移。</li>
+<li><b>超额分/$</b>：先减去 1200 地板；更接近边际价值，仍有偏差。</li>
+</ul>
+
+<h2>数据来源与快照日期</h2>
+<ul>
+<li>分数与 Cost/Task：公开的 <a href="https://arena.ai/leaderboard/code/webdev">arena.ai WebDev 榜单</a>及子榜，快照 <b>2026-11-11</b>（抓取于 2026-11-14）。自动化刷新请优先用官方机器可读镜像：<a href="https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset">Hugging Face 上的 lmarena-ai/leaderboard-dataset</a>。</li>
+<li>价格：各厂商一方 API 标价（输入/输出每 $1M token），已逐条对照 <a href="https://benchr.org/pricing">benchr.org/pricing</a>（2026-09-11 快照）核实。开源模型挂的是厂商托管 API 价，不是自托管成本。</li>
+<li>Cost/Task (P50) = 一个 Arena 任务的实测 token 用量中位数 &times; 标价 —— 缓存未命中口径。P50 隐藏长尾（P95 可达 5&ndash;10×），且只覆盖 token 花费。</li>
+</ul>
+
+<h2>价格是时间的函数</h2>
+<p>标价随时段和日历变化。默认生效的已核实规则：<b>DeepSeek 峰谷价</b>（峰 = 工作日 01:00&ndash;04:00 与 06:00&ndash;10:00 UTC，2×；其余 ½×）—— 榜面本身就把同一家族的峰价行与谷价行混在一张表；<b>GLM-5.3-Flash 促销到期</b>（2026-09-09：$0.05/$0.18 &rarr; $0.15/$0.50）；<b>Gemini 4 Carbon/Argon 2026-12-01 涨价</b>（$2/$10 &rarr; $4/$20）。存疑规则（DeepSeek V4-Flash 是否分峰谷；两个模型与第三方指数差 2×）收录但默认关闭。</p>
+
+<h2>缓存模型</h2>
+<p>榜单成本假设 0% 缓存命中，对 agent 负载是系统性高估。有效输入价 = <code>(1&minus;h)&middot;pin&middot;wm + h&middot;pin&middot;ratio</code>；输出永不打折。缓存读取价存为标价输入价的比例（DeepSeek 2&ndash;3.3%、MiMo 0.8&ndash;2%、Kimi 10&ndash;20%、GLM 18&ndash;20%、Hy3/Grok 25%、Anthropic 2.5&ndash;10%、OpenAI 5&ndash;10%、Gemini 5%、Mistral 10.3%；未知 &rarr; 10% 估算并标注）。写入倍率 <code>wm</code>：Anthropic/OpenAI（模型名以 Claude/GPT- 开头）为 1.25×，其余 1.0×。h=95% 时头部模型有效成本下降 59&ndash;79%，前沿本身也会重排。</p>
+
+<h2>严格 CI 模式</h2>
+<p>95% CI 重叠的相邻档合并（保留更便宜的模型），让你不为统计噪声多付钱。注意这是保守的<i>重叠筛</i>，不是分数差的正式检验。</p>
+
+<h2>局限</h2>
+<ul>
+<li>分数是快照；榜单更新时能力也在漂移。价格每周漂移。</li>
+<li>P50 任务成本是任务混合；你的负载不同。请用自己的账单配合粘贴扩展功能。</li>
+<li>含闭源榜只覆盖前 41 行；仅开源榜是完整的。</li>
+<li>置信度：这里每个数字都能追溯到公开页面；每条修正在工具里带来源。</li>
+</ul>
+
+<h2>署名与合规</h2>
+<p>榜单数据 &copy; LMArena (arena.ai)。这是对公开数字的独立分析，与 arena.ai 无隶属关系。请勿高频抓取 arena.ai —— 自动化请用 Hugging Face 数据集。发布衍生结论时请注明来源与快照日期。</p>
+<p><a href="%ROOT%">← 返回分析工具</a> · <a href="/data/v1/all.json">JSON 导出</a> · <a href="/llms.txt">llms.txt</a></p>

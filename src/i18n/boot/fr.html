@@ -1,0 +1,85 @@
+<p><b>En une phrase : l'approche tient — mais votre formulation mélangeait deux choses différentes. Avec les corrections ci-dessous, elle devient un outil rigoureux et utile (cette page).</b></p>
+
+<p><b>1. « Trier par cost/task + glisser le bord gauche de la plage » ne produit pas de vainqueur à lui seul.</b>
+Une direction de tri ne produit aucune conclusion ; l'opération réelle est : fixer un seuil <code>T</code> et prendre le modèle de <code>cost</code> minimum parmi ceux de <code>score ≥ T</code>.
+En balayant <code>T</code> du score le plus haut vers le bas, la séquence des vainqueurs est la <b>courbe inférieure (frontière de Pareto)</b> du plan (score, coût).
+On peut prouver que l'application <code>C(T) = min{cost : score ≥ T}</code> est <b>monotone non décroissante</b>, donc « chaque palier a un vainqueur et les vainqueurs deviennent plus chers à mesure que le seuil monte » en découle nécessairement —
+votre intuition est juste. La vue <a href="https://arena.ai/leaderboard/code/webdev/pareto" target="_blank" rel="noopener">/pareto</a> officielle d'Arena trace exactement cette courbe.
+La correction clé : le vainqueur ne change que lorsqu'un modèle <b>strictement moins cher</b> apparaît — pas à chaque pas de glissement — donc la frontière est un <b>escalier</b>, et chaque segment plat est « la plage de scores que ce modèle règne ».</p>
+
+<p><b>2. « Meilleur rapport qualité-prix » a au moins trois définitions, avec des réponses différentes :</b></p>
+<ul>
+<li><b>Seuil (Threshold)</b> (= votre idée, et la seule correcte en optimisation sous contrainte) : <code>min cost s.t. score ≥ T</code>. Signification : « le moins cher parmi les modèles qui franchissent la barre ».</li>
+<li><b>Score par $ (Score per $)</b> : <code>max score/cost</code>. Signification : « le moins cher par point » — mais les scores Arena portent un décalage de base d'environ 1200 qui gonfle le numérateur, donc ce critère <b>choisit presque toujours le petit modèle le moins cher</b>. Peu de valeur pratique.</li>
+<li><b>Score excédentaire/$ (Excess score per $)</b> : <code>max (score − baseline)/cost</code>. Valeur marginale après suppression du décalage ; utile pour comparer l'efficacité « payer plus, gagner combien ».</li>
+</ul>
+<p>Le plus proche d'une décision d'achat est le <b>prix marginal</b> : monter d'un palier depuis le palier actuel, <code>Δcost / Δscore</code> = dollars par point supplémentaire. La table de paliers le calcule pour vous.</p>
+
+<p><b>3. Cinq pièges qui retournent les conclusions (chacun a un interrupteur dans l'outil) :</b></p>
+<ol>
+<li><b>Intervalles de confiance qui se chevauchent.</b> Si la plage de scores est plus étroite que l'IC, les classements à l'intérieur sont du bruit. Exemple : sur le classement HTML, Inkling 2 Small n'a que 130 votes (IC ±55) ; Muse Spark Open ±41.
+Cet outil offre un « mode strict » : n'accepte un écart que si la borne inférieure d'IC de A &gt; la borne supérieure d'IC de B ; les paliers adjacents statistiquement indiscernables sont <b>fusionnés en un seul</b> (en gardant le moins cher).</li>
+<li><b>Preliminary (provisoire) / faible nombre de votes.</b> Ne couronnez pas un « champion de la valeur » parmi un modèle de &lt;1000 votes.</li>
+<li><b>Le Cost/Task (P50) est un artefact de mélange de charges.</b> Le même modèle peut avoir des coûts différents sur différents classements (Overall / Frontend / Fullstack / HTML / React) car la longueur des tâches et la profondeur des appels d'outils diffèrent.
+Le P50 ignore aussi la queue : quand un agent déraille, le P95 peut être 5–10× le P50. Et il ne couvre que les dépenses de tokens — pas la latence, les taux de retry, ni les limites de fenêtre de contexte.</li>
+<li><b>Troncature du jeu de données.</b> Dans ce scraping, <code>frontend_os</code> et <code>overall_all</code> ne couvrent que le segment à haut score (la basse traîne n'a pas été entièrement scrapée).
+Bonne nouvelle : <b>le bout haut de gamme de la frontière de Pareto n'est pas affecté par le manque de modèles à bas score</b> (un modèle moins bien noté et plus cher ne peut jamais entrer dans la frontière) ;
+mauvaise nouvelle : le prix le moins cher au global et la référence du « score excédentaire/$ » seront biaisés. Utilisez la boîte de collage en bas pour combler le manque.</li>
+<li><b>Ponctualité.</b> L'API officielle renvoie 403, seuls des instantanés de page sont possibles ; les prix et rangs changent chaque semaine. Les exports CSV portent la date dans le nom de fichier.</li>
+</ol>
+
+<p><b>4. La question que vous voulez vraiment poser, et où elle se trouve dans l'outil :</b>
+« sur un classement donné, dans une plage de scores acceptable, quel modèle a le meilleur rapport qualité-prix » → c'est le <b>mode Seuil + le curseur de plage de scores</b> :
+mettez <code>lo</code> à votre capacité minimum acceptable et <code>hi</code> au plafond pour lequel vous ne paierez pas plus ; la carte donne la réponse,
+et le graphique en escalier vous dit « combien coûte le palier suivant de plus » — plus utile pour décider qu'un champion unique.</p>
+
+<p><b>5. Un rappel contre-intuitif mais important :</b> les modèles sur la frontière de Pareto sont <b>mutuellement non dominés</b> ; il n'y a pas de « meilleur sur la frontière ».
+« Meilleur » dépend de votre fonction d'utilité — à quelle vitesse votre utilité marginale du score décroît, et votre budget.
+La bonne question n'est donc pas « lequel a le meilleur rapport qualité-prix » mais « <b>au-dessus du score minimum que j'accepte, combien de points chaque dollar supplémentaire achète-t-il — et à partir de quel palier ce taux d'échange cesse-t-il d'en valoir la peine</b> ».
+La colonne « coût marginal $/pt » de la table de paliers est exactement cette courbe de taux d'échange ; trouvez son coude.</p>
+
+<p><b>6. Le prix est une fonction du temps — cette version fait de « l'heure » une variable de premier ordre.</b>
+Le <code>Price $/M</code> du classement est un <b>instantané du prix catalogue au moment du scraping</b>, et les prix catalogues changent avec le temps. Deux dépendances temporelles sont vérifiées :</p>
+<ul>
+<li><b>Rythme intrajournalier (heures pleines/creuses).</b> La pointe DeepSeek = jours ouvrés 01:00–04:00 et 06:00–10:00 UTC ; toutes les autres heures (y compris tout le week-end) sont à demi-prix.
+La gêne : le classement <b>mélange les deux conventions dans un même tableau</b> — <code>V4.1-Flash-20261017</code> est listé à 0,15/0,60 $ en heures creuses, tandis que <code>V4.1-Flash-20260910</code> et la famille <code>V4-Pro</code> sont listés à 0,30/1,20 $ et 1,32/3,96 $ en heures pleines. Comparer entre les lignes revient à comparer la pointe d'un modèle aux heures creuses d'un autre.</li>
+<li><b>Événements calendaires (expiration des promos).</b> Le prix du classement de <code>GLM-5.3-Flash</code> à 0,05/0,18 $ était une promo de lancement qui <b>s'est terminée le 2026-09-09</b> ; le prix actuel est 0,15/0,50 $ (~2,9×). L'instantané du 11-11 utilise encore le prix promo, donc son Cost/Task de 0,15 $ est en réalité ~0,44 $.</li>
+</ul>
+<p><b>Conversion :</b> <code>Cost/Task = utilisation de tokens × prix unitaire</code> ; l'utilisation ne change pas avec le prix, donc la correction = mise à l'échelle par le <b>rapport de prix unitaire pondéré</b> :
+<code>scale = [pin'·(1−w) + pout'·w] ÷ [pin·(1−w) + pout·w]</code>, où <code>w</code> = part des tokens de sortie, défaut <b>8 %</b>
+(depuis le classement Agent : rapport inférencé entrée/sortie médian ≈ 11:1 sur 14 modèles ; plage 3,8–17,9× ; ajustable par curseur).
+Les heures pleines/creuses de DeepSeek déplacent entrée et sortie de façon <b>proportionnelle</b>, donc insensible à <code>w</code> ; <code>w</code> ne compte que pour des corrections comme l'entrée ×3 / sortie ×2,8 de GLM.</p>
+<p><b>Réversible sans perte :</b> chaque modèle conserve <code>cRaw</code> (la valeur brute du classement) ; tous les scénarios en dérivent, et couper les interrupteurs le restaure exactement — aucune « dérive des modifications par rapport à la vérité ».</p>
+<p><b>Les conclusions changent réellement avec l'heure — c'est tout l'intérêt :</b> en heures creuses, l'ancienne version de DeepSeek est à demi-prix et <b>éjecte <code>Hy3</code> et <code>MiMo-V2.5</code> de la frontière de Pareto</b> (totalement dominés) ;
+le vainqueur à T=1500 passe de Hy3 0,04 $ à DeepSeek-V4.1-Flash-20260910 0,03 $ ; inversement en pointe, <code>20261017</code> monte de 0,12 $ à 0,24 $.
+Le graphique ③ trace cela comme une courbe hebdomadaire <code>C(T)</code> sur 168 heures : les bandes grises sont les fenêtres de pointe ; les sauts de ligne sont des changements de champion.</p>
+<p><b>Trois limites de cette section :</b> ① les scores sont un instantané du 2026-11-11 et ne changent pas avec le temps, donc l'axe temporel reflète la dépendance temporelle des <b>prix</b>, pas des <b>capacités</b> (les capacités dérivent aussi au fil des mises à jour des classements) ;
+② les coûts du classement utilisent l'utilisation P50 et <b>excluent les remises de réussite de cache</b> (entrée cache DeepSeek : pointe 0,006 $ / creuse 0,003 $ ; entrée cache Anthropic 0,10–1,00 $), donc les vraies factures d'agent peuvent être bien en dessous de « utilisation × prix catalogue » ;
+③ deux règles <b>incertaines</b> (si V4-Flash distingue aussi pleines/creuses ; Mistral Medium 3.5 et GPT-6 Sol à 2× d'un index tiers) sont <b>désactivées par défaut</b> — ne les cochez que pour l'analyse de sensibilité.
+La table de règles <code>PRICE_EVENTS</code> vit dans la source, libre à modifier — ce n'est que « nom de modèle → prix unitaire à deux heures ».
+L'une d'elles, <code>gem_dec1</code>, est un <b>événement futur</b> : Gemini 4 Carbon/Argon ont annoncé une hausse de 2/10 $ à 4/20 $ le 2026-12-01 (prix cache 0,10 → 0,20 $) ;
+faites glisser la date de tarification en décembre et vous la verrez sortir ce jour-là de la frontière <code>overall_all</code>, remplacée par GPT-6.1 Sol.</p>
+
+<p><b>7. Le taux de réussite du cache — la variable la plus impactante (défaut 95 %).</b>
+Le <code>Cost/Task</code> d'Arena est calculé aux <b>prix de cache manqué</b>, donc pour les charges d'agent — où les préfixes sont relus en permanence — c'est une <b>surestimation systématique</b>.
+Les remises de cache ne s'appliquent qu'aux tokens d'<b>entrée</b> ; la sortie est toujours au prix plein :
+<code>prix d'entrée effectif = (1−h)·prix d'entrée·multiplicateur d'écriture + h·prix d'entrée·ratio de cache</code>, où <code>h</code> est le taux de réussite.
+Deux détails faciles à manquer : ① <b>les prix de lecture de cache sont stockés comme un ratio du prix d'entrée, pas des valeurs absolues</b>, donc pleines/creuses, expiration de promo et hausses futures déplacent automatiquement les prix de cache
+(DeepSeek pointe 0,006 $ → creuse automatiquement 0,003 $ ; promo GLM 0,01 $ → 0,03 $ après) ;
+② le <b>multiplicateur d'écriture</b> : Anthropic (palier 5 min) et OpenAI (palier 30 min) facturent séparément les écritures de cache à 1,25× le prix d'entrée, et la part manquée est payée au prix d'écriture,
+donc au même taux de réussite de 95 %, la remise de Claude est plus mince que celle de DeepSeek ; DeepSeek / Z.ai / Xiaomi / Tencent / Google (cache implicite) / xAI ne facturent pas de frais d'écriture.
+39 modèles utilisent des ratios publiés (DeepSeek 2 %–3,3 %, MiMo 0,8 %–2 %, Kimi 10 %–20 %, GLM 18,3 %–20 %, Hy3 25 %, Grok 25 %,
+Anthropic 2,5 %–10 %, OpenAI 5 %–10 %, Gemini 5 %, Mistral Large 4 10,3 %) ; les 48 autres n'ont pas de prix publié → estimés à <b>10 %</b>, une norme industrielle, et étiquetés « estim. » dans l'UI,
+ou aplatis avec « Forfait 10 % » pour une comparaison conservatrice.
+<span style="color:var(--dim2)">Sources des prix de cache : page tarifaire officielle de DeepSeek ; pages tarifaires Anthropic / OpenAI / Google / xAI / Moonshot / Z.ai
+(contre-vérifiées via benchlm.ai, morphllm, sentra.app, maximem.ai, tech-insider, felloai, eesel, layer3labs, getnadir, imisofts,
+munderdiffl.in, datastudios.org, aipricing.guru, glm-ai.chat, glm5.app, subconscious.dev, mem0.ai, llm-stats, orcarouter,
+requesty.ai, codersera, saascity, alphasignal, truescho, flowtivity, deepseekai.guide) ; la table de comparaison complète est dans le README.</span></p>
+<p><b>Trois changements au niveau des conclusions apportés par les remises de cache :</b> ① <b>niveaux</b> : les modèles de tête économisent généralement 59 %–79 % (Fable 5.2 : 11,04 → 4,10 $, Kimi : 0,91 → 0,375 $, MiMo-V2.6-Flash : 0,05 → 0,011 $) ;
+② <b>structure de la frontière</b> : <code>overall_os</code> passe de 7 paliers à 8, trois variantes DeepSeek s'y glissent ;
+③ <b>la valeur de la planification est comprimée</b> : l'amplitude hebdomadaire des coûts à T=1600 passe de 1,67× à <b>1,11×</b> — avec le cache à 95 %, éviter les heures de pointe n'économise plus que ~10 %,
+donc le bon ordre est <b>d'abord corriger le cache de préfixe, ensuite parler planification</b>.
+De plus, le curseur « part de sortie » passe d'irrelevant au <b>deuxième paramètre le plus sensible</b> une fois le cache activé : au même taux de réussite de 95 %,
+DeepSeek-20261017 économise 86 % à w=2 %, 68 % à w=8 % (défaut), 55 % à w=15 %, 40 % à w=25 %, et seulement 25 % à w=40 %
+— plus vos sorties sont longues, moins le cache peut sauver. Inversement, si les prix d'entrée et de sortie d'un champion de palier <b>tous deux</b> doublent (comme DeepSeek-20261017 à T=1664),
+le cache ne peut pas comprimer l'amplitude — toujours 2,00× — et le levier de ce palier est la planification.</p>

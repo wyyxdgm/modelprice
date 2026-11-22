@@ -1,0 +1,85 @@
+<p><b>Bottom line: the approach holds — but your phrasing mixes two different things. With the corrections below it becomes a rigorous, useful tool (this page).</b></p>
+
+<p><b>1. "Sort by cost/task + drag the range's left edge" ≠ the winner by itself.</b>
+A sort direction produces no conclusion; the real operation is: fix a threshold <code>T</code> and take the min-<code>cost</code> model among those with <code>score ≥ T</code>.
+Sweep <code>T</code> from the highest score down and the winner sequence is the <b>lower envelope (Pareto frontier)</b> of the (score, cost) plane.
+It can be proven that the map <code>C(T) = min{cost : score ≥ T}</code> is <b>monotonically non-decreasing</b>, so "every tier has a winner, and winners get pricier as the threshold rises" necessarily follows —
+your intuition is right. Arena's official <a href="https://arena.ai/leaderboard/code/webdev/pareto" target="_blank" rel="noopener">/pareto</a> view plots exactly this curve.
+The key correction: the winner only switches when a <b>strictly cheaper</b> model appears — not on every drag step — so the frontier is a <b>staircase</b>, and each flat segment is "the score range this model rules".</p>
+
+<p><b>2. "Best value" has at least three definitions, with different answers:</b></p>
+<ul>
+<li><b>Threshold</b> (= your idea, and the only one correct as constrained optimization): <code>min cost s.t. score ≥ T</code>. Meaning: "cheapest among models that clear the bar".</li>
+<li><b>Score per $</b>: <code>max score/cost</code>. Meaning: "cheapest per point" — but Arena scores carry a ~1200 baseline offset that inflates the numerator, so this <b>almost always picks the cheapest small model</b>. Little practical value.</li>
+<li><b>Excess score per $</b>: <code>max (score − baseline)/cost</code>. Marginal value after removing the offset; good for comparing "pay more, gain how much" efficiency.</li>
+</ul>
+<p>Closest to a purchasing decision is the <b>marginal price</b>: moving from the current tier up one, <code>Δcost / Δscore</code> = dollars per extra point. The tier table computes it for you.</p>
+
+<p><b>3. Five pitfalls that flip conclusions (each has a toggle in the tool):</b></p>
+<ol>
+<li><b>Overlapping confidence intervals.</b> If the score range is narrower than the CI, rankings inside it are noise. Example: on the HTML board, Inkling 2 Small has only 130 votes (CI ±55); Muse Spark Open ±41.
+This tool offers a "strict mode": only accepts a gap where A's CI lower bound &gt; B's CI upper bound; statistically indistinguishable adjacent tiers are <b>merged into one</b> (keeping the cheaper model).</li>
+<li><b>Preliminary / low votes.</b> Don't crown a "value champion" from a model with &lt;1000 votes.</li>
+<li><b>Cost/Task (P50) is a workload-mix artifact.</b> The same model can have different costs on different boards (Overall / Frontend / Fullstack / HTML / React) because task length and tool-call depth differ.
+P50 also ignores the tail: when an agent goes off the rails, P95 can be 5–10× P50. And it only covers token spend — not latency, retry rates, or context-window limits.</li>
+<li><b>Dataset truncation.</b> In this scrape, <code>frontend_os</code> and <code>overall_all</code> only cover the high-score segment (the low tail wasn't fully scraped).
+Good news: <b>the high-score end of the Pareto frontier is unaffected by missing low-scoring models</b> (a lower-scoring, pricier model can never enter the frontier);
+bad news: the global cheapest price and the "excess score/$" baseline skew. Use the paste box at the bottom to fill the gap.</li>
+<li><b>Point-in-time.</b> The official API returns 403, so only page snapshots are possible; prices and ranks change weekly. CSV exports carry the date in the filename.</li>
+</ol>
+
+<p><b>4. The question you actually want, and where it lives in the tool:</b>
+"on a given board, within an acceptable score range, which model has the best value" → that's <b>Threshold mode + the score-range slider</b>:
+set <code>lo</code> to your minimum acceptable capability and <code>hi</code> to the ceiling you won't pay extra for; the card gives the answer,
+and the step chart tells you "how much more the next tier costs" — more decision-useful than a single champion.</p>
+
+<p><b>5. One counter-intuitive but important reminder:</b> models on the Pareto frontier are <b>mutually undominated</b>; there is no "best one on the frontier".
+"Best" depends on your utility function — how fast your marginal utility of score decays, and your budget.
+So the right question is not "which has the best value" but "<b>above the minimum score I can accept, how many points does each extra dollar buy — and from which tier does that exchange rate stop being worth it</b>".
+The "marginal cost $/pt" column in the tier table is exactly that exchange-rate curve; find its knee.</p>
+
+<p><b>6. Price is a function of time — this version makes "the hour" a first-class variable.</b>
+The board's <code>Price $/M</code> is a <b>snapshot of list price at scrape time</b>, and list prices change over time. Two time dependencies are verified:</p>
+<ul>
+<li><b>Intraday rhythm (peak/off-peak).</b> DeepSeek peak = weekdays 01:00–04:00 and 06:00–10:00 UTC; all other hours (including the whole weekend) are half price.
+The annoyance: the board <b>mixes both conventions in one table</b> — <code>V4.1-Flash-20261017</code> is listed at off-peak $0.15/$0.60, while <code>V4.1-Flash-20260910</code> and the <code>V4-Pro</code> family are listed at peak $0.30/$1.20 and $1.32/$3.96. Comparing across rows means comparing one model's peak against another's off-peak.</li>
+<li><b>Calendar events (promo expiry).</b> <code>GLM-5.3-Flash</code>'s board price $0.05/$0.18 was a launch promo that <b>ended 2026-09-09</b>; the current price is $0.15/$0.50 (~2.9×). The 11-11 snapshot still uses the promo price, so its $0.15 Cost/Task is really ~$0.44.</li>
+</ul>
+<p><b>Conversion:</b> <code>Cost/Task = token usage × unit price</code>; usage doesn't change with price, so the correction = scale by the <b>weighted unit-price ratio</b>:
+<code>scale = [pin'·(1−w) + pout'·w] ÷ [pin·(1−w) + pout·w]</code>, where <code>w</code> = output token share, default <b>8%</b>
+(from the Agent board: median inferred input/output ratio ≈ 11:1 across 14 models; range 3.8–17.9×; adjustable via slider).
+DeepSeek's peak/off-peak moves input and output <b>proportionally</b>, so it is insensitive to <code>w</code>; <code>w</code> only matters for corrections like GLM's input ×3 / output ×2.8.</p>
+<p><b>Losslessly reversible:</b> every model keeps <code>cRaw</code> (the raw board value); all scenarios are derived from it, and switching toggles off restores it exactly — no "edits drifting from truth".</p>
+<p><b>Conclusions actually change with the hour — that's the point:</b> off-peak, DeepSeek's older version is half price and <b>kicks <code>Hy3</code> and <code>MiMo-V2.5</code> off the Pareto frontier</b> (fully dominated);
+the T=1500 winner changes from Hy3 $0.04 to DeepSeek-V4.1-Flash-20260910 $0.03; conversely at peak, <code>20261017</code> rises from $0.12 to $0.24.
+Chart ③ draws this as a 168-hour weekly <code>C(T)</code> curve: gray bands are peak windows; jumps in the line are champion changes.</p>
+<p><b>Three limits of this section:</b> ① scores are a 2026-11-11 snapshot and don't change with time, so the time axis reflects the time-dependence of <b>prices</b>, not of <b>capability</b> (capability also drifts as boards update);
+② board costs use P50 usage and <b>exclude cache-hit discounts</b> (DeepSeek cache input: peak $0.006 / off-peak $0.003; Anthropic cache input $0.10–$1.00), so real agent bills can be well below "usage × list price";
+③ two <b>uncertain</b> rules (whether V4-Flash also splits peak/off-peak; Mistral Medium 3.5 and GPT-6 Sol being 2× off vs a third-party index) are <b>off by default</b> — tick them only for sensitivity analysis.
+The rule table <code>PRICE_EVENTS</code> lives in the source, free to edit — it's just "model name → unit price at two hours".
+One of them, <code>gem_dec1</code>, is a <b>future event</b>: Gemini 4 Carbon/Argon have announced a hike from $2/$10 to $4/$20 on 2026-12-01 (cache price $0.10→$0.20);
+drag the pricing date into December and you'll see it drop off the <code>overall_all</code> frontier that day, replaced by GPT-6.1 Sol.</p>
+
+<p><b>7. Cache hit rate — the single most impactful variable (default 95%).</b>
+Arena's <code>Cost/Task</code> is computed at <b>cache-miss prices</b>, so for agent workloads — where prefixes get re-read constantly — it's a <b>systematic overestimate</b>.
+Cache discounts only apply to <b>input</b> tokens; output is always full price:
+<code>effective input price = (1−h)·input price·write multiplier + h·input price·cache ratio</code>, where <code>h</code> is the hit rate.
+Two easily-missed details: ① <b>cache read prices are stored as a ratio of the input price, not absolute values</b>, so peak/off-peak, promo expiry and future hikes move cache prices automatically
+(DeepSeek peak $0.006 → off-peak automatically $0.003; GLM promo $0.01 → $0.03 after);
+② <b>write multiplier</b>: Anthropic (5-min tier) and OpenAI (30-min tier) bill cache writes separately at 1.25× input price, and the missed share is paid at the write price,
+so at the same 95% hit rate Claude's discount is thinner than DeepSeek's; DeepSeek / Z.ai / Xiaomi / Tencent / Google (implicit cache) / xAI don't charge a write fee.
+39 models use published ratios (DeepSeek 2%–3.3%, MiMo 0.8%–2%, Kimi 10%–20%, GLM 18.3%–20%, Hy3 25%, Grok 25%,
+Anthropic 2.5%–10%, OpenAI 5%–10%, Gemini 5%, Mistral Large 4 10.3%); the other 48 have no published price → estimated at an industry-typical <b>10%</b> and labeled "est." in the UI,
+or flatten everything with "Flat 10%" for a conservative comparison.
+<span style="color:var(--dim2)">Cache price sources: DeepSeek's official pricing page; Anthropic / OpenAI / Google / xAI / Moonshot / Z.ai pricing pages
+(cross-checked via benchlm.ai, morphllm, sentra.app, maximem.ai, tech-insider, felloai, eesel, layer3labs, getnadir, imisofts,
+munderdiffl.in, datastudios.org, aipricing.guru, glm-ai.chat, glm5.app, subconscious.dev, mem0.ai, llm-stats, orcarouter,
+requesty.ai, codersera, saascity, alphasignal, truescho, flowtivity, deepseekai.guide); the full comparison table is in the README.</span></p>
+<p><b>Three conclusion-level changes cache discounts bring:</b> ① <b>levels</b>: top models generally save 59%–79% (Fable 5.2 $11.04→$4.10, Kimi $0.91→$0.375, MiMo-V2.6-Flash $0.05→$0.011);
+② <b>frontier structure</b>: <code>overall_os</code> goes from 7 tiers to 8, with three DeepSeek variants squeezing in;
+③ <b>scheduling value gets compressed</b>: the weekly cost amplitude at T=1600 shrinks from 1.67× to <b>1.11×</b> — with cache at 95%, dodging peak hours only saves ~10% more,
+so the right order is <b>fix prefix caching first, then talk scheduling</b>.
+Also, the "output share" slider goes from irrelevant to the <b>second-most sensitive parameter</b> once cache is on: at the same 95% hit rate,
+DeepSeek-20261017 saves 86% at w=2%, 68% at w=8% (default), 55% at w=15%, 40% at w=25%, and only 25% at w=40%
+— the longer your outputs, the less cache can rescue. Conversely, if a tier champion's input and output prices <b>both</b> double (like DeepSeek-20261017 at T=1664),
+cache can't compress the amplitude — still 2.00× — and that tier's lever is scheduling.</p>

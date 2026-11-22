@@ -1,0 +1,32 @@
+<p><b>ソース：</b><a href="https://arena.ai/leaderboard/code/webdev" target="_blank" rel="noopener">arena.ai/leaderboard/code/webdev</a> とそのサブボード（frontend / fullstack）、取得日 <span class="mono">%SCRAPED%</span>；リーダーボードデータの日付 <span class="mono">%CAPTURED%</span>。</p>
+<p><b>利用可能性：</b>ページは公開されており読み取り・取得可能；ただし <span class="mono">arena.ai/api/*</span> と <span class="mono">api.arena.ai/*</span> は 403 を返します（Cloudflare + ルート許可リスト）—— <b>公開 JSON API なし</b>。そのため本ツールは「埋め込みスナップショット + 貼り付け拡張」設計で、ライブリクエストは行いません。</p>
+<p><b>フィールドの意味：</b></p>
+<ul>
+<li><b>Score（スコア）</b>：Arena の Bradley-Terry 型レーティング；<span class="mono">+u/−d</span> はブートストラップ 95% 信頼区間。</li>
+<li><b>Cost/Task (P50)</b>：Arena の1タスク完了にかかる<b>中央</b>ドルコスト = 実測トークン使用量 × 下記の API 価格。<span class="mono">N/A</span> = 未公表 —— 該当モデルはデフォルトで除外（切替可）。</li>
+<li><b>Price $/M</b>：<b>ベンダー一次の API 定価</b>（入力 / 出力 100万トークンあたり）—— Arena が統一設定した価格ではなく、セルフホスティングの償却コストでもありません。注意：Cost/Task が低くても単価が低いとは限りません（モデルが出力したトークン量にも依存します）。</li>
+</ul>
+<p><b>この価格はいったい誰の価格？（1件ずつ確認済み）</b></p>
+<p>独立価格インデックス <a href="https://benchr.org/pricing" target="_blank" rel="noopener">benchr.org/pricing</a>（2026-09-11 スナップショット）と1件ずつ照合した結果、Arena の <span class="mono">Price $/M</span> は各ベンダーの<b>公式 API 定価</b>と一致します：
+Kimi K3.1 Pro <span class="mono">$2/$10</span>、Kimi K3 <span class="mono">$3/$15</span>（Moonshot）；GLM-5.2 / 5.3 <span class="mono">$1.40/$4.40</span>（Z.ai）；Claude Opus 5.5 <span class="mono">$4/$20</span>、Sonnet 5.5 <span class="mono">$2/$10</span>、Haiku 5.5 <span class="mono">$0.10/$0.50</span>（Anthropic）；GPT-6.1 Sol <span class="mono">$2/$10</span>、Terra <span class="mono">$1/$5</span>、GPT-6 Astra <span class="mono">$10/$50</span>（OpenAI）；Grok 4.7 <span class="mono">$2/$6</span>、Gemini 4 Argon <span class="mono">$2/$10</span>；Mistral Large 4 <span class="mono">$0.70/$2.10</span>；MiniMax M3 <span class="mono">$0.30/$1.20</span>；DeepSeek V4-Pro <span class="mono">$1.32/$3.96</span>。</p>
+<p><b>オープンソースモデルも API 価格で掲載されています —— セルフホスティングで払う金額ではありません。</b>Gemma 4 31B <span class="mono">$0.16/$0.47</span>、Granite 4.1 8B <span class="mono">$0.05/$0.10</span>、Hy3 <span class="mono">$0.13/$0.53</span>、Qwen3.8-27B <span class="mono">$0.40/$3</span>、MiMo-V2.6-Flash <span class="mono">$0.14/$0.28</span> —— これらは Google / IBM / Tencent / Alibaba / Xiaomi の<b>自社ホスティングエンドポイント</b>の見積もりです（ボード上の各モデルのリンクはそれらの API ドキュメントを指します）。オープンウェイト ≠ 無料推論：セルフホスティングコストは GPU 償却 + 電力 + 運用であり、トークンあたり定価への対応関係はありません。</p>
+<p><b>Cost/Task は実測使用量から計算されている —— 3つの内部証拠：</b></p>
+<ul>
+<li>同一モデルの <span class="mono">Price $/M</span> は本ツールの全 7 ボードで<b>完全に同一</b> → 単価はモデルレベルの定数；</li>
+<li>同一モデルの <span class="mono">Cost/Task</span> は 5 つの WebDev サブボード（Overall / Frontend / React / Reference-based / Fullstack）で<b>完全に同一</b>ですが、Image-to-WebDev では異なります（例：DeepSeek-V4.1-Flash-20261017：$0.12 vs $0.10）→ 使用量は<b>タスクカテゴリ</b>ごとに集計され、サブボードごとではありません；</li>
+<li>Agent ボードは <span class="mono">Output Tokens/Task</span> も公表しており、そこから入力量を推定できます：14 モデルは 125K–1.27M 入力トークン、入力/出力比 3.8–17.9× に推定 —— まさにマルチターンツール呼び出し負荷の特徴。さらに <span class="mono">(Max)/(High)/(xHigh)</span> ティアは<b>同一単価</b>を共有しながら Cost は 2–4× 異なります（Claude Opus 5.5：$5.66 vs $2.13）—— 完全にトークン使用量の差です。</li>
+</ul>
+<p><b>結論を楽観側に倒す3つの価格罠：</b></p>
+<ul>
+<li><b>DeepSeek ピーク/オフピーク。</b>ボードは 20261017 版を<b>オフピーク</b> <span class="mono">$0.15/$0.60</span> で、20260910 版を<b>ピーク</b> <span class="mono">$0.30/$1.20</span> で掲載。ピーク = 平日 01:00–04:00 と 06:00–10:00 UTC；その他は半額。ワークロードをオフピークに配せない場合、20261017 の $0.12/タスクは ~$0.24 に倍増：それでも 1664 Tier は維持（構造不変）ですが、「1638→1664」の限界価格は $0.0027/pt から $0.0073/pt に上昇、「1664→1687」は $0.0343 から $0.0291 に低下 —— 膝点ジャンプは 12.8× から 4.0× に縮小し、そこで止まる緊急性が弱まります。</li>
+<li><b>GLM-5.3-Flash は期限切れのローンチプロモ価格を使用</b> <span class="mono">$0.05/$0.18</span>；プロモは 2026-09-09 に終了、現価格 <span class="mono">$0.15/$0.50</span>（3×）なので、その $0.15/タスクは実際には約 $0.45。もともとフロンティアにはいませんでしたが、同様の古いプロモ価格が他のモデルを水増ししている可能性があります。</li>
+<li><b>キャッシュ割引なし。</b>DeepSeek キャッシュヒット入力 <span class="mono">$0.006</span>（ピーク）/ <span class="mono">$0.003</span>（オフピーク）；Anthropic キャッシュ入力 <span class="mono">$0.10–$1.00</span>。マルチターン agent ワークロードはキャッシュに頻繁にヒットします；実際の請求は「定価 × トークン」を大きく下回り得ます。</li>
+</ul>
+<p><b>自分のコスト基準を使いたい？</b>下の貼付ボックスで <span class="mono">Cost/Task</span> 列をあなたの実測請求またはセルフホスティング償却コストに置き換えてください —— パーサーは<b>列名</b>を読み、数字の出所は問いません。得られるフロンティアは<b>あなたの</b>ものです。</p>
+<ul>
+<li><b>Rank vs Overall Rank</b>：前者はこのサブボード/ライセンスフィルタ内の順位；後者は全モデル総合順位。</li>
+<li><b>Preliminary（暫定）</b>：票数が安定しきい値に達していない；CI は通常広い。</li>
+<li><b>AutoEval（自動評価）</b>：スコアが人間の対戦ではなく自動評価から —— 人間投票スコアと直接比較不能 → デフォルトで除外。</li>
+</ul>
+<p><b>本ツールの限界：</b>データはスナップショットでライブではない；コストはトークン費用のみカバー；「コスパ」の定義はあなたが選び、定義によって異なるチャンピオンが生まれる；統計的有意性は厳密モードでのみ強制。</p>
+<p><b>コンプライアンス：</b>データは公開ページから取得し、個人分析に使用しています。arena.ai を高頻度で取得しないでください。派生的な結論を公開する場合は、データソースと取得日を明記してください。</p>

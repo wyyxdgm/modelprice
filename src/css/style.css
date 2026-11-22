@@ -182,6 +182,14 @@ input[type=range]{accent-color:var(--accent)}
 .tierstable td{font-size:12px}
 .tierstable tr:first-child td{color:var(--dim2)}
 
+
+/* ===== 语言切换器（构建期静态渲染；当前 locale 高亮） ===== */
+.lang{margin-top:8px;display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+.lang a{font-size:12px;padding:3px 9px;border:1px solid rgba(255,255,255,.14);border-radius:14px;
+  color:var(--dim);text-decoration:none;line-height:1.4}
+.lang a:hover{border-color:var(--accent);color:var(--text)}
+.lang a.on{border-color:var(--gold);color:var(--gold);background:rgba(245,197,66,.08)}
+
 /* ===== 手机（≤720px）：压缩留白、加大触摸目标 ===== */
 @media(max-width:720px){
   .wrap{padding:14px 12px 60px}

@@ -40,12 +40,12 @@ $('#inHi').onchange=e=>{S.hi=clamp(+e.target.value||0,...scoreExtent());if(S.hi<
 
 /* ---------- play ---------- */
 let timer=null;
-function stopPlay(){ S.playing=false; if(timer){clearInterval(timer);timer=null;} $('#play').textContent='▶ Play: sweep the threshold from highest to lowest'; $('#playState').textContent='Stop'; }
+function stopPlay(){ S.playing=false; if(timer){clearInterval(timer);timer=null;} $('#play').textContent=T('interact.play'); $('#playState').textContent=T('interact.stop'); }
 $('#play').onclick=()=>{
   if(S.playing){ stopPlay(); return; }
   S.mode='pareto'; syncSeg($('#mode'),S.mode); setModeHint();
   const [mn,mx]=scoreExtent(); S.hi=mx; S.lo=mn; S.playing=true;
-  $('#play').textContent='⏸ Pause'; $('#playState').textContent='sweeping';
+  $('#play').textContent=T('interact.pause'); $('#playState').textContent=T('interact.sweeping');
   const spd=+$('#spd').value;
   timer=setInterval(()=>{
     S.hi-=spd;
@@ -58,9 +58,9 @@ $('#play').onclick=()=>{
 function syncSeg(root,v){ [...root.children].forEach(b=>b.classList.toggle('on',b.dataset.v===v)); }
 function setModeHint(){
   $('#modeHint').innerHTML={
-    pareto:'<b>Your original idea.</b> Fix threshold T, take the cheapest model among those with score ≥ T. Sweep T downward and the winner sequence is the <b>Pareto lower envelope</b>. The only mathematically self-consistent definition (= capability maximization under a cost constraint).',
-    ratio:'<b>Score ÷ Cost.</b> Strongly biased toward cheap models because Arena scores carry a ~1200 baseline offset (the numerator is artificially inflated). For rough comparison only.',
-    baseline:'<b>(Score − 1200) ÷ Cost.</b> Arena BT scores have a ~1200 practical floor (below it ≈ random); subtracting it yields "how much real capability gain each dollar buys". Still biased toward cheap models — which is exactly why Threshold mode is the decision-grade definition.'
+    pareto:T('interact.modeHintPareto'),
+    ratio:T('interact.modeHintRatio'),
+    baseline:T('interact.modeHintBaseline')
   }[S.mode];
 }
 $('#mode').onclick=e=>{const b=e.target.closest('button');if(!b)return;S.mode=b.dataset.v;syncSeg($('#mode'),S.mode);setModeHint();recompute();};
@@ -92,7 +92,7 @@ $('#expCsv').onclick=()=>{
   dl(`arena_${S.ds}_${S.lo}-${S.hi}.csv`,[head.join(','),...rows.map(r=>r.join(','))].join('\n'));
 };
 $('#expTiers').onclick=()=>{
-  if(!tiers.length){alert('Switch to ① Threshold mode first');return;}
+  if(!tiers.length){alert(T('interact.alertTiers'));return;}
   const fr=[...tiers].sort((a,b)=>b.model.s-a.model.s);
   const head=['tier','score_band_lo','score_band_hi','model','score','cost_per_task','marginal_$per_point_to_next_tier','votes','license'];
   let pc=null,ps=null; const rows=fr.map((t,i)=>{
@@ -109,8 +109,8 @@ $('#copyLink').onclick=()=>{
     hr:S.hour,dow:S.dow,date:S.dateISO,os:Math.round(S.outShare*100),tz:S.tz,ev:onIds.join(','),
     ch:Math.round(S.cacheHit*100),cs:S.cacheSrc});
   const u=location.origin+location.pathname+'?'+p;
-  (navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(()=>{$('#copyLink').textContent='✓ Copied';setTimeout(()=>$('#copyLink').textContent='Copy state link',1500);})
-   .catch(()=>prompt('Copy manually: ',u));
+  (navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(()=>{$('#copyLink').textContent=T('interact.copied');setTimeout(()=>$('#copyLink').textContent=T('interact.copyLink'),1500);})
+   .catch(()=>prompt(T('interact.promptCopy'),u));
 };
 
 /* ---------- paste new dataset ---------- */
@@ -212,21 +212,21 @@ function parsePasted(text){
 }
 $('#addDs').onclick=()=>{
   const txt=$('#paste').value.trim();
-  if(!txt){$('#pasteMsg').innerHTML='<span style="color:var(--bad)">Paste table text first</span>';return;}
+  if(!txt){$('#pasteMsg').innerHTML=T('interact.pasteFirst');return;}
   const rows=parsePasted(txt);
-  if(rows.length<2){$('#pasteMsg').innerHTML=`<span style="color:var(--bad)">Only parsed ${rows.length} rows — check this is an arena.ai leaderboard table (needs Score / Cost/Task columns)</span>`;return;}
-  const name=($('#pasteName').value.trim()||'Custom board')+' ('+rows.length+')';
+  if(rows.length<2){$('#pasteMsg').innerHTML=TF('interact.tooFewRows',{n:rows.length});return;}
+  const name=($('#pasteName').value.trim()||T('interact.customBoard'))+' ('+rows.length+')';
   const key='custom_'+Date.now().toString(36);
   const scored=rows.filter(r=>r.s), wc=rows.filter(r=>r.c!=null);
-  DATASETS[key]={label:name,path:'custom',license:'custom',meta:`${rows.length} models · user paste`,
-    note:'from data you pasted in this session',total_claimed:rows.length,
+  DATASETS[key]={label:name,path:'custom',license:'custom',meta:`${rows.length}${T('interact.userPaste')}`,
+    note:T('interact.customNote'),total_claimed:rows.length,
     stats:{n:rows.length,with_cost:wc.length,score_min:Math.min(...scored.map(r=>r.s)),score_max:Math.max(...scored.map(r=>r.s)),
            cost_min:wc.length?Math.min(...wc.map(r=>r.c)):null,cost_max:wc.length?Math.max(...wc.map(r=>r.c)):null},
     models:hydrate(rows.map(r=>F.map(k=>r[k])))};
   const o=el('option'); o.value=key; o.textContent=name; dsSel.appendChild(o);
   S.ds=key; dsSel.value=key; stopPlay(); loadDataset(true);
   $('#pasteMsg').innerHTML = wc.length===0
-    ? `<span style="color:var(--bad)">⚠ Parsed ${rows.length} models, but the Cost/Task column is entirely empty</span> — without costs there's no value analysis (the WebDev · HTML board on arena.ai is exactly like this). The dataset was added: you can view score rankings, but the frontier will be empty.`
-    : `<span style="color:var(--good)">✓ Added ${rows.length} models</span> (${wc.length} with cost data). Custom datasets are lost on reload — save them with "Export CSV".`;
+    ? TF('interact.noCostParsed',{n:rows.length})
+    : TF('interact.addedOk',{n:rows.length,wc:wc.length});
   $('#paste').value='';
 };

@@ -1,0 +1,40 @@
+<h1>Méthode et sources de données</h1>
+<p class="tagline">Comment la frontière est calculée, d'où vient chaque chiffre, et ce que cet outil ne prétend <i>pas</i> délibérément.</p>
+
+<h2>La question</h2>
+<p>Les sites de comparaison montrent les prix ; les classements montrent les scores. Cet outil les joint et répond à une question de niveau décision : <b>étant donné le score Arena minimum que vous acceptez (seuil T), quel modèle a le coût mesuré par tâche le plus bas ?</b> Formellement <code>C(T) = min{cost : score &ge; T}</code>. En balayant T vers le bas, on obtient la frontière coût-qualité de Pareto — un escalier où chaque segment plat est la plage de scores qu'un modèle règne. La table rapporte aussi le <b>prix marginal</b> de la montée d'un palier (&Delta;cost/&Delta;score en $/point), le chiffre sur lequel tournent réellement les décisions d'achat.</p>
+
+<h2>Trois définitions du « meilleur rapport qualité-prix »</h2>
+<ul>
+<li><b>Seuil (Threshold)</b> (défaut) : le modèle le moins cher avec score &ge; T. La seule définition correcte en optimisation sous contrainte.</li>
+<li><b>Score par $</b> : fortement biaisé vers les modèles bon marché car les scores Bradley-Terry d'Arena portent un décalage de base d'environ 1200.</li>
+<li><b>Score excédentaire/$</b> : soustrait d'abord le plancher de 1200 ; plus proche de la valeur marginale, toujours biaisé.</li>
+</ul>
+
+<h2>Sources de données et dates d'instantané</h2>
+<ul>
+<li>Scores et Cost/Task : les <a href="https://arena.ai/leaderboard/code/webdev">classements WebDev publics d'arena.ai</a> et sous-classements, instantané du <b>2026-11-11</b> (extrait le 2026-11-14). Pour un rafraîchissement automatisé, préférez le miroir officiel lisible par machine : <a href="https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset">lmarena-ai/leaderboard-dataset sur Hugging Face</a>.</li>
+<li>Prix : le prix catalogue API de chaque fournisseur lui-même (entrée/sortie par million de tokens), vérifié point par point contre <a href="https://benchr.org/pricing">benchr.org/pricing</a> (instantané du 2026-09-11). Les modèles ouverts sont listés à leur prix API hébergé par le fournisseur, pas au coût d'auto-hébergement.</li>
+<li>Cost/Task (P50) = utilisation de tokens mesurée médiane d'une tâche Arena × prix catalogue — une base cache-miss. Le P50 cache la queue (le P95 peut être 5&ndash;10×) et ne couvre que les dépenses de tokens.</li>
+</ul>
+
+<h2>Le prix comme fonction du temps</h2>
+<p>Les prix catalogues changent à l'heure et au calendrier. Règles vérifiées appliquées par défaut : <b>heures pleines/creuses DeepSeek</b> (pointe = jours ouvrés 01:00&ndash;04:00 et 06:00&ndash;10:00 UTC, 2× ; sinon ½×) — le classement lui-même mélange des lignes au prix de pointe et des lignes aux heures creuses de la même famille ; <b>expiration de la promo GLM-5.3-Flash</b> (2026-09-09 : 0,05/0,18 $ &rarr; 0,15/0,50 $) ; <b>hausse Gemini 4 Carbon/Argon au 2026-12-01</b> (2/10 $ &rarr; 4/20 $). Les règles incertaines (division pointe de DeepSeek V4-Flash ; deux modèles à 2× d'un index tiers) sont incluses mais désactivées par défaut.</p>
+
+<h2>Modèle de cache</h2>
+<p>Les coûts du classement supposent 0 % de réussite de cache, ce qui surestime systématiquement les charges d'agent. Prix d'entrée effectif = <code>(1&minus;h)&middot;pin&middot;wm + h&middot;pin&middot;ratio</code> ; la sortie n'est jamais remisée. Les prix de lecture de cache sont stockés comme un ratio du prix catalogue d'entrée (DeepSeek 2&ndash;3,3 %, MiMo 0,8&ndash;2 %, Kimi 10&ndash;20 %, GLM 18&ndash;20 %, Hy3/Grok 25 %, Anthropic 2,5&ndash;10 %, OpenAI 5&ndash;10 %, Gemini 5 %, Mistral 10,3 % ; inconnu &rarr; estimation à 10 %, étiquetée). Le multiplicateur d'écriture <code>wm</code> = 1,25× pour Anthropic/OpenAI (noms de modèles commençant par Claude/GPT-), sinon 1,0×. À h=95 %, les modèles de tête chutent de 59&ndash;79 % en coût effectif et la frontière elle-même se réordonne.</p>
+
+<h2>Mode CI strict</h2>
+<p>Les paliers adjacents dont les IC à 95 % se chevauchent sont fusionnés (le modèle moins cher est gardé) pour que vous ne payiez pas le bruit statistique. Notez que c'est un <i>crible de chevauchement</i> conservateur, pas un test formel des différences de scores.</p>
+
+<h2>Limites</h2>
+<ul>
+<li>Les scores sont un instantané ; les capacités dérivent au fil des mises à jour des classements. Les prix dérivent chaque semaine.</li>
+<li>Le coût par tâche P50 est un mélange de charges ; votre charge diffère. Utilisez la fonction de collage avec vos propres factures.</li>
+<li>Le classement toutes licences ne couvre que ses 41 premières lignes ; les classements open-source sont complets.</li>
+<li>Confiance : chaque chiffre ici remonte à une page publique ; les corrections portent leurs sources par règle dans l'outil.</li>
+</ul>
+
+<h2>Attribution et conformité</h2>
+<p>Données du classement &copy; LMArena (arena.ai). Ceci est une analyse indépendante de chiffres publiquement listés ; aucune affiliation avec arena.ai. Ne scrapez pas arena.ai à haute fréquence — utilisez le jeu de données Hugging Face pour l'automatisation. Si vous publiez des conclusions dérivées, attribuez la source et les dates d'instantané.</p>
+<p><a href="%ROOT%">← Retour à l'outil</a> · <a href="/data/v1/all.json">Export JSON</a> · <a href="/llms.txt">llms.txt</a></p>

@@ -118,11 +118,11 @@ function listPricesAt(m,hour,dow,dateISO){
     let want,listed,tag;
     if(ev.kind==='tod'){
       const pk=isPeakAt(ev,hour,dow);
-      want=pk?e.peak:e.off; listed=(e.listed==='peak')?e.peak:e.off; tag=pk?'peak':'off-peak';
+      want=pk?e.peak:e.off; listed=(e.listed==='peak')?e.peak:e.off; tag=pk?T('peakTag.peak'):T('peakTag.off');
     }else{
       const after=String(dateISO)>=ev.date;
       want=after?e.after:e.before; listed=(e.listed==='after')?e.after:e.before;
-      tag=ev.future?(after?'in effect':'not yet in effect'):(after?'after promo':'promo period');
+      tag=ev.future?(after?T('peakTag.inEffect'):T('peakTag.notYet')):(after?T('peakTag.afterPromo'):T('peakTag.promo'));
       if(ev.future&&!after) continue;              // 未来事件在未生效时对List price没有修正意义
     }
     if(want[0]===listed[0]&&want[1]===listed[1]) continue;

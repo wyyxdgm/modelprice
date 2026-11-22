@@ -1,0 +1,40 @@
+<h1>Method &amp; data sources</h1>
+<p class="tagline">How the frontier is computed, where every number comes from, and what this tool deliberately does <i>not</i> claim.</p>
+
+<h2>The question</h2>
+<p>Comparison sites show prices; leaderboards show scores. This tool joins them and answers a decision-grade question: <b>given the minimum Arena Score you can accept (threshold T), which model has the lowest measured cost per task?</b> Formally <code>C(T) = min{cost : score &ge; T}</code>. Sweeping T downward yields the cost-quality Pareto frontier &mdash; a staircase where each flat segment is the score range one model rules. The table also reports the <b>marginal price</b> of moving up one tier (&Delta;cost/&Delta;score in $/point), which is the number purchasing decisions actually turn on.</p>
+
+<h2>Three definitions of &ldquo;best value&rdquo;</h2>
+<ul>
+<li><b>Threshold</b> (default): cheapest model with score &ge; T. The only definition that is correct constrained optimization.</li>
+<li><b>Score per $</b>: strongly biased toward cheap models because Arena&rsquo;s Bradley-Terry scores carry a ~1200 baseline offset.</li>
+<li><b>Excess score per $</b>: subtracts the 1200 floor first; closer to marginal value, still biased.</li>
+</ul>
+
+<h2>Data sources &amp; snapshot dates</h2>
+<ul>
+<li>Scores and Cost/Task: the public <a href="https://arena.ai/leaderboard/code/webdev">arena.ai WebDev leaderboards</a> and sub-boards, snapshot <b>2026-11-11</b> (scraped 2026-11-14). For automated refresh prefer the official machine-readable mirror: <a href="https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset">lmarena-ai/leaderboard-dataset on Hugging Face</a>.</li>
+<li>Prices: each vendor&rsquo;s first-party API list price (input/output per $1M tokens), verified item-by-item against <a href="https://benchr.org/pricing">benchr.org/pricing</a> (2026-09-11 snapshot). Open models are listed at their vendor-hosted API price, not self-hosting cost.</li>
+<li>Cost/Task (P50) = median measured token usage of an Arena task &times; list price &mdash; a cache-miss basis. P50 hides the tail (P95 can be 5&ndash;10&times;) and covers token spend only.</li>
+</ul>
+
+<h2>Price as a function of time</h2>
+<p>List prices change by hour and by calendar. Verified rules applied by default: <b>DeepSeek peak/off-peak</b> (peak = weekdays 01:00&ndash;04:00 &amp; 06:00&ndash;10:00 UTC, 2&times;; otherwise &frac12;&times;) &mdash; the board itself mixes peak-priced and off-peak-priced rows of the same family; <b>GLM-5.3-Flash promo expiry</b> (2026-09-09: $0.05/$0.18 &rarr; $0.15/$0.50); <b>Gemini 4 Carbon/Argon hike on 2026-12-01</b> ($2/$10 &rarr; $4/$20). Uncertain rules (DeepSeek V4-Flash peak split; two models 2&times; off vs a third-party index) are included but off by default.</p>
+
+<h2>Cache model</h2>
+<p>Leaderboard costs assume 0% cache hits, which systematically overestimates agent workloads. Effective input price = <code>(1&minus;h)&middot;pin&middot;wm + h&middot;pin&middot;ratio</code>; output is never discounted. Cache read prices are stored as a ratio of list input price (DeepSeek 2&ndash;3.3%, MiMo 0.8&ndash;2%, Kimi 10&ndash;20%, GLM 18&ndash;20%, Hy3/Grok 25%, Anthropic 2.5&ndash;10%, OpenAI 5&ndash;10%, Gemini 5%, Mistral 10.3%; unknown &rarr; 10% estimate, labeled). Write multiplier <code>wm</code> = 1.25&times; for Anthropic/OpenAI (model names starting Claude/GPT-), else 1.0&times;. At h=95% top models drop 59&ndash;79% in effective cost and the frontier itself re-orders.</p>
+
+<h2>Strict CI mode</h2>
+<p>Adjacent tiers whose 95% CIs overlap are merged (cheaper model kept) so you don&rsquo;t pay for statistical noise. Note this is a conservative <i>overlap screen</i>, not a formal test of score differences.</p>
+
+<h2>Limitations</h2>
+<ul>
+<li>Scores are a snapshot; capability drifts as boards update. Prices drift weekly.</li>
+<li>P50 task cost is a workload mix; your workload differs. Use the paste-to-extend feature with your own bills.</li>
+<li>The all-license board covers only its top 41 rows; the open-source boards are complete.</li>
+<li>Confidence: every number here traces to a public page; corrections carry per-rule sources in the tool.</li>
+</ul>
+
+<h2>Attribution &amp; compliance</h2>
+<p>Leaderboard data &copy; LMArena (arena.ai). This is an independent analysis of publicly listed numbers; no affiliation with arena.ai. Don&rsquo;t scrape arena.ai at high frequency &mdash; use the Hugging Face dataset for automation. If you publish derived conclusions, attribute the source and snapshot dates.</p>
+<p><a href="%ROOT%">← Back to the tool</a> · <a href="/data/v1/all.json">JSON export</a> · <a href="/llms.txt">llms.txt</a></p>

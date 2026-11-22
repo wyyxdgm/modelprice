@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="__LANG__">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Which AI model is cheapest for your quality bar? An interactive Pareto ladder of Arena (LMArena) WebDev scores vs. real cost per task — with peak/off-peak pricing, cache-hit discounts, and strict CI merging. Free, no signup.">
-<meta property="og:title" content="Cheapest AI models at every quality level — Arena Score vs. real cost per task">
-<meta property="og:description" content="Set your minimum acceptable Arena Score and see the cheapest model that clears it, how much the next tier costs per point, and how peak/off-peak and cache pricing change the answer.">
+<meta name="description" content="{{meta.desc}}">
+<meta property="og:title" content="{{meta.ogTitle}}">
+<meta property="og:description" content="{{meta.ogDesc}}">
 <meta property="og:type" content="website">
 <meta name="robots" content="index,follow">
-<title>Arena Leaderboard Value Analyzer · Score Range → Best-Value Model</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b0e14'/%3E%3Cpath d='M7 23 L13 14 L19 18 L25 8' fill='none' stroke='%233ddc97' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='25' cy='8' r='2.6' fill='%23f5c542'/%3E%3C/svg%3E">
+<title>{{meta.title}}</title>
+__HEAD_EXTRA__<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b0e14'/%3E%3Cpath d='M7 23 L13 14 L19 18 L25 8' fill='none' stroke='%233ddc97' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='25' cy='8' r='2.6' fill='%23f5c542'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="/assets/style.css">
 </head>
 <body>
@@ -17,140 +17,138 @@
 
 <header class="top">
   <div>
-    <h1>Arena Leaderboard Value Analyzer <span class="sub">score range → best-value model in range</span></h1>
+    <h1>{{header.h1}} <span class="sub">{{header.sub}}</span></h1>
     <div class="tagline">
-      Drag the capability threshold from highest to lowest and watch each tier's winner update live. This is the 
-      <b style="color:var(--good)">lower envelope / Pareto frontier</b> — Your intuition "every capability tier has a best-value model" is mathematically sound, but it needs the right definition (see below). Data: <a href="https://arena.ai/leaderboard/code/webdev" target="_blank" rel="noopener">arena.ai/leaderboard</a>, scraped <span class="mono" id="scraped"></span> (leaderboard dated <span class="mono" id="captured"></span>).
+      {{header.tagline}}
     </div>
+    <nav class="lang" id="langNav" aria-label="Language">__LANG_NAV__</nav>
   </div>
   <div class="badge-row" id="topBadges"></div>
 </header>
 
 <section class="intro">
-  <h2>Cheapest AI models at every quality level — Arena Score vs. real cost per task</h2>
-  <p><b style="color:var(--text)">Set the minimum Arena Score you can accept, and it names the cheapest model that clears the bar</b> — plus the marginal $/point to the next tier, corrected for DeepSeek peak/off-peak pricing, expired promos and cache-miss bias. Drag the gold threshold line (or hit ▶ Play) and watch every tier's winner update live.</p>
-  <p class="lnk">Three definitions of "best value" · strict 95% CI mode · prices modeled over a 168-hour week · <a href="/method.html">Method &amp; data sources</a> · <a href="/data/v1/all.json">JSON (AI-readable)</a> · <a href="/llms.txt">llms.txt</a></p>
+  <h2>{{intro.h2}}</h2>
+  <p>{{intro.p1}}</p>
+  <p class="lnk">{{intro.lnk}}</p>
 </section>
 <div class="grid">
   <!-- ============ 左：控制台（分组可折叠；手机上整块沉底） ============ -->
   <div class="ctrl">
     <div class="panel">
       <details class="grp" open>
-      <summary>Dataset &amp; definition</summary>
+      <summary>{{grp.ds.summary}}</summary>
       <div class="bd">
-      <h2 style="margin-top:0">Leaderboard dataset</h2>
+      <h2 style="margin-top:0">{{grp.ds.h2}}</h2>
       <select id="ds"></select>
       <div class="hint" id="dsNote"></div>
       <div class="hint" style="margin-top:6px;border-left:2px solid var(--gold);padding-left:8px">
-        <b>Open-source-only and all-license are two different boards; their scores are not comparable.</b>
-        Open-source board (<span class="mono">?license=open-source</span>) maxes out at  <b class="mono">1687</b> (Kimi K3.1 Pro); the all-license board tops out at  <b class="mono">1838</b> (Claude Fable 5.2 xHigh, $11.04/task) — Claude Opus 5.5 1815, Sonnet 5.5 1772, Gemini 4 Carbon 1768, GPT-6 Astra 1764 are all there. Switch the dataset to the <b>All-license</b> entry.<br>
-        <span style="color:var(--dim2)">Note: the all-license board only has the top 41 scraped (Score 1590–1838); the long tail beyond rank 41 is missing. The high-score frontier is unaffected, but "cheapest overall" and "excess score/$" baselines will skew.</span>
+        {{grp.ds.licHint}}
       </div>
 
-      <h2>Definition of "best value"</h2>
+      <h2>{{grp.mode.h2}}</h2>
       <div class="seg" id="mode">
-        <button data-v="pareto" class="on" title="cheapest among models with score ≥ T (= lower envelope, your original idea)">① Threshold</button>
-        <button data-v="ratio" title="max Score ÷ Cost">② Score / $</button>
-        <button data-v="baseline" title="max (Score − 1200) ÷ Cost">③ Excess score / $</button>
+        <button data-v="pareto" class="on" title="{{grp.mode.b1t}}">{{grp.mode.b1}}</button>
+        <button data-v="ratio" title="{{grp.mode.b2t}}">{{grp.mode.b2}}</button>
+        <button data-v="baseline" title="{{grp.mode.b3t}}">{{grp.mode.b3}}</button>
       </div>
       <div class="hint" id="modeHint"></div>
 
-      <h2>Significance mode</h2>
+      <h2>{{grp.ci.h2}}</h2>
       <div class="seg" id="ci">
-        <button data-v="point" class="on">Point estimate</button>
-        <button data-v="strict">Strict (win only if 95% CIs don't overlap)</button>
+        <button data-v="point" class="on">{{grp.ci.point}}</button>
+        <button data-v="strict">{{grp.ci.strict}}</button>
       </div>
-      <div class="hint">Strict mode only accepts a gap where A's CI lower bound &gt; B's CI upper bound, so noise never becomes a conclusion. Low-vote  <span class="pill warn" style="padding:0 5px">Preliminary</span>  model CIs often reach ±20–55.</div>
+      <div class="hint">{{grp.ci.hint}}</div>
       </div>
       </details>
 
       <details class="grp" open>
-      <summary>Score range &amp; sweep</summary>
+      <summary>{{grp.rng.summary}}</summary>
       <div class="bd">
-      <h2 style="margin-top:0">Score range (capability acceptance)</h2>
+      <h2 style="margin-top:0">{{grp.rng.h2}}</h2>
       <div class="rng" id="rng">
         <div class="track"></div><div class="fill" id="fill"></div><div class="hi" id="hiFill"></div>
         <div class="h" id="hLo"></div><div class="h max" id="hHi"></div>
         <div class="lab" id="labLo"></div><div class="lab" id="labHi"></div>
       </div>
       <div class="row" style="margin-top:8px">
-        <div style="flex:1"><label class="fld">Lower lo</label><input type="number" id="inLo" step="1"></div>
-        <div style="flex:1"><label class="fld">Upper hi</label><input type="number" id="inHi" step="1"></div>
+        <div style="flex:1"><label class="fld">{{grp.rng.lo}}</label><input type="number" id="inLo" step="1"></div>
+        <div style="flex:1"><label class="fld">{{grp.rng.hi}}</label><input type="number" id="inHi" step="1"></div>
       </div>
       <div class="chips" style="margin-top:9px">
-        <button class="btn" data-p="full">Full domain [min, max]</button>
-        <button class="btn" data-p="sweep">[T, max] sweep</button>
-        <button class="btn" data-p="top10">Top10 tiers</button>
-        <button class="btn" data-p="mid">Mid band 1400–1550</button>
+        <button class="btn" data-p="full">{{grp.rng.pFull}}</button>
+        <button class="btn" data-p="sweep">{{grp.rng.pSweep}}</button>
+        <button class="btn" data-p="top10">{{grp.rng.pTop10}}</button>
+        <button class="btn" data-p="mid">{{grp.rng.pMid}}</button>
       </div>
       <div class="playbar">
-        <button class="btn primary" id="play">▶ Play: sweep the threshold from highest to lowest</button>
-        <input type="range" class="spd" id="spd" min="1" max="20" value="8" title="speed">
-        <span class="pill" id="playState">Stop</span>
+        <button class="btn primary" id="play">{{grp.rng.play}}</button>
+        <input type="range" class="spd" id="spd" min="1" max="20" value="8" title="{{grp.rng.speed}}">
+        <span class="pill" id="playState">{{grp.rng.stop}}</span>
       </div>
       </div>
       </details>
 
       <details class="grp" open>
-      <summary>Price scenarios &amp; cache</summary>
+      <summary>{{grp.price.summary}}</summary>
       <div class="bd">
-      <h2 style="margin-top:0">Price scenarios: making list prices <b>a function of time</b></h2>
+      <h2 style="margin-top:0">{{grp.price.h2}}</h2>
       <div class="row" style="gap:10px;flex-wrap:wrap">
-        <div style="flex:1;min-width:118px"><label class="fld">Display timezone</label>
+        <div style="flex:1;min-width:118px"><label class="fld">{{grp.price.tz}}</label>
           <select id="tz">
-            <option value="0">UTC ±0</option>
-            <option value="1">CET +1</option>
-            <option value="2">EET +2</option>
-            <option value="8">Beijing +8</option>
-            <option value="9">Tokyo +9</option>
-            <option value="-5">US East −5</option>
-            <option value="-8">US West −8</option>
+            <option value="0">{{grp.price.tz0}}</option>
+            <option value="1">{{grp.price.tz1}}</option>
+            <option value="2">{{grp.price.tz2}}</option>
+            <option value="8">{{grp.price.tz8}}</option>
+            <option value="9">{{grp.price.tz9}}</option>
+            <option value="-5">{{grp.price.tzM5}}</option>
+            <option value="-8">{{grp.price.tzM8}}</option>
           </select></div>
-        <div style="flex:1;min-width:96px"><label class="fld">Day (UTC)</label>
+        <div style="flex:1;min-width:96px"><label class="fld">{{grp.price.dow}}</label>
           <select id="dow">
-            <option value="1">Mon</option><option value="2">Tue</option><option value="3">Wed</option>
-            <option value="4">Thu</option><option value="5">Fri</option><option value="6">Sat</option>
-            <option value="0">Sun</option>
+            <option value="1">{{grp.price.d1}}</option><option value="2">{{grp.price.d2}}</option><option value="3">{{grp.price.d3}}</option>
+            <option value="4">{{grp.price.d4}}</option><option value="5">{{grp.price.d5}}</option><option value="6">{{grp.price.d6}}</option>
+            <option value="0">{{grp.price.d0}}</option>
           </select></div>
       </div>
-      <label class="fld" style="margin-top:9px">UTC hour <span class="mono" id="hourUtc">--:00</span>
+      <label class="fld" style="margin-top:9px">{{grp.price.utcHour}} <span class="mono" id="hourUtc">--:00</span>
         <span class="pill" id="peakPill" style="padding:0 6px">—</span>
-        <span style="color:var(--dim);font-weight:400">· Your local time is  <span class="mono" id="hourLocal">--:00</span></span></label>
+        <span style="color:var(--dim);font-weight:400">{{grp.price.localTime}}  <span class="mono" id="hourLocal">--:00</span></span></label>
       <input type="range" id="hour" min="0" max="23" step="1" value="12" style="width:100%;accent-color:var(--accent)">
       <div class="chips" style="margin-top:8px">
-        <button class="btn" data-pk="now">now</button>
-        <button class="btn" data-pk="peak">Priciest hour</button>
-        <button class="btn" data-pk="off">Cheapest hour</button>
-        <button class="btn" data-pk="sat">Saturday (all off-peak)</button>
-        <button class="btn" data-pk="board">As listed (all off)</button>
-        <button class="btn" data-pk="all">Enable all (incl. uncertain)</button>
+        <button class="btn" data-pk="now">{{grp.price.now}}</button>
+        <button class="btn" data-pk="peak">{{grp.price.peak}}</button>
+        <button class="btn" data-pk="off">{{grp.price.off}}</button>
+        <button class="btn" data-pk="sat">{{grp.price.sat}}</button>
+        <button class="btn" data-pk="board">{{grp.price.board}}</button>
+        <button class="btn" data-pk="all">{{grp.price.all}}</button>
       </div>
       <div class="row" style="gap:10px;margin-top:10px;flex-wrap:wrap">
-        <div style="flex:1;min-width:140px"><label class="fld">Pricing date</label><input type="date" id="dateIso"></div>
-        <div style="flex:1;min-width:150px"><label class="fld">Output token share <span class="mono" id="osLab">8%</span></label>
+        <div style="flex:1;min-width:140px"><label class="fld">{{grp.price.date}}</label><input type="date" id="dateIso"></div>
+        <div style="flex:1;min-width:150px"><label class="fld">{{grp.price.outShare}} <span class="mono" id="osLab">8%</span></label>
           <input type="range" id="outShare" min="0" max="60" step="1" value="8" style="width:100%;accent-color:var(--accent)"></div>
       </div>
       <div class="hint" id="osHint"></div>
 
-      <h2 style="margin-top:14px">Cache hit rate <span class="pill" id="cachePill" style="padding:0 6px">95%</span></h2>
+      <h2 style="margin-top:14px">{{grp.price.cacheH2}} <span class="pill" id="cachePill" style="padding:0 6px">95%</span></h2>
       <div class="row" style="gap:10px;align-items:flex-end">
         <div style="flex:1;min-width:150px">
           <input type="range" id="cacheHit" min="0" max="100" step="1" value="95" style="width:100%;accent-color:var(--accent)"></div>
-        <div style="width:92px"><label class="fld">Exact %</label>
+        <div style="width:92px"><label class="fld">{{grp.price.exact}}</label>
           <input type="number" id="cacheHitN" min="0" max="100" step="1" value="95"></div>
       </div>
       <div class="chips" style="margin-top:8px">
-        <button class="btn" data-ch="0">0% (board prices)</button>
-        <button class="btn" data-ch="50">50%</button>
-        <button class="btn" data-ch="85">85%</button>
-        <button class="btn" data-ch="95">95% (default)</button>
-        <button class="btn" data-ch="99">99%</button>
+        <button class="btn" data-ch="0">{{grp.price.c0}}</button>
+        <button class="btn" data-ch="50">{{grp.price.c50}}</button>
+        <button class="btn" data-ch="85">{{grp.price.c85}}</button>
+        <button class="btn" data-ch="95">{{grp.price.c95}}</button>
+        <button class="btn" data-ch="99">{{grp.price.c99}}</button>
       </div>
-      <label class="fld" style="margin-top:9px">Cache read-price source</label>
+      <label class="fld" style="margin-top:9px">{{grp.price.cacheSrc}}</label>
       <select id="cacheSrc">
-        <option value="pub">Published cache prices (missing → estimated at 10% of input)</option>
-        <option value="flat">Flat 10% of input price for all (uniform conservative)</option>
-        <option value="off">Disable cache discount (= Arena board prices)</option>
+        <option value="pub">{{grp.price.srcPub}}</option>
+        <option value="flat">{{grp.price.srcFlat}}</option>
+        <option value="off">{{grp.price.srcOff}}</option>
       </select>
       <div class="hint" id="cacheHint"></div>
 
@@ -160,36 +158,36 @@
       </details>
 
       <details class="grp">
-      <summary>Filters</summary>
+      <summary>{{grp.filters.summary}}</summary>
       <div class="bd">
-      <h2 style="margin-top:0">Filters</h2>
-      <label class="fld">Min votes ≥ <span class="mono" id="vLab">0</span></label>
+      <h2 style="margin-top:0">{{grp.filters.h2}}</h2>
+      <label class="fld">{{grp.filters.minVotes}} <span class="mono" id="vLab">0</span></label>
       <input type="range" id="minVotes" min="0" max="25000" step="250" value="0" style="width:100%;accent-color:var(--accent)">
       <div class="row" style="margin-top:9px;flex-wrap:wrap;gap:12px">
-        <label class="row" style="gap:6px;font-size:12.5px;color:var(--dim)"><input type="checkbox" id="exPrelim" style="width:auto"> Exclude Preliminary</label>
-        <label class="row" style="gap:6px;font-size:12.5px;color:var(--dim)"><input type="checkbox" id="exAuto" checked style="width:auto"> Exclude AutoEval</label>
-        <label class="row" style="gap:6px;font-size:12.5px;color:var(--dim)"><input type="checkbox" id="onlyCost" checked style="width:auto"> Only models with Cost/Task</label>
+        <label class="row" style="gap:6px;font-size:12.5px;color:var(--dim)"><input type="checkbox" id="exPrelim" style="width:auto"> {{grp.filters.exPrelim}}</label>
+        <label class="row" style="gap:6px;font-size:12.5px;color:var(--dim)"><input type="checkbox" id="exAuto" checked style="width:auto"> {{grp.filters.exAuto}}</label>
+        <label class="row" style="gap:6px;font-size:12.5px;color:var(--dim)"><input type="checkbox" id="onlyCost" checked style="width:auto"> {{grp.filters.onlyCost}}</label>
       </div>
-      <label class="fld" style="margin-top:11px">Cost/Task cap ≤ $<span class="mono" id="cLab">∞</span>(budget cap)</label>
+      <label class="fld" style="margin-top:11px">{{grp.filters.costCap}}</label>
       <input type="range" id="maxCost" min="0" max="100" step="1" value="100" style="width:100%;accent-color:var(--accent)">
-      <div class="hint">Budget cap + score threshold = two independent real-world constraints. Set to max for no limit.</div>
+      <div class="hint">{{grp.filters.capHint}}</div>
       </div>
       </details>
 
       <details class="grp">
-      <summary>Export &amp; extend data</summary>
+      <summary>{{grp.export.summary}}</summary>
       <div class="bd">
-      <h2 style="margin-top:0">Export / extend data</h2>
+      <h2 style="margin-top:0">{{grp.export.h2}}</h2>
       <div class="row">
-        <button class="btn" id="expCsv">Export CSV (current table)</button>
-        <button class="btn" id="expTiers">Export tier-ladder CSV</button>
-        <button class="btn" id="copyLink">Copy state link</button>
+        <button class="btn" id="expCsv">{{grp.export.csv}}</button>
+        <button class="btn" id="expTiers">{{grp.export.tiers}}</button>
+        <button class="btn" id="copyLink">{{grp.export.copyLink}}</button>
       </div>
-      <div class="hint">To add another board (e.g.  <span class="mono">code/terminal</span>、<span class="mono">text</span>、<span class="mono">vision</span>): open the board's page on arena.ai, select the table, copy, and paste below (columns are auto-detected).</div>
-      <textarea id="paste" placeholder="Paste an arena.ai leaderboard's markdown / table text…"></textarea>
+      <div class="hint">{{grp.export.hint}}</div>
+      <textarea id="paste" placeholder="{{grp.export.pastePh}}"></textarea>
       <div class="row" style="margin-top:8px">
-        <input type="text" id="pasteName" placeholder="New dataset name (optional)" style="flex:1">
-        <button class="btn primary" id="addDs">Add</button>
+        <input type="text" id="pasteName" placeholder="{{grp.export.namePh}}" style="flex:1">
+        <button class="btn primary" id="addDs">{{grp.export.add}}</button>
       </div>
       <div class="hint" id="pasteMsg"></div>
       </div>
@@ -202,44 +200,44 @@
     <div class="win" id="winCard"></div>
 
     <div class="chart" style="margin-top:16px">
-      <div class="ttl"><span>① Step chart: threshold T → cheapest model clearing T (the "winner of every tier" you asked for)</span>
-        <span class="lg">Each bar = one model ruling that score range · click any bar to jump to it</span></div>
+      <div class="ttl"><span>{{charts.steps.ttl}}</span>
+        <span class="lg">{{charts.steps.lg}}</span></div>
       <svg id="steps" viewBox="0 0 900 250" preserveAspectRatio="xMidYMid meet"></svg>
     </div>
 
     <div class="chart" style="margin-top:14px">
-      <div class="ttl"><span>② Scatter: Score (x) × Cost/Task (y, log)</span>
-        <span class="lg">◆ Pareto frontier · gray dots = dominated · vertical bars = CI · shade = current score band · gold dashed line = threshold T (drag it)</span></div>
+      <div class="ttl"><span>{{charts.scat.ttl}}</span>
+        <span class="lg">{{charts.scat.lg}}</span></div>
       <svg id="scat" viewBox="0 0 900 430" preserveAspectRatio="xMidYMid meet"></svg>
     </div>
 
     <div class="chart" style="margin-top:14px">
-      <div class="ttl"><span>③ 168 hours of the week: minimum cost at threshold T <span class="mono">C(T)</span> change over time</span>
-        <span class="lg">Gray = peak windows · line jumps = champion changes · gold dashed = your selected hour · click anywhere to jump to that hour</span></div>
+      <div class="ttl"><span>{{charts.tl.ttl}}</span>
+        <span class="lg">{{charts.tl.lg}}</span></div>
       <svg id="tl" viewBox="0 0 900 300" preserveAspectRatio="xMidYMid meet"></svg>
       <div class="hint" id="tlNote"></div>
     </div>
 
     <div class="panel" style="margin-top:14px">
-      <h2>Tier ladder <span class="pill" id="tierCount"></span></h2>
+      <h2>{{tables.tier.h2}} <span class="pill" id="tierCount"></span></h2>
       <div class="scroll" style="max-height:300px">
         <table class="tierstable" id="tiersT"><thead><tr>
-          <th>#</th><th>Score range</th><th>Winner in range</th><th class="num">Score</th><th class="num">Cost/Task</th>
-          <th class="num">↑ Marginal cost of the next tier ($/pt)</th><th class="num">Votes</th><th>Notes</th>
+          <th>{{tables.tier.c1}}</th><th>{{tables.tier.c2}}</th><th>{{tables.tier.c3}}</th><th class="num">{{tables.tier.c4}}</th><th class="num">{{tables.tier.c5}}</th>
+          <th class="num">{{tables.tier.c6}}</th><th class="num">{{tables.tier.c7}}</th><th>{{tables.tier.c8}}</th>
         </tr></thead><tbody></tbody></table>
       </div>
     </div>
 
     <div class="panel" style="margin-top:14px">
-      <h2>Model table <span class="pill" id="tblCount"></span></h2>
+      <h2>{{tables.model.h2}} <span class="pill" id="tblCount"></span></h2>
       <div class="scroll">
         <table id="tbl"><thead><tr>
-          <th data-k="r">Board #</th><th data-k="or">Overall #</th><th data-k="n">Model</th>
-          <th class="num" data-k="s">Score</th><th class="num" data-k="ci">±CI</th>
-          <th class="num" data-k="c">Cost/Task</th><th class="num" data-k="ratio"> pts/$</th>
-          <th class="num" data-k="base">Excess score/$</th><th class="num" data-k="v">Votes</th>
-          <th class="num" data-k="pin">$/M in</th><th class="num" data-k="pout">$/M out</th>
-          <th data-k="ctx">Context</th><th data-k="lic">License</th>
+          <th data-k="r">{{tables.model.boardNo}}</th><th data-k="or">{{tables.model.overallNo}}</th><th data-k="n">{{tables.model.model}}</th>
+          <th class="num" data-k="s">{{tables.model.score}}</th><th class="num" data-k="ci">{{tables.model.ci}}</th>
+          <th class="num" data-k="c">{{tables.model.cost}}</th><th class="num" data-k="ratio">{{tables.model.pts}}</th>
+          <th class="num" data-k="base">{{tables.model.excess}}</th><th class="num" data-k="v">{{tables.model.votes}}</th>
+          <th class="num" data-k="pin">{{tables.model.pin}}</th><th class="num" data-k="pout">{{tables.model.pout}}</th>
+          <th data-k="ctx">{{tables.model.ctx}}</th><th data-k="lic">{{tables.model.lic}}</th>
         </tr></thead><tbody></tbody></table>
       </div>
     </div>
@@ -247,21 +245,22 @@
 </div>
 
 <details open id="method">
-  <summary>Methodology: does this approach hold? (Verdict: yes — with 5 corrections)</summary>
+  <summary>{{bottom.method}}</summary>
   <div class="bd"><div class="note" id="methodBody"></div></div>
 </details>
 
 <details>
-  <summary>Data sources, methodology & disclaimers</summary>
+  <summary>{{bottom.sources}}</summary>
   <div class="bd"><div class="note" id="sourceBody"></div></div>
 </details>
 
 <div class="footer">
-  Static build · zero runtime dependencies · data embedded at build time from arena.ai snapshots (the <span class="mono">/api/*</span> endpoints return 403, so live queries are impossible — this is <b>a point-in-time snapshot</b>). Arena's built-in Pareto view: <a href="https://arena.ai/leaderboard/code/webdev/pareto" target="_blank" rel="noopener">arena.ai/leaderboard/code/webdev/pareto</a>.<br>Leaderboard data © LMArena (arena.ai), snapshot 2026-11-11 · prices from vendor pricing pages, checked 2026-11-14 · <a href="/method.html">Method</a> · <a href="/data/v1/all.json">JSON</a> · <a href="/llms.txt">llms.txt</a> · <a href="/sitemap.xml">Sitemap</a>
+  {{footer.html}}
 </div>
 </div>
 
 <script id="DATA" type="application/json">__DATA__</script>
+<script id="I18N" type="application/json">__I18N__</script>
 <script src="/assets/js/01-util.js"></script>
 <script src="/assets/js/02-data.js"></script>
 <script src="/assets/js/03-pricing.js"></script>

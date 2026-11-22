@@ -1,0 +1,32 @@
+<p><b>来源：</b><a href="https://arena.ai/leaderboard/code/webdev" target="_blank" rel="noopener">arena.ai/leaderboard/code/webdev</a> 及其子榜（frontend / fullstack），抓取于 <span class="mono">%SCRAPED%</span>；榜单数据日期 <span class="mono">%CAPTURED%</span>。</p>
+<p><b>可用性：</b>页面公开可读、可抓取；但 <span class="mono">arena.ai/api/*</span> 与 <span class="mono">api.arena.ai/*</span> 返回 403（Cloudflare + 路由白名单）—— <b>没有公开 JSON API</b>。所以本工具采用「内嵌快照 + 粘贴扩展」设计，不做实时请求。</p>
+<p><b>字段语义：</b></p>
+<ul>
+<li><b>Score（分数）</b>：Arena 的 Bradley-Terry 型评分；<span class="mono">+u/−d</span> 是 bootstrap 95% 置信区间。</li>
+<li><b>Cost/Task (P50)</b>：完成一个 Arena 任务的<b>中位</b>美元成本 = 实测 token 用量 × 下方 API 价格。<span class="mono">N/A</span> = 未公布 —— 此类模型默认排除（可开关）。</li>
+<li><b>Price $/M</b>：<b>厂商一方 API 标价</b>（输入 / 输出每百万 token）—— 不是 Arena 统一定价，也不是自托管的摊销成本。注意：Cost/Task 低不代表单价低（还取决于模型产出了多少 token）。</li>
+</ul>
+<p><b>这些价格到底是谁的价格？（逐条核对过）</b></p>
+<p>与独立价格索引 <a href="https://benchr.org/pricing" target="_blank" rel="noopener">benchr.org/pricing</a>（2026-09-11 快照）逐条比对，Arena 的 <span class="mono">Price $/M</span> 等于各厂商的<b>官方 API 标价</b>：
+Kimi K3.1 Pro <span class="mono">$2/$10</span>、Kimi K3 <span class="mono">$3/$15</span>（Moonshot）；GLM-5.2 / 5.3 <span class="mono">$1.40/$4.40</span>（Z.ai）；Claude Opus 5.5 <span class="mono">$4/$20</span>、Sonnet 5.5 <span class="mono">$2/$10</span>、Haiku 5.5 <span class="mono">$0.10/$0.50</span>（Anthropic）；GPT-6.1 Sol <span class="mono">$2/$10</span>、Terra <span class="mono">$1/$5</span>、GPT-6 Astra <span class="mono">$10/$50</span>（OpenAI）；Grok 4.7 <span class="mono">$2/$6</span>、Gemini 4 Argon <span class="mono">$2/$10</span>；Mistral Large 4 <span class="mono">$0.70/$2.10</span>；MiniMax M3 <span class="mono">$0.30/$1.20</span>；DeepSeek V4-Pro <span class="mono">$1.32/$3.96</span>。</p>
+<p><b>开源模型挂的也是 API 价 —— 不是你自托管要付的钱。</b>Gemma 4 31B <span class="mono">$0.16/$0.47</span>、Granite 4.1 8B <span class="mono">$0.05/$0.10</span>、Hy3 <span class="mono">$0.13/$0.53</span>、Qwen3.8-27B <span class="mono">$0.40/$3</span>、MiMo-V2.6-Flash <span class="mono">$0.14/$0.28</span> —— 这些是 Google / IBM / 腾讯 / 阿里 / 小米<b>自家托管端点</b>的报价（榜上各模型链接指向那些 API 文档）。开放权重 ≠ 免费推理：自托管成本是 GPU 摊销 + 电费 + 运维，与每 token 标价没有换算关系。</p>
+<p><b>Cost/Task 是按实测用量算的 —— 三个内部证据：</b></p>
+<ul>
+<li>同一个模型的 <span class="mono">Price $/M</span> 在本工具全部 7 张榜上<b>完全一致</b> → 单价是模型级常量；</li>
+<li>同一个模型的 <span class="mono">Cost/Task</span> 在五个 WebDev 子榜（Overall / Frontend / React / Reference-based / Fullstack）上<b>完全一致</b>，但在 Image-to-WebDev 上不同（例：DeepSeek-V4.1-Flash-20261017：$0.12 vs $0.10）→ 用量按<b>任务类别</b>聚合，不按子榜；</li>
+<li>Agent 榜还公布 <span class="mono">Output Tokens/Task</span>，据此可反推输入量：14 个模型反推为 125K–1.27M 输入 token，输入/输出比 3.8–17.9× —— 正是多轮工具调用的负载特征。而 <span class="mono">(Max)/(High)/(xHigh)</span> 档共用<b>同一单价</b>但 Cost 差 2–4×（Claude Opus 5.5：$5.66 vs $2.13）—— 纯粹是用量差异。</li>
+</ul>
+<p><b>三个让结论偏乐观的价格陷阱：</b></p>
+<ul>
+<li><b>DeepSeek 峰谷价。</b>榜面把 20261017 版标为<b>谷价</b> <span class="mono">$0.15/$0.60</span>、20260910 版标为<b>峰价</b> <span class="mono">$0.30/$1.20</span>。峰时 = 工作日 01:00–04:00 与 06:00–10:00 UTC；其余时段半价。如果你的负载排不进谷时，20261017 的 $0.12/任务会翻倍到 ~$0.24：它仍守住 1664 档（结构不变），但「1638→1664」的边际价从 $0.0027/分 涨到 $0.0073/分，「1664→1687」从 $0.0343 降到 $0.0291 —— 膝点跳跃从 12.8× 缩到 4.0×，削弱了「停在 1664」的紧迫性。</li>
+<li><b>GLM-5.3-Flash 用的是已过期的首发促销价</b> <span class="mono">$0.05/$0.18</span>；促销 2026-09-09 结束，现价 <span class="mono">$0.15/$0.50</span>（3×），所以它的 $0.15/任务实际约 $0.45。它本来就不在前沿上，但类似的过期促销价可能虚高了其他模型。</li>
+<li><b>无缓存折扣。</b>DeepSeek 缓存命中输入 <span class="mono">$0.006</span>（峰）/ <span class="mono">$0.003</span>（谷）；Anthropic 缓存输入 <span class="mono">$0.10–$1.00</span>。多轮 agent 负载经常命中缓存；真实账单可能远低于「标价 × token」。</li>
+</ul>
+<p><b>想用你自己的成本口径？</b>用下面的粘贴框，把 <span class="mono">Cost/Task</span> 列换成你的实测账单或自托管摊销成本 —— 解析器读的是<b>列名</b>，不关心数字从哪来。你得到的前沿就是<b>你的</b>前沿。</p>
+<ul>
+<li><b>Rank vs Overall Rank</b>：前者是本子榜/许可过滤内的排名；后者是全部模型总榜排名。</li>
+<li><b>Preliminary（预评）</b>：票数未达稳定阈值；CI 通常较宽。</li>
+<li><b>AutoEval（自动评测）</b>：分数来自自动评测而非人类对战 —— 与人类投票分数不可直接比较 → 默认排除。</li>
+</ul>
+<p><b>本工具的局限：</b>数据是快照不是实时；成本只覆盖 token 花费；「性价比」的定义由你选择，不同定义会加冕不同冠军；统计显著性只在严格模式下强制。</p>
+<p><b>合规：</b>数据来自公开页面，仅用于个人分析。请勿高频抓取 arena.ai。若发布衍生结论，请注明数据来源与抓取日期。</p>
