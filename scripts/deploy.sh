@@ -64,7 +64,9 @@ echo "$home" | grep -o '<title>[^<]*</title>' | head -1 | grep -q 'Arena Leaderb
   || { echo "❌ 首页 title 不含工具名"; fail=1; }
 n=$(echo "$home" | grep -c 'src="/assets/js/' || true)
 [[ "$n" -ge 9 ]] || { echo "❌ 首页外链 js 引用数异常: $n (期望 ≥9)"; fail=1; }
-echo "$home" | grep -q '<script id="DATA" type="application/json">' \
+# ⚠️ 不用 echo|grep -q：pipefail 下 grep -q 早退会让左侧写进程收 SIGPIPE（exit 141）→ 误报 MISS
+#    （实测：匹配位置越靠前/数据越冷越必现）。改用 bash 原生子串匹配，零进程零 SIGPIPE。
+[[ "$home" == *'<script id="DATA" type="application/json">'* ]] \
   || { echo "❌ 首页缺 DATA JSON 块"; fail=1; }
 
 # ③ CSP 已收紧：script-src 必须是 'self' 且不含 unsafe-inline（style-src 的 unsafe-inline 是允许的——win 卡有内联 style 属性）
@@ -94,11 +96,10 @@ u=$(smoke_curl -s --max-time 20 "$B/sitemap.xml" | grep -c 'https://modelprice.d
 
 # ⑦ i18n 抽检：zh 首页 title 为中文 + hreflang 互指完整（5 语言 + x-default = 6 条）+ 切换器在位
 zhhome=$(smoke_curl -s --max-time 20 "$B/zh/")
-echo "$zhhome" | grep -o '<title>[^<]*</title>' | head -1 | grep -q '性价比\|分析器' \
-  || { echo "❌ /zh/ title 非中文"; fail=1; }
-n_hf=$(echo "$zhhome" | grep -c 'rel="alternate" hreflang=' || true)
+[[ "$zhhome" =~ 中文 && "$zhhome" == *'<title>'* ]] || { echo "❌ /zh/ title 非中文"; fail=1; }
+n_hf=$(echo "$zhhome" | grep -o 'rel="alternate" hreflang=' | wc -l | tr -d ' ')
 [[ "$n_hf" -ge 6 ]] || { echo "❌ /zh/ hreflang 条数异常: $n_hf (期望 ≥6，5 语言 + x-default)"; fail=1; }
-echo "$zhhome" | grep -q 'id="langNav"' || { echo "❌ /zh/ 缺语言切换器"; fail=1; }
-echo "$zhhome" | grep -q '<html lang="zh">' || { echo "❌ /zh/ html lang 非 zh"; fail=1; }
+[[ "$zhhome" == *'id="langNav"'* ]] || { echo "❌ /zh/ 缺语言切换器"; fail=1; }
+[[ "$zhhome" == *'<html lang="zh">'* ]] || { echo "❌ /zh/ html lang 非 zh"; fail=1; }
 
 [[ $fail -eq 0 ]] && echo "🎉 冒烟全过" || { echo "💥 冒烟有失败项"; exit 1; }

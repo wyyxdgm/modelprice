@@ -20,13 +20,15 @@ Interactive: https://modelprice.damolabs.app · Method: `/method.html` · Machin
 src/                    ← editable sources (git-tracked)
   templates/index.html    page skeleton; __DATA__ placeholder filled at build time
   css/style.css           all styles (desktop ≥1240 two-col · tablet · ≤720 mobile)
-  js/0N-*.js              app modules in load order:
+  i18n/<locale>.json      per-locale dictionaries (nested, flattened to dot paths at build time; 299 keys ×5, key sets must stay identical — test enforces)
+  i18n/boot|source|method/<locale>.html   long-form bodies (in-page methodology / sources / method page), filled into the dict at build time
+  js/0N-*.js              app modules in load order (all locales share one copy; user-visible strings go through T()/TF() against the inline I18N dict):
     01-util.js    02-data.js    03-pricing.js    04-core.js    05-timeline.js
     06-scenarios.js    07-render.js    08-interact.js    09-boot.js
 data/datasets.json      parse.py output (the numbers)
 raw/*.md                scrape provenance — arena.ai tables as captured (source of truth)
-scripts/build_page.py   src/ + data → dist/index.html + dist/assets/
-build_site.py [domain]  dist/data/v1/all.json + method.html + llms.txt + robots.txt + sitemap.xml
+scripts/build_page.py   src/ + data → dist/index.html (en) + dist/<locale>/index.html ×5 + dist/assets/
+build_site.py [domain]  dist/data/v1/all.json + method.html ×5 + llms.txt + robots.txt + sitemap.xml (全语言互指)
 parse.py                raw/*.md → data/datasets.json
 scripts/deploy.sh       build → rsync dist/ → wd → smoke checks
 test/                   61 regression cases (see below)
@@ -55,7 +57,7 @@ python3 -m http.server 8080 -d dist    # Ctrl-C when done
 
 ## Deploy
 
-`scripts/deploy.sh` builds `dist/`, `rsync --delete` it to `wd:/www/wwwroot/modelprice.damolabs.app/`, then runs smoke checks (9 URLs 200, page structure, CSP header, all.json boards=7 models=338). `--verify-only` skips the deploy. Price events / cache ratios live in `src/js/03-pricing.js` (`PRICE_EVENTS`, `CACHE_RATIO`) and are mirrored in `build_site.py` — keep both in sync when editing.
+`scripts/deploy.sh` builds `dist/`, `rsync --delete` it to `wd:/www/wwwroot/modelprice.damolabs.app/`, then runs smoke checks (root + 4 locale homes + 5 method pages all 200, page structure, CSP header, all.json boards=7 models=338, zh title/hreflang/lang-nav spot checks). `--verify-only` skips the deploy. Price events / cache ratios live in `src/js/03-pricing.js` (`PRICE_EVENTS`, `CACHE_RATIO`) and are mirrored in `build_site.py` — keep both in sync when editing.
 
 ## Attribution
 
