@@ -11,7 +11,6 @@ function syncInputs(){
   $('#labHi').style.left=p(S.hi)+'%'; $('#labHi').textContent=S.hi;
   $('#inLo').value=S.lo; $('#inHi').value=S.hi;
   $('#vLab').textContent=fmtN(S.minVotes);
-  $('#cLab').textContent = S.maxCost>=+$('#maxCost').max ? '∞' : S.maxCost;
 }
 function dragSetup(handle,get){
   let on=false;
@@ -107,7 +106,8 @@ $('#copyLink').onclick=()=>{
   const onIds=PRICE_EVENTS.filter(e=>S.evState[e.id]).map(e=>e.id);
   const p=new URLSearchParams({ds:S.ds,mode:S.mode,ci:S.ci,lo:S.lo,hi:S.hi,mv:S.minVotes,pre:S.exPrelim?1:0,
     hr:S.hour,dow:S.dow,date:S.dateISO,os:Math.round(S.outShare*100),tz:S.tz,ev:onIds.join(','),
-    ch:Math.round(S.cacheHit*100),cs:S.cacheSrc});
+    ch:Math.round(S.cacheHit*100),cs:S.cacheSrc,
+    tab:S.tab,rk:S.rankPreset,ri:S.rankIn,ro:S.rankOut,rd:S.rankPerDay,rt:S.rankT,rp:S.rankPk});
   const u=location.origin+location.pathname+'?'+p;
   (navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(()=>{$('#copyLink').textContent=T('interact.copied');setTimeout(()=>$('#copyLink').textContent=T('interact.copyLink'),1500);})
    .catch(()=>prompt(T('interact.promptCopy'),u));
@@ -115,7 +115,8 @@ $('#copyLink').onclick=()=>{
 
 /* ---------- paste new dataset ---------- */
 function parsePasted(text){
-  const LINK=/\[([^\]]+)\]\(([^)\s]+)\)/g;
+  /* 与 parse.py 的 LINK 同口径：lazy + http 锚定 —— 模型名可含内嵌 [..]（如 FLUX.2 [max]）不被切断 */
+  const LINK=/\[(.*?)\]\((https?[^)\s]+)\)/g;
   const SCORE_RE=/(\d{3,4})\s*\+(\d+)\s*\/\s*-(\d+)/;
   const money=x=>{x=(x==null?'':String(x)).replace(/[$,\s]/g,'');return (x&&x!=='N/A'&&x!=='-'&&!isNaN(+x))?+x:null;};
   const isInt=x=>/^[\d,]+$/.test(String(x).trim());

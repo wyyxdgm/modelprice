@@ -213,3 +213,16 @@ input[type=range]{accent-color:var(--accent)}
   details .bd{padding:0 10px 10px}
   .playbar .btn{flex:1;white-space:normal;line-height:1.3}
 }
+
+/* ===== 页签：实惠排行榜 / 阶梯·图析 ===== */
+.tabs{display:flex;gap:6px;margin-bottom:14px}
+.tabs button{flex:1;background:var(--panel2);border:1px solid var(--line2);color:var(--dim);
+  padding:9px 10px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;line-height:1.3}
+.tabs button:hover:not(.on){color:var(--text);border-color:var(--accent)}
+.tabs button.on{background:#123a4a;border-color:#1d5f77;color:#a9e9ff}
+.ranktbl td,.ranktbl th{white-space:nowrap}
+.ranktbl td.nm{white-space:normal}
+@media(max-width:720px){
+  .hidemid{display:none}
+  .tabs button{padding:10px 6px;font-size:12.5px}
+}

@@ -21,6 +21,7 @@ BOARD_META = {
     "reference_os":  ("WebDev · Reference-based design (open-source only)", "open-source"),
     "img2webdev_os": ("Image-to-WebDev (open-source only)", "open-source"),
     "overall_all":   ("WebDev · Overall (all licenses)", "all"),
+    "t2i":           ("Text-to-Image (all licenses)", "all"),
 }
 
 CACHE_RATIO = {
@@ -113,7 +114,8 @@ for key, d in RAW["datasets"].items():
     title, scope = BOARD_META[key]
     boards.append({
         "id": key, "title": title, "license_scope": scope,
-        "arena_path": d["path"], "url": f"https://arena.ai/leaderboard/code/{d['path']}",
+        "unit": d.get("unit", "task"),
+        "arena_path": d["path"], "url": f"https://arena.ai/leaderboard/{d['path']}",
         "votes_note": d["meta"], "coverage_note": d["note"],
         "score_domain": {"min": s_min, "max": s_max},
         "stats": {"models": d["stats"]["n"], "with_cost": d["stats"]["with_cost"]},
@@ -124,20 +126,20 @@ for key, d in RAW["datasets"].items():
 
 generated = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d")
 payload = {
-    "$schema_note": "Machine-readable export of the cost-quality Pareto frontier computed from arena.ai (LMArena) WebDev leaderboards. Question it answers: for a minimum acceptable Arena Score T, which model has the lowest measured cost per task? Humans: see " + DOMAIN + "/ ; interactive tool: " + DOMAIN + "/",
+    "$schema_note": "Machine-readable export of the cost-quality Pareto frontier computed from arena.ai (LMArena) leaderboards (WebDev code boards + Text-to-Image). Question it answers: for a minimum acceptable Arena Score T, which model has the lowest measured cost per task? Humans: see " + DOMAIN + "/ ; interactive tool: " + DOMAIN + "/",
     "meta": {
-        "name": "Arena WebDev Cost-Quality Frontier",
+        "name": "Arena Cost-Quality Frontier (WebDev + Text-to-Image)",
         "version": 1,
         "generated": generated,
         "leaderboard_snapshot": RAW["captured"],
         "scraped": RAW["scraped"],
         "sources": {
-            "leaderboards": "arena.ai/leaderboard/code/webdev (+ sub-boards) public pages",
+            "leaderboards": "arena.ai/leaderboard/code/webdev (+ sub-boards) and arena.ai/leaderboard/image/text-to-image public pages",
             "machine_readable_leaderboard_data": "https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset (official; use for automated refresh)",
             "prices": "each vendor's first-party API list price (verified vs benchr.org/pricing 2026-09-11 snapshot)",
         },
         "attribution": "Leaderboard data © LMArena (arena.ai). This export reproduces publicly listed scores and costs with added analysis.",
-        "cost_basis": "Cost/Task (P50) = median measured token usage of an Arena task x the vendor's list price (cache-miss basis; no cache discount applied).",
+        "cost_basis": "Cost/Task (P50) = median measured usage of one Arena task x the vendor's list price (cache-miss basis; no cache discount applied). unit=task boards bill per code task; unit=image boards (t2i) bill per generated image.",
         "methodology_url": DOMAIN + "/method.html",
         "interactive_tool_url": DOMAIN + "/",
         "disclaimers": [

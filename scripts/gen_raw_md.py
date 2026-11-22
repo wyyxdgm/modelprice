@@ -29,6 +29,7 @@ BOARDS = [
     ("react", ["react_os"]),
     ("reference", ["reference_os"]),
     ("img2webdev", ["img2webdev_os"]),
+    ("t2i", ["t2i"]),
 ]
 TOP_ALL = 40  # overall_all 只取前 40（与旧 raw 口径一致: ranks 41+ not scraped）
 
@@ -40,7 +41,10 @@ def fmt_price(v):
 
 
 def fmt_cost(v):
-    return "N/A" if v is None else f"${v:.2f}"
+    # < $0.1 用 4 位小数（文生图榜成本 $0.01-$0.15, 2 位会抹平排行分差）；≥ $0.1 维持 2 位（与旧榜口径一致）
+    if v is None:
+        return "N/A"
+    return f"${v:.4f}".rstrip("0") if v < 0.1 else f"${v:.2f}"
 
 
 def fmt_ctx(v):
@@ -112,6 +116,11 @@ def board_meta(inner, key):
             "meta": f"{votes} votes · {n} models",
             "note": f"Top {TOP_ALL} all-license models (incl. closed); ranks 41+ not scraped",
         }
+    if key == "t2i":
+        return {
+            "meta": f"{votes} votes · {n} models",
+            "note": "Text-to-Image board, all licenses; Cost/Task = measured USD per generated image (median)",
+        }
     os_n = sum(1 for r in inner["rows"] if (r.get("license") or "") != "Proprietary")
     return {
         "meta": f"{votes} votes · {os_n} open source models",
@@ -156,6 +165,9 @@ def main():
         for key in keys:
             if key == "overall_all":
                 body = render([r for r in rows if (r["rank"] or 999) <= TOP_ALL], overall_rank_of, False, True)
+            elif key == "t2i":
+                # 文生图榜: 全 license（含闭源）、8 列无 Overall Rank（image 系没有 code 榜的 overall 概念）
+                body = render(rows, {}, False, False)
             else:
                 # 所有 *_os 榜: license 过滤 + 9 列带 Overall Rank（与旧 raw 一致, DATASETS 全部 hor=True）
                 os_rows = [r for r in rows if (r.get("license") or "") != "Proprietary"]

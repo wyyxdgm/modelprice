@@ -63,11 +63,15 @@ home=$(smoke_curl -s --max-time 20 "$B/")
 echo "$home" | grep -o '<title>[^<]*</title>' | head -1 | grep -q 'Arena Leaderboard Value Analyzer' \
   || { echo "❌ 首页 title 不含工具名"; fail=1; }
 n=$(echo "$home" | grep -c 'src="/assets/js/' || true)
-[[ "$n" -ge 9 ]] || { echo "❌ 首页外链 js 引用数异常: $n (期望 ≥9)"; fail=1; }
+[[ "$n" -ge 10 ]] || { echo "❌ 首页外链 js 引用数异常: $n (期望 ≥10，含 10-rank.js)"; fail=1; }
 # ⚠️ 不用 echo|grep -q：pipefail 下 grep -q 早退会让左侧写进程收 SIGPIPE（exit 141）→ 误报 MISS
 #    （实测：匹配位置越靠前/数据越冷越必现）。改用 bash 原生子串匹配，零进程零 SIGPIPE。
 [[ "$home" == *'<script id="DATA" type="application/json">'* ]] \
   || { echo "❌ 首页缺 DATA JSON 块"; fail=1; }
+# ②b 排行榜页签 + 文生图榜（t2i）必须在线
+[[ "$home" == *'id="rankView"'* ]] || { echo "❌ 首页缺排行榜页签容器 rankView"; fail=1; }
+t2i=$(smoke_curl -s --max-time 20 "$B/data/v1/all.json")
+[[ "$t2i" == *'"id":"t2i"'* ]] || { echo "❌ all.json 缺 t2i 文生图榜"; fail=1; }
 
 # ③ CSP 已收紧：script-src 必须是 'self' 且不含 unsafe-inline（style-src 的 unsafe-inline 是允许的——win 卡有内联 style 属性）
 csp=$(smoke_curl -s -o /dev/null -D - --max-time 20 "$B/" | grep -i '^content-security-policy:' | head -1) || true

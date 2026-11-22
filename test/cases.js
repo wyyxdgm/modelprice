@@ -107,7 +107,7 @@ TC('每一档的「↑升一档 边际单价」', ()=>{
 });
 TC('标注区间 == 实际统治区间（全数据集逐个门槛暴力核对）', ()=>{
   let tot=0, bad=[];
-  for(const ds of ['overall_os','frontend_os','fullstack_os','react_os','reference_os','img2webdev_os','overall_all']){
+  for(const ds of ['overall_os','frontend_os','fullstack_os','react_os','reference_os','img2webdev_os','overall_all','t2i']){
     offTime(); S.ds=ds; S.mode='pareto'; S.ci='point'; loadDataset(true);
     const st=DATASETS[ds].stats, fr=[...tiers];
     for(let i=0;i<fr.length;i++){
@@ -123,7 +123,7 @@ TC('标注区间 == 实际统治区间（全数据集逐个门槛暴力核对）
   }
   S.hi=DATASETS.overall_os.stats.score_max; offTime(); S.ds='overall_os'; loadDataset(true);
   if(bad.length) throw new Error(bad.slice(0,4).join(' | ')+(bad.length>4?` …共 ${bad.length} 处`:''));
-  return `7 个数据集的全部前沿档、共 ${tot} 次门槛判定：每一档标注的区间与它实际获胜的区间**逐位相同**，且都连续`;
+  return `8 个数据集的全部前沿档、共 ${tot} 次门槛判定：每一档标注的区间与它实际获胜的区间**逐位相同**，且都连续`;
 });
 TC('严格 CI 模式：合并统计上不可区分的档', ()=>{
   const res=[];
@@ -146,7 +146,7 @@ TC('无解时返回空状态', ()=>{ S.minVotes=25000; S.maxCost=0.001; recomput
 TC('口径② 分数/美元 的退化（印证文中的警告）', ()=>{ S.mode='ratio'; S.hi=D().stats.score_max; recompute(); const r=`${view.w.n}（${view.w.s} 分 / $${view.w.c}）= ${Math.round(view.val)} 分每美元 ← 荒谬，故不推荐`; S.mode='pareto'; recompute(); return r; });
 TC('口径③ (Score−1200)/$', ()=>{ S.mode='baseline'; S.hi=D().stats.score_max; recompute(); const r=`${view.w.n}（${view.w.s} 分 / $${view.w.c}）= ${view.val.toFixed(0)} 超额分每美元`; S.mode='pareto'; recompute(); return r; });
 /* 其余每个数据集都逐个门槛扫一遍：工具给出的赢家必须等于暴力解 min{cost | score ≥ T} */
-['fullstack_os','frontend_os','react_os','reference_os','img2webdev_os','overall_all'].forEach(k=>{
+['fullstack_os','frontend_os','react_os','reference_os','img2webdev_os','overall_all','t2i'].forEach(k=>{
   TC('数据集 '+k+' 全门槛扫描', ()=>{ const r=sweep(k,1); reset();
     if(r.bad.length) throw new Error(r.bad.slice(0,3).join(' | '));
     if(!r.orderOK) throw new Error('拖动时赢家顺序与前沿顺序不一致');
@@ -506,12 +506,12 @@ TC('敏感性数字锁定：面板/README 里引用的百分比必须可复现',
   const kimi=pct('Kimi K3.1 Pro (Max)',1/12), mimo=pct('MiMo-V2.6-Flash',1/12);
   if(kimi!==59) throw new Error('Kimi w=8% 应省 59%，实际 '+kimi);
   if(mimo!==79) throw new Error('MiMo w=8% 应省 79%，实际 '+mimo);
-  /* 峰谷振幅被缓存压缩：T=1600 从 1.67× → 1.11× */
+  /* 峰谷振幅被缓存压缩：T=1600 从 1.45× → 1.00×（2026-11-21 榜面 + 成本 4 位精度口径） */
   const amp=hh=>{ cacheOn(hh,hh===0?'off':'pub'); S.outShare=1/12; S.hi=1600; recompute();
     const cs=weekCurve(1600,cur).filter(p=>p.c!=null).map(p=>p.c);
     return Math.max(...cs)/Math.min(...cs); };
   const a0=amp(0), a95=amp(0.95);
-  if(Math.abs(a0-5/3)>0.01) throw new Error('h=0 振幅应约 1.67×，实际 '+a0.toFixed(3));
+  if(Math.abs(a0-1.4469)>0.02) throw new Error('h=0 振幅应约 1.45×，实际 '+a0.toFixed(3));
   if(!(a95<a0-0.4)) throw new Error(`缓存应显著压缩振幅: ${a0.toFixed(2)} → ${a95.toFixed(2)}`);
   S.outShare=saveW; S.hi=DATASETS.overall_os.stats.score_max; offTime(); S.ds='overall_os'; loadDataset(true);
   return `DeepSeek-20261017 @h=95%：w=2%→省86% / 8%→68% / 15%→55% / 25%→40% / 40%→25%；Kimi 省 ${kimi}%、MiMo 省 ${mimo}%。`+
@@ -740,6 +740,88 @@ TC('i18n 多 locale 渲染：切字典后核心链路 + 占位符残留检查', 
   S.hi=D().stats.score_max; recompute();
   return results.join(' ')+' — 每 locale 渲染一轮（winCard/dsNote/tlNote）无残留';
 });
+
+
+
+/* ==================== 页签①实惠排行榜 ==================== */
+TC('排行榜：画像成本公式手算对照（写入倍率 1.25 + 缓存 95% + 峰谷修正）', ()=>{
+  S.ds='overall_os'; loadDataset(true); S.rankPreset='custom'; S.rankIn=20; S.rankOut=2;
+  /* Claude Sonnet 5.5 (High)（overall_all，闭源榜）：wm=1.25、公布缓存比 0.05、无峰谷事件 → 手算逐位对照 */
+  onTime(12,3); cacheOn(0.95);
+  const sn=G('overall_all','Claude Sonnet 5.5 (High)');
+  const L1=listPricesAt(sn,S.hour,S.dow,S.dateISO);
+  const pinEff=(1-0.95)*L1.pin*1.25+0.95*L1.pin*0.05;
+  const want1=(20*pinEff+2*L1.pout)/1000;
+  if(Math.abs(dailyCost(sn)-want1)>1e-12) throw new Error(`Sonnet dailyCost=${dailyCost(sn)} 手算=${want1}`);
+  /* DeepSeek-20260910（榜面=峰价）：谷时画像 = 峰时的一半（pin/pout 同折半，缓存关闭口径） */
+  const ds=G('overall_os','DeepSeek-V4.1-Flash-20260910 (Max)');
+  onTime(2,3);
+  const pk=dailyCost(ds);
+  onTime(12,6);
+  const off=dailyCost(ds);
+  if(Math.abs(off/pk-0.5)>1e-9) throw new Error(`DeepSeek 谷/峰画像成本比应 0.5，实际 ${off/pk}`);
+  onTime(12,3);
+  return `Sonnet ${fmt$(dailyCost(sn))}/task @20k/2k+缓存95%；DeepSeek 峰 ${fmt$(pk)} → 谷 ${fmt$(off)}（恰 ×0.5）`;
+});
+TC('排行榜：达标过滤 + 成本升序 + 冠军=暴力最小成本', ()=>{
+  onTime(12,3); cacheOn(0.95); S.ds='overall_os'; loadDataset(true);
+  S.rankPreset='dev'; S.rankT=1400; recompute();
+  const rows=rankRows();
+  if(!rows.length) throw new Error('T=1400 应有达标模型');
+  for(let i=1;i<rows.length;i++){
+    if(rows[i].c<rows[i-1].c-1e-12) throw new Error(`排序破坏 @${i}: ${rows[i-1].c} > ${rows[i].c}`);
+    if(rows[i].m.s<S.rankT) throw new Error(`未达标模型混入: ${rows[i].m.n} s=${rows[i].m.s}`);
+  }
+  const bruteMin=Math.min(...cur.filter(m=>m.s>=S.rankT&&m.c!=null&&m.c>0).map(m=>dailyCost(m)));
+  if(Math.abs(rows[0].c-bruteMin)>1e-12) throw new Error(`冠军 ${rows[0].m.n} ${rows[0].c} ≠ 暴力最小 ${bruteMin}`);
+  /* 渲染一轮不抛 + 行数一致（fake DOM: appendChild 的行读 tb.children） */
+  renderRank();
+  const shown=$('#rankTbl tbody').children.length;
+  if(shown!==Math.min(rows.length,20)) throw new Error(`渲染 ${shown} 行 ≠ 预期 ${Math.min(rows.length,20)}`);
+  S.rankT=DATASETS.overall_os.stats.score_max; loadDataset(true);
+  return `T=1400 达标 ${rows.length} 个，冠军 ${rows[0].m.n} ${fmt$(rows[0].c)}；渲染 ${shown} 行`;
+});
+TC('排行榜：门槛钳制到榜内 + 空态文案不崩', ()=>{
+  S.ds='overall_os'; loadDataset(true); S.rankT=99999; recompute();
+  /* renderRank 把门槛 clamp 进 [score_min, score_max]：99999 → score_max，达标只剩顶档 */
+  const st=DATASETS.overall_os.stats;
+  if(S.rankT!==st.score_max) throw new Error('门槛应被钳到 score_max，实际 '+S.rankT);
+  const rows=rankRows();
+  if(rows.length!==1) throw new Error('顶档门槛应只剩 1 个达标，实际 '+rows.length);
+  /* 达标为空的真实空态：把门槛拖到全榜无模型可达的口径（排除成本空模型）——直接断言空态渲染路径 */
+  S.rankT=st.score_max; recompute(); renderRank();
+  const html=$('#rankVerdict').children.map(c=>c.textContent||c.innerHTML||'').join(' ');
+  if(!html||html.length<10) throw new Error('verdict 应有内容');
+  S.rankT=null; loadDataset(true);
+  return `门槛钳制 OK（99999→${st.score_max}，顶档达标 ${rows.length} 个）`;
+});
+TC('排行榜：文生图榜按张计价（画像区隐藏，成本直用实测）', ()=>{
+  S.ds='t2i'; loadDataset(true); S.rankPreset='dev'; recompute();
+  if(!rankIsImage()) throw new Error('t2i 未识别为 image 单位');
+  const rows=rankRows();
+  if(!rows.length) throw new Error('t2i 默认门槛下应有达标模型');
+  for(const x of rows) if(Math.abs(x.c-x.m.c)>1e-12) throw new Error(`image 榜成本应=实测 m.c：${x.m.n}`);
+  renderRank();
+  if($('#rankProfile').style.display!=='none') throw new Error('image 榜画像区应隐藏');
+  if($('#rankUnitHint').style.display==='none') throw new Error('image 榜应显示按张计价提示');
+  const label=$('#rankVerdict').innerHTML+' '+(tb=$('#rankUnitHint')).innerHTML;
+  if(!/image/i.test(label)&&!/张/.test(label)) throw new Error('verdict/提示应标注按张口径: '+label.slice(0,120));
+  S.ds='overall_os'; loadDataset(true);
+  return `t2i 达标 ${rows.length} 个，冠军 ${rows[0].m.n} ${fmt$(rows[0].c)}/image；画像区已隐藏`;
+});
+TC('排行榜：页签状态机 + deep 重渲（fake DOM 烟雾）', ()=>{
+  S.tab='deep'; $('#rankView').style.display='none'; $('#deepView').style.display='';
+  if($('#deepView').style.display!=='') throw new Error('deep 显隐失败');
+  recompute();
+  const card=$('#winCard').children.map(c=>c.textContent||c.innerHTML||'').join(' ');
+  if(!card||card.length<40) throw new Error('deep 页签 winCard 应渲染');
+  S.tab='rank'; $('#rankView').style.display=''; $('#deepView').style.display='none';
+  recompute();
+  const rv=$('#rankVerdict').children.map(c=>c.textContent||c.innerHTML||'').join(' ');
+  if(!rv||rv.length<10) throw new Error('rank 页签 verdict 应渲染');
+  return '页签状态机 + deep 重渲 OK';
+});
+
 let fail=0;
 for(const [n,st,r,ms] of out){ if(st!=='OK')fail++; W((st==='OK'?'✓ ':'✗ ')+n+`  [${ms}ms]\n     `+String(r).slice(0,1500)); }
 W('\n'+(out.length-fail)+'/'+out.length+' passed');

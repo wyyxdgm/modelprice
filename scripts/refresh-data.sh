@@ -14,13 +14,14 @@ cd "$(dirname "$0")/.."
 DEPLOY=1; COMMIT=1
 for a in "$@"; do case "$a" in --no-deploy) DEPLOY=0;; --no-commit) COMMIT=0;; esac; done
 
-BOARDS=(  # SSR 路由:抓取名（gen_raw_md.py 按 DATASETS 生成 7 个 md; overall 拆 overall_os/overall_all）
+BOARDS=(  # SSR 路由:抓取名（gen_raw_md.py 按 DATASETS 生成 8 个 md; overall 拆 overall_os/overall_all）
   "/leaderboard/code/webdev:overall"
   "/leaderboard/code/webdev/frontend:frontend"
   "/leaderboard/code/webdev/fullstack:fullstack"
   "/leaderboard/code/webdev/react:react"
   "/leaderboard/code/webdev/reference-based-design:reference"
   "/leaderboard/code/image-to-webdev:img2webdev"
+  "/leaderboard/image/text-to-image:t2i"
 )
 SCRATCH=scripts/.scrape
 DOMAIN=https://modelprice.damolabs.app

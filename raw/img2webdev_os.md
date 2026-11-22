@@ -1,10 +1,10 @@
 | Rank | Overall Rank | Model | Score | Rank Spread | Votes | Cost/Task (P50) | Price $/M | Context |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 15 |  | [DeepSeek-V4.1-Flash-20260910 (Max)](https://www.deepseek.com/en/news/deepseek-v4-1-flash/)<br>DeepSeek · MIT | 1612+23/-23 | 12 | 721 | $0.06 | $0.30 / $1.20 | 1M |
+| 15 |  | [DeepSeek-V4.1-Flash-20260910 (Max)](https://www.deepseek.com/en/news/deepseek-v4-1-flash/)<br>DeepSeek · MIT | 1612+23/-23 | 12 | 721 | $0.0596 | $0.30 / $1.20 | 1M |
 | 16 | 17 | [Kimi K3.1 Pro (Max)](https://platform.kimi.ai/docs/guide/kimi-k3-1-pro-quickstart)<br>Moonshot · Kimi K3.1 Pro License | 1609+40/-40 | 16 | 224 | $1.21 | $2 / $10 | 1M |
-| 17 | 23 | [DeepSeek-V4.1-Flash-20261017 (Max)](https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017)<br>DeepSeek · MIT | 1608+10/-10 | 8 | 4,670 | $0.10 | $0.15 / $0.60 | 1M |
+| 17 | 23 | [DeepSeek-V4.1-Flash-20261017 (Max)](https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash-1017)<br>DeepSeek · MIT | 1608+10/-10 | 8 | 4,670 | $0.0984 | $0.15 / $0.60 | 1M |
 | 22 |  | [MiMo-V2.6-Pro](https://mimo.xiaomi.com/mimo-v2-6)<br>Xiaomi · MIT | 1596+10/-10 | 6 | 3,991 | $0.11 | $0.43 / $0.87 | 1M |
-| 24 |  | [MiMo-V2.6-Flash](https://mimo.xiaomi.com/mimo-v2-6)<br>Xiaomi · MIT | 1592+11/-11 | 5 | 3,642 | $0.05 | $0.14 / $0.28 | 1M |
+| 24 |  | [MiMo-V2.6-Flash](https://mimo.xiaomi.com/mimo-v2-6)<br>Xiaomi · MIT | 1592+11/-11 | 5 | 3,642 | $0.0462 | $0.14 / $0.28 | 1M |
 | 26 |  | [Kimi K3 (Max)](https://platform.kimi.ai/docs/guide/kimi-k3-quickstart)<br>Moonshot · Kimi K3 license | 1586+9/-9 | 3 | 4,969 | $1.71 | $3 / $15 | 1M |
 | 27 |  | [GLM-5.3-Flash](https://z.ai/blog/glm-5.3)<br>Z.ai · MIT | 1581+8/-8 | 3 | 8,447 | $0.18 | $0.02 / $0.07 | 1M |
 | 29 |  | [Qwen3.8-27B](https://huggingface.co/Qwen/Qwen3.8-27B)<br>Alibaba · Apache 2.0 | 1575+8/-8 | 3 | 8,779 | $0.42 | $0.40 / $3 | N/A |

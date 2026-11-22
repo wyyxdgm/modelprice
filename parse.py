@@ -5,7 +5,7 @@ import json, re, sys, pathlib
 RAW = pathlib.Path(__file__).parent / "raw"
 OUT = pathlib.Path(__file__).parent / "data" / "datasets.json"
 
-LINK = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
+LINK = re.compile(r"\[(.*?)\]\((https?[^)]+)\)")   # lazy + http 锚定：模型名可含内嵌 [..]（如 FLUX.2 [max]）不被切断
 SCORE = re.compile(r"(\d{3,4})\s*\+(\d+)\s*/\s*-(\d+)")   # 不锚定：AutoEval 行尾部还挂着 [AutoEval](...) 链接
 
 
@@ -123,6 +123,8 @@ DATASETS = [
      "210,832 votes · 15 open source models", "All 15 open-source models; this board is dated 2026-11-10"),
     ("overall_all", "WebDev · Overall (all models)", "code/webdev", "all", False,
      "997,838 votes · 158 models", "Top 40 all-license models (incl. closed); ranks 41+ not scraped"),
+    ("t2i", "Text-to-Image", "image/text-to-image", "all", False,
+     "1.2M votes · 87 models", "Text-to-Image board, all licenses; Cost/Task = measured USD per generated image (median)"),
 ]
 
 FIELDS = ["n", "u", "lab", "lic", "r", "or", "s", "u95", "d95", "pre", "ae", "v", "c", "pin", "pout", "ctx"]
@@ -147,6 +149,8 @@ for key, label, path, license_, hor, meta, note in DATASETS:
     withcost = [r for r in scored if r["c"] is not None]
     out["datasets"][key] = {
         "label": label, "path": path, "license": license_, "meta": meta, "note": note,
+        # unit = Cost/Task 的「一次任务」单位：task=一次开发/对话任务（token 计价），image=一张生成图（按张计价）
+        "unit": "image" if key == "t2i" else "task",
         "total_claimed": len(rows), "rows": [[r[k] for k in FIELDS] for r in rows],
         "stats": {"n": len(rows), "with_cost": len(withcost),
                   "score_min": min(r["s"] for r in scored), "score_max": max(r["s"] for r in scored),

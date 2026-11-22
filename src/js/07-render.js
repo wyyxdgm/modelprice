@@ -1,5 +1,6 @@
 
 function render(){
+  renderRank();
   renderWinner(); renderScatter(); renderSteps(); renderTimeline(); renderTiers(); renderTable(); renderBadges(); syncInputs(); renderAdjNote();
 }
 function renderBadges(){

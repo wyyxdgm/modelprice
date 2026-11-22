@@ -26,6 +26,19 @@ $('#sourceBody').innerHTML=bootSub(T('boot.sourceBody'));
   if(p.get('cs')&&CACHE_SRC[p.get('cs')]) S.cacheSrc=p.get('cs');
   if(p.get('ev')!=null){ const on=new Set(p.get('ev').split(',').filter(Boolean));
     PRICE_EVENTS.forEach(e=>{ S.evState[e.id]=on.has(e.id); }); }
+  /* —— 排行榜页签状态（tab=rank|deep；rk=画像预设；ri/ro=画像 in/out k；rd=每天次数；rt=质量门槛；rp=时段快捷） —— */
+  if(p.get('tab')==='deep'||p.get('tab')==='rank') S.tab=p.get('tab');
+  if(p.get('rk')&&(['light','dev','heavy','board','custom'].includes(p.get('rk')))) S.rankPreset=p.get('rk');
+  if(p.get('ri')!=null) S.rankIn=Math.max(0,+p.get('ri')||0);
+  if(p.get('ro')!=null) S.rankOut=Math.max(0,+p.get('ro')||0);
+  if(p.get('rd')!=null) S.rankPerDay=Math.max(1,+p.get('rd')||1);
+  if(p.get('rp')&&['now','peak','off'].includes(p.get('rp'))){
+    S.rankPk=p.get('rp');
+    if(S.rankPk==='now'){ S.hour=new Date().getUTCHours(); S.dow=new Date().getUTCDay(); }
+    else if(S.rankPk==='peak'){ S.hour=2; S.dow=3; }
+    else { S.hour=12; S.dow=6; }
+  }
+  if(p.get('rt')!=null){ S.rankT=+p.get('rt')||0; S.rankTSet=true; }
   syncPriceUI();
   if(p.get('lo')&&p.get('hi')){ S.lo=+p.get('lo'); S.hi=+p.get('hi'); }
   /* 首渲延到首帧（布局稳定后再量容器宽）：fresh navigation 下同步首渲会在预布局期量错宽度。

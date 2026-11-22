@@ -195,11 +195,68 @@ __HEAD_EXTRA__<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www
     </div>
   </div>
 
-  <!-- ============ 右：答案区（win 卡 → ①阶梯 → ②散点 → ③时间轴 → 两张表） ============ -->
+  <!-- ============ 右：答案区（页签①实惠排行榜 ②阶梯·图析） ============ -->
   <div class="res">
-    <div class="win" id="winCard"></div>
+    <div class="tabs" id="tabs">
+      <button data-tab="rank" class="on">{{tabs.rank}}</button>
+      <button data-tab="deep">{{tabs.deep}}</button>
+    </div>
 
-    <div class="chart" style="margin-top:16px">
+    <!-- —— 页签①实惠排行榜：直接告诉用户「什么标准下谁最实惠、差多少分、用多少$」 —— -->
+    <div id="rankView">
+      <div class="win" id="rankVerdict"></div>
+
+      <div class="panel" style="margin-top:14px">
+        <h2>{{rank.ctrlH2}}</h2>
+        <label class="fld">{{rank.capability}}</label>
+        <select id="rankDs"></select>
+        <div class="row" style="gap:10px;margin-top:11px;flex-wrap:wrap">
+          <div style="flex:1;min-width:150px"><label class="fld">{{rank.threshold}} <span class="mono" id="rankTLab">—</span></label>
+            <input type="range" id="rankT" min="0" max="100" step="1" style="width:100%;accent-color:var(--accent)"></div>
+          <div style="flex:1;min-width:170px"><label class="fld">{{rank.period}}</label>
+            <div class="seg" id="rankPk">
+              <button data-v="now">{{rank.pkNow}}</button>
+              <button data-v="peak">{{rank.pkPeak}}</button>
+              <button data-v="off">{{rank.pkOff}}</button>
+            </div></div>
+        </div>
+        <div id="rankProfile">
+          <label class="fld" style="margin-top:11px">{{rank.profile}}</label>
+          <div class="seg" id="rankPreset">
+            <button data-v="light" title="{{rank.presetLightT}}">{{rank.presetLight}}</button>
+            <button data-v="dev" class="on" title="{{rank.presetDevT}}">{{rank.presetDev}}</button>
+            <button data-v="heavy" title="{{rank.presetHeavyT}}">{{rank.presetHeavy}}</button>
+            <button data-v="board" title="{{rank.presetBoardT}}">{{rank.presetBoard}}</button>
+          </div>
+          <div class="row" style="gap:10px;margin-top:9px;flex-wrap:wrap">
+            <div style="flex:1;min-width:104px"><label class="fld">{{rank.inTok}} <span class="mono">k</span></label><input type="number" id="rankIn" min="0" step="1" value="20"></div>
+            <div style="flex:1;min-width:104px"><label class="fld">{{rank.outTok}} <span class="mono">k</span></label><input type="number" id="rankOut" min="0" step="0.5" value="2"></div>
+            <div style="flex:1;min-width:104px"><label class="fld">{{rank.perDay}}</label><input type="number" id="rankDay" min="1" step="1" value="30"></div>
+          </div>
+          <div class="hint" id="rankHint"></div>
+        </div>
+        <div class="hint" id="rankUnitHint" style="display:none"></div>
+      </div>
+
+      <div class="panel" style="margin-top:14px">
+        <h2>{{rank.tblH2}} <span class="pill" id="rankCount"></span></h2>
+        <table class="ranktbl" id="rankTbl"><thead><tr>
+          <th>{{rank.c1}}</th><th>{{rank.c2}}</th><th class="num">{{rank.c3}}</th>
+          <th class="num">{{rank.c4}}</th><th class="num">{{rank.c5}}</th>
+          <th class="num hidemid">{{rank.c6}}</th><th class="num hidemid">{{rank.c7}}</th>
+        </tr></thead><tbody></tbody></table>
+        <div class="row" style="margin-top:8px">
+          <button class="btn" id="rankMore"></button>
+        </div>
+        <div class="hint">{{rank.tblNote}}</div>
+      </div>
+    </div>
+
+    <!-- —— 页签②阶梯·图析（win 卡 → ①阶梯 → ②散点 → ③时间轴 → 两张表） —— -->
+    <div id="deepView">
+      <div class="win" id="winCard"></div>
+
+      <div class="chart" style="margin-top:16px">
       <div class="ttl"><span>{{charts.steps.ttl}}</span>
         <span class="lg">{{charts.steps.lg}}</span></div>
       <svg id="steps" viewBox="0 0 900 250" preserveAspectRatio="xMidYMid meet"></svg>
@@ -241,6 +298,7 @@ __HEAD_EXTRA__<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www
         </tr></thead><tbody></tbody></table>
       </div>
     </div>
+    </div><!-- /deepView -->
   </div>
 </div>
 
@@ -269,6 +327,7 @@ __HEAD_EXTRA__<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www
 <script src="/assets/js/06-scenarios.js"></script>
 <script src="/assets/js/07-render.js"></script>
 <script src="/assets/js/08-interact.js"></script>
+<script src="/assets/js/10-rank.js"></script>
 <script src="/assets/js/09-boot.js"></script>
 </body>
 </html>

@@ -29,13 +29,13 @@
 | 27 | 4 | Meta<br>[Muse Wonder (Max)](https://research.meta.ai/blog/muse-wonder)<br>Meta · Proprietary | 1647+8/-8 | 6,570 | $1.59 | $4 / $20 | 1M |
 | 28 | 11 | Thinky<br>[Inkling 2 Small](https://thinkingmachines.ai/news/inkling-2-small/)<br>Thinky · Apache 2.0 | 1643+18/-18 | 1,204 | $0.32 | $0.30 / $1 | N/A |
 | 29 | 5 | SpaceXAI<br>[Grok 4.7 (xHigh)](https://docs.x.ai/developers/models/grok-4.7)<br>SpaceXAI · Proprietary | 1639+8/-8 | 9,336 | $3.76 | $2 / $6 | 500K |
-| 30 | 4 | Xiaomi<br>[MiMo-V2.6-Flash](https://mimo.xiaomi.com/mimo-v2-6)<br>Xiaomi · MIT | 1638+7/-7 | 10,015 | $0.05 | $0.14 / $0.28 | 1M |
+| 30 | 4 | Xiaomi<br>[MiMo-V2.6-Flash](https://mimo.xiaomi.com/mimo-v2-6)<br>Xiaomi · MIT | 1638+7/-7 | 10,015 | $0.0463 | $0.14 / $0.28 | 1M |
 | 31 | 9 | Tencent<br>[Hy4 preview](https://hy.tencent.ai/research/hy4-preview)<br>Tencent · Apache 2.0 | 1631+10/-10 | 4,575 | $0.35 | $0.83 / $2.50 | 1M |
 | 32 | 9 | Anthropic<br>[Claude Fable 5 (High)](https://www.anthropic.com/news/claude-fable-5-mythos-5)<br>Anthropic · Proprietary | 1626+6/-6 | 16,876 | $3.06 | $10 / $50 | 1M |
 | 33 | 8 | Alibaba<br>[Qwen3.8-Flash-Next](https://qwen.ai/blog?id=qwen3.8-flash-next)<br>Alibaba · qwen-community-1.0 | 1626+7/-7 | 12,473 | $0.18 | $0.16 / $0.47 | 1M |
 | 34 | 8 | Z.ai<br>[GLM-5.3 (Max)](https://z.ai/blog/glm-5.3)<br>Z.ai · MIT | 1623+7/-7 | 13,776 | $1.40 | $1.40 / $4.40 | 1M |
 | 35 | 7 | Xiaomi<br>[MiMo-V2.6-Pro](https://mimo.xiaomi.com/mimo-v2-6)<br>Xiaomi · MIT | 1622+7/-7 | 10,272 | $0.10 | $0.43 / $0.87 | 1M |
-| 36 | 7 | DeepSeek<br>[DeepSeek-V4.1-Flash-20260910 (Max)](https://www.deepseek.com/en/news/deepseek-v4-1-flash/)<br>DeepSeek · MIT | 1621+11/-11 | 3,374 | $0.06 | $0.30 / $1.20 | 1M |
+| 36 | 7 | DeepSeek<br>[DeepSeek-V4.1-Flash-20260910 (Max)](https://www.deepseek.com/en/news/deepseek-v4-1-flash/)<br>DeepSeek · MIT | 1621+11/-11 | 3,374 | $0.064 | $0.30 / $1.20 | 1M |
 | 37 | 5 | Meta<br>[Muse Spark 1.3 (xHigh)](https://developer.meta.com/ai/models/muse-spark/)<br>Meta · Proprietary | 1621+7/-7 | 12,932 | $0.48 | $1.25 / $4.25 | 1M |
 | 38 | 5 | SpaceXAI<br>[Grok 4.6 (High)](https://docs.x.ai/developers/models/grok-4.6)<br>SpaceXAI · Proprietary | 1618+7/-7 | 12,125 | $1.57 | $1.60 / $4.80 | 500K |
 | 39 | 4 | OpenAI<br>[GPT-5.6 Sol (xHigh, Codex Harness)](https://openai.com/index/gpt-5-6/)<br>OpenAI · Proprietary | 1615+6/-6 | 18,779 | $1.47 | $4 / $20 | 1.1M |

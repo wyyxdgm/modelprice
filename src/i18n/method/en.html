@@ -13,7 +13,7 @@
 
 <h2>Data sources &amp; snapshot dates</h2>
 <ul>
-<li>Scores and Cost/Task: the public <a href="https://arena.ai/leaderboard/code/webdev">arena.ai WebDev leaderboards</a> and sub-boards, snapshot <b>2026-11-11</b> (scraped 2026-11-14). For automated refresh prefer the official machine-readable mirror: <a href="https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset">lmarena-ai/leaderboard-dataset on Hugging Face</a>.</li>
+<li>Scores and Cost/Task: the public <a href="https://arena.ai/leaderboard/code/webdev">arena.ai WebDev leaderboards</a> and sub-boards + the <a href="https://arena.ai/leaderboard/image/text-to-image">Text-to-Image board</a> (billed per image: measured median USD per generated image), snapshot <b>2026-11-21</b> (scraped 2026-11-22). For automated refresh prefer the official machine-readable mirror: <a href="https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset">lmarena-ai/leaderboard-dataset on Hugging Face</a>.</li>
 <li>Prices: each vendor&rsquo;s first-party API list price (input/output per $1M tokens), verified item-by-item against <a href="https://benchr.org/pricing">benchr.org/pricing</a> (2026-09-11 snapshot). Open models are listed at their vendor-hosted API price, not self-hosting cost.</li>
 <li>Cost/Task (P50) = median measured token usage of an Arena task &times; list price &mdash; a cache-miss basis. P50 hides the tail (P95 can be 5&ndash;10&times;) and covers token spend only.</li>
 </ul>
