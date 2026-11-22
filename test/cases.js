@@ -86,9 +86,13 @@ TC('拖动分数线的赢家序列 == 前沿顺序', ()=>{
   return `${seen.length} 档，从高到低依次：\n     `+seen.join('\n     → ');
 });
 TC('T=最高分 → 最强模型', ()=>{ S.hi=D().stats.score_max; recompute(); if(view.w.s!==D().stats.score_max) throw new Error(view.w.n); return `${view.w.n} | ${view.w.s} | $${view.w.c} | ↑ 无（天花板）`; });
-TC('T=1660 → DeepSeek-V4.1-Flash $0.12（而非 Kimi $0.91）', ()=>{ S.hi=1660; recompute();
-  if(view.w.n!=='DeepSeek-V4.1-Flash-20261017 (Max)') throw new Error('实际 '+view.w.n);
-  const r=`${view.w.n} | ${view.w.s} | $${view.w.c} | 统治门槛区间 [${view.covers.map(Math.round)}]\n     ↑ 升一档：${view.nxt.n} +${view.marginal.ds} 分 / +$${view.marginal.dc.toFixed(2)} = $${view.marginal.per.toFixed(4)} 每分`;
+TC('T=1660 → 赢家 = 满足分数的最低成本模型（数据驱动, 不锚模型名）', ()=>{ S.ds='overall_os'; loadDataset(true); S.hi=1660; recompute();
+  const brute = cur.filter(m=>m.s>=1660).sort((a,b)=>a.c-b.c)[0];
+  if(!brute) throw new Error('overall_os 无 s>=1660 的模型, 测试门槛需随数据更新');
+  if(!view||!view.w) throw new Error('DIAG mode='+S.mode+' ds='+S.ds+' hi='+S.hi+' cur='+cur.length+' view='+JSON.stringify(view));
+  if(view.w.n!==brute.n) throw new Error('view 赢家 '+view.w.n+' ≠ 暴力重算 '+brute.n);
+  const up = view.nxt ? `\n     ↑ 升一档：${view.nxt.n} +${view.marginal.ds} 分 / +$${view.marginal.dc.toFixed(2)} = $${view.marginal.per.toFixed(4)} 每分` : '\n     ↑ 无（赢家已是最高分档）';
+  const r=`${view.w.n} | ${view.w.s} | $${view.w.c} | 统治门槛区间 [${view.covers.map(Math.round)}]${up}`;
   S.hi=D().stats.score_max; recompute(); return r; });
 TC('T=1500 → Hy3 $0.04（Muse Spark Open 被支配故出局）', ()=>{ S.hi=1500; recompute();
   if(view.w.n!=='Hy3') throw new Error('实际 '+view.w.n);
@@ -299,32 +303,35 @@ TC('周末豁免：周六 02:00 仍是谷价（峰时窗口只在工作日）', 
   if(!(Math.abs(wk-we*2)<1e-9 && Math.abs(we-su)<1e-9)) throw new Error(`周三 ${wk} / 周六 ${we} / 周日 ${su}`);
   return `${DS0910}: 周三 02:00 = $${wk.toFixed(4)}，周六 02:00 = 周日 02:00 = $${we.toFixed(4)}`;
 });
-TC('GLM-5.3-Flash 促销修正：日期跨过 2026-09-09 即涨价', ()=>{
-  /* 注意：每次都必须拷贝数值 —— find() 返回的是同一个对象引用，
-     后一次 applyPriceScenario 会就地改写它，直接存引用会读到「最后一次」的值。 */
+TC('glm_promo 已下线（11-20 榜面价 $0.02/$0.07 不再是旧 promo 价 → GLM 全日期无修正）', ()=>{
+  if(PRICE_EVENTS.some(e=>e.id==='glm_promo')) throw new Error('glm_promo 应已从 PRICE_EVENTS 移除');
+  /* 注意：拷贝数值 —— find() 返回同一对象引用，applyPriceScenario 会就地改写。 */
   const snap=d=>{ onTime(OFF.h,OFF.dow,d); S.ds='overall_os'; S.hi=1500; recompute();
     const m=D().models.find(x=>x.n===GLM);
-    return {c:m.c, cRaw:m.cRaw, scale:m.adj?m.adj.scale:1, date:d}; };
-  const m1=snap('2026-09-01'), m8=snap('2026-09-08'), m9=snap('2026-09-09'), mN=snap(DATA.scraped);
-  if(Math.abs(m1.c-m8.c)>1e-9) throw new Error('促销期内应完全相同: '+m1.c+' vs '+m8.c);
-  if(Math.abs(m1.c-m1.cRaw)>1e-9) throw new Error('促销期内应等于榜面价: '+m1.c+' vs '+m1.cRaw);
-  if(!(m9.c>m1.c)) throw new Error('2026-09-09 当天应已涨价');
-  if(Math.abs(m9.c-mN.c)>1e-9) throw new Error('09-09 之后应保持稳定');
-  if(Math.abs(m9.scale-2.9452)>1e-4) throw new Error('倍率应为 2.945，实际 '+m9.scale);
-  return `促销期（09-01 = 09-08）${fmt$(m1.c)} = 榜面价 → 09-09 起 ${fmt$(m9.c)}（×${m9.scale.toFixed(3)}，此后不再变）；输入 $0.05→$0.15、输出 $0.18→$0.50，按 8% 输出占比加权`;
+    return {c:m.c, cRaw:m.cRaw, scale:m.adj?m.adj.scale:1}; };
+  const dates=['2026-09-01','2026-09-09','2026-11-14',DATA.scraped];
+  const snaps=dates.map(snap);
+  for(let i=0;i<snaps.length;i++){
+    if(Math.abs(snaps[i].c-snaps[i].cRaw)>1e-9) throw new Error(dates[i]+' 应无修正: c='+snaps[i].c+' cRaw='+snaps[i].cRaw);
+    if(snaps[i].scale!==1) throw new Error(dates[i]+' scale 应为 1, 实际 '+snaps[i].scale);
+  }
+  return `GLM-5.3-Flash 在 ${dates.join(' / ')} 全部 = 榜面价 $${snaps[0].cRaw}（scale=1）；glm_promo 规则已移除，新价性质（疑似新 promo）待人工核实`;
 });
-TC('输出占比滑块只对「输入输出涨幅不同」的修正起作用', ()=>{
-  S.outShare=0;    const ds0=cOf(DS1017,PEAK), glm0=cOf(GLM,OFF);
-  S.outShare=0.5;  const ds1=cOf(DS1017,PEAK), glm1=cOf(GLM,OFF);
-  S.outShare=1/12;
+TC('输出占比滑块不影响同比例修正（峰谷 / date 型全部同比例）', ()=>{
+  // cOf/at 锁 overall_os（无 Proprietary），这里手动在 overall_all 上量两个模型的加权成本
+  const grab=(name)=>{ const m=cur.find(x=>x.n===name); if(!m) throw new Error(name+' 不在当前数据集'); return m.c; };
+  S.ds='overall_all'; loadDataset(true); S.hi=D().stats.score_max; onTime(OFF.h,OFF.dow);
+  S.outShare=0;   S.dateISO='2026-12-15'; recompute(); const ds0=grab(DS1017), gem0=grab('Gemini 4 Carbon (High)');
+  S.outShare=0.5;                          recompute(); const ds1=grab(DS1017), gem1=grab('Gemini 4 Carbon (High)');
+  S.outShare=1/12; S.dateISO=DATA.scraped; onTime(OFF.h,OFF.dow); S.ds='overall_os'; loadDataset(true); S.hi=1600; recompute();
   if(Math.abs(ds0-ds1)>1e-12) throw new Error('DeepSeek 峰谷是同比涨跌，不该受滑块影响');
-  if(Math.abs(glm0-glm1)<1e-12) throw new Error('GLM 修正应随滑块变化');
-  return `DeepSeek ×2 恒定（$${ds0.toFixed(4)}）；GLM 0%输出=$${glm0.toFixed(4)} → 50%输出=$${glm1.toFixed(4)}`;
+  if(Math.abs(gem0-gem1)>1e-12) throw new Error('Gemini $2/$10→$4/$20 也是同比涨跌，不该受滑块影响');
+  return `DeepSeek ×2 恒定（$${ds0.toFixed(4)}）；Gemini Carbon 12-15 日 0%输出=$${gem0.toFixed(4)} → 50%输出=$${gem1.toFixed(4)}（同比 ×2, 不随滑块变）`;
 });
 TC('存疑事件默认关闭，且勾选后可见（敏感性分析）', ()=>{
   const st={}; PRICE_EVENTS.forEach(e=>st[e.id]=S.evState[e.id]);
   if(st.ds_v4flash!==false||st.suspect2x!==false) throw new Error('默认应为 false: '+JSON.stringify(st));
-  if(st.ds_tod!==true||st.glm_promo!==true) throw new Error('已核实事件默认应为 true');
+  if(st.ds_tod!==true||st.gem_dec1!==true) throw new Error('已核实事件默认应为 true');
   onTime(OFF.h,OFF.dow); S.ds='overall_os'; loadDataset(true); S.hi=1600; recompute();
   const g=n=>DATASETS.overall_os.models.find(m=>m.n===n);
   const before=[g('Mistral Medium 3.5'),g('GPT-6 Sol (Max)')];
@@ -518,12 +525,11 @@ TC('缓存读取价随峰谷/促销自动缩放（存比例而非绝对值的好
   if(Math.abs(pk-0.006)>1e-9) throw new Error('峰时缓存价应为 $0.006，实际 '+pk);
   if(Math.abs(offp-0.003)>1e-9) throw new Error('谷时缓存价应为 $0.003，实际 '+offp);
   const g=G('overall_os','GLM-5.3-Flash');
-  S.dateISO='2026-09-01'; const promo=priceScale(g,12,3,S.dateISO).cache.pc;
-  S.dateISO='2026-11-14'; const now=priceScale(g,12,3,S.dateISO).cache.pc;
-  if(Math.abs(promo-0.01)>1e-9) throw new Error('促销期缓存价应为 $0.05×20%=$0.01，实际 '+promo);
-  if(Math.abs(now-0.03)>1e-9) throw new Error('促销后缓存价应为 $0.15×20%=$0.03，实际 '+now);
+  const p1=priceScale(g,12,3,'2026-09-01').cache.pc, p2=priceScale(g,12,3,DATA.scraped).cache.pc;
+  if(Math.abs(p1-p2)>1e-12) throw new Error('GLM 无价格修正, 缓存价不该随日期变: '+p1+' vs '+p2);
+  if(Math.abs(p1-g.pin*0.2)>1e-9) throw new Error('GLM 缓存价应 = 榜面输入价 × 20%，实际 '+p1+' vs pin='+g.pin);
   offTime(); S.ds='overall_os'; loadDataset(true);
-  return `DeepSeek-20261017：峰时 $${pk}/M、谷时 $${offp}/M（公布值 $0.006/$0.003）；GLM-5.3-Flash：促销期 $${promo}/M、促销后 $${now}/M（= 输入价的 20%）`;
+  return `DeepSeek-20261017：峰时 $${pk}/M、谷时 $${offp}/M（公布值 $0.006/$0.003）；GLM-5.3-Flash 缓存价 $${p1}/M = 榜面输入价 × 20%（无修正, 不随日期变）`;
 });
 TC('缓存价来源三档：公布价 / 一律 10% / 关闭', ()=>{
   onTime(12,3); S.ds='overall_os'; loadDataset(true); S.hi=1600; recompute();
@@ -616,9 +622,10 @@ TC('weekSpan：冠军自己的一周成本波动区间', ()=>{
   onTime(PEAK.h,PEAK.dow); S.ds='overall_os'; loadDataset(true); S.hi=1600; recompute();
   const g=n=>DATASETS.overall_os.models.find(m=>m.n===n);
   const a=weekSpan(g(DS0910)), b=weekSpan(g(DS1017)), c=weekSpan(g('Kimi K3.1 Pro (Max)'));
-  if(Math.abs(a.lo-0.03)>1e-9||Math.abs(a.hi-0.06)>1e-9) throw new Error('20260910 应为 0.03–0.06，实际 '+a.lo+'–'+a.hi);
+  const gA=g(DS0910), gB=g(DS1017);
+  if(Math.abs(a.lo-gA.c/2)>1e-9||Math.abs(a.hi-gA.c)>1e-9) throw new Error('20260910 weekSpan 应为 c/2–c（'+gA.c+'/2–'+gA.c+'），实际 '+a.lo+'–'+a.hi);
   if(Math.abs(a.spread-2)>1e-6) throw new Error('spread 应为 2.0');
-  if(Math.abs(b.lo-0.12)>1e-9||Math.abs(b.hi-0.24)>1e-9) throw new Error('20261017 应为 0.12–0.24');
+  if(Math.abs(b.lo-gB.c/2)>1e-9||Math.abs(b.hi-gB.c)>1e-9) throw new Error('20261017 weekSpan 应为 c/2–c（'+gB.c+'/2–'+gB.c+'），实际 '+b.lo+'–'+b.hi);
   if(Math.abs(c.spread-1)>1e-9) throw new Error('Kimi 无峰谷价，spread 应为 1，实际 '+c.spread);
   if(a.hiAt.hour!==1||!(a.hiAt.dow>=1&&a.hiAt.dow<=5)) throw new Error('最贵时刻应落在工作日峰时窗口起点');
   offTime(); S.ds='overall_os'; loadDataset(true);

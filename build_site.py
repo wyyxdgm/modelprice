@@ -46,10 +46,7 @@ PRICE_EVENTS = [
      "rule":"Peak = weekdays 01:00-04:00 and 06:00-10:00 UTC (2x); all other hours incl. weekends 0.5x",
      "models_affected":["DeepSeek-V4.1-Flash-20261017","DeepSeek-V4.1-Flash-20260910","DeepSeek-V4-Flash family","DeepSeek-V4-Pro family"],
      "source":"DeepSeek official pricing page + 4 independent sources"},
-    {"id":"glm_promo","name":"GLM-5.3-Flash launch promo expired","confidence":"verified","default":True,
-     "rule":"Before 2026-09-09: $0.05/$0.18; on/after: $0.15/$0.50 (~2.95x). The 2026-11-11 board still lists the promo price.",
-     "models_affected":["GLM-5.3-Flash"],
-     "source":"benchr.org/pricing (2026-09-11 snapshot, states promo end date)"},
+    # glm_promo 已下线（2026-11-22）: 11-20 榜面价 $0.02/$0.07 不再是旧 promo 价，修正前提失效
     {"id":"gem_dec1","name":"Gemini 4 Carbon/Argon price hike on 2026-12-01 (announced)","confidence":"verified","default":True,
      "rule":"Before 2026-12-01: $2/$10; on/after: $4/$20; cache read price $0.10 -> $0.20",
      "models_affected":["Gemini 4 Carbon (High)","Gemini 4 Argon (High)"],

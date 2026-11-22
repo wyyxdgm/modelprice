@@ -163,7 +163,7 @@
     "sources": "데이터 출처, 방법론 및 면책 조항"
   },
   "footer": {
-    "html": "정적 빌드 · 런타임 의존성 없음 · 데이터는 빌드 시점에 arena.ai 스냅샷에서 내장(<span class=\"mono\">/api/*</span> 엔드포인트는 403을 반환하여 실시간 조회 불가 —— 이것은 <b>시점 스냅샷</b>입니다). Arena 공식 파레토 보기: <a href=\"https://arena.ai/leaderboard/code/webdev/pareto\" target=\"_blank\" rel=\"noopener\">arena.ai/leaderboard/code/webdev/pareto</a>.<br>리더보드 데이터 © LMArena (arena.ai), 스냅샷 2026-11-11 · 가격은 벤더 가격 페이지 기준, 2026-11-14 확인 · <a href=\"%METHOD%\">방법론</a> · <a href=\"/data/v1/all.json\">JSON</a> · <a href=\"/llms.txt\">llms.txt</a> · <a href=\"/sitemap.xml\">사이트맵</a>"
+    "html": "정적 빌드 · 런타임 의존성 없음 · 데이터는 빌드 시점에 arena.ai 스냅샷에서 내장(<span class=\"mono\">/api/*</span> 엔드포인트는 403을 반환하여 실시간 조회 불가 —— 이것은 <b>시점 스냅샷</b>입니다). Arena 공식 파레토 보기: <a href=\"https://arena.ai/leaderboard/code/webdev/pareto\" target=\"_blank\" rel=\"noopener\">arena.ai/leaderboard/code/webdev/pareto</a>.<br>리더보드 데이터 © LMArena (arena.ai), 스냅샷 %CAPTURED% · 가격은 벤더 가격 페이지 기준, 2026-11-14 확인 · <a href=\"%METHOD%\">방법론</a> · <a href=\"/data/v1/all.json\">JSON</a> · <a href=\"/llms.txt\">llms.txt</a> · <a href=\"/sitemap.xml\">사이트맵</a>"
   },
   "data": {
     "licAll": "전체 라이선스 · ",
@@ -320,11 +320,6 @@
       "name": "DeepSeek 피크/비피크 가격",
       "desc": "피크 = 평일 01:00–04:00 및 06:00–10:00 UTC; 나머지 시간대(주말 포함)는 반값. 보드는 20261017을 비피크, 20260910과 V4-Pro 계열을 피크로 게재 —— 같은 계열에 두 기준이 한 표에 혼재.",
       "src": "DeepSeek 공식 가격 페이지; datacamp / justinmckelvey / felloai / okamomedia 등 4개 독립 소스로 확인"
-    },
-    "glm_promo": {
-      "name": "GLM-5.3-Flash 출시 프로모션 만료",
-      "desc": "출시 프로모션이 2026-09-09 종료: $0.05/$0.18 → $0.15/$0.50. 보드(11-11 스냅샷)는 여전히 프로모 가격이라 그 $0.15 Cost/Task은 실제로 약 $0.44.",
-      "src": "benchr.org/pricing (2026-09-11 스냅샷, 프로모 종료일 명시)"
     },
     "gem_dec1": {
       "name": "Gemini 4 Carbon/Argon 12-01 인상(발표됨)",

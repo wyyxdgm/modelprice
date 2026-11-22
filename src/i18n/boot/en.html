@@ -43,12 +43,12 @@ The board's <code>Price $/M</code> is a <b>snapshot of list price at scrape time
 <ul>
 <li><b>Intraday rhythm (peak/off-peak).</b> DeepSeek peak = weekdays 01:00–04:00 and 06:00–10:00 UTC; all other hours (including the whole weekend) are half price.
 The annoyance: the board <b>mixes both conventions in one table</b> — <code>V4.1-Flash-20261017</code> is listed at off-peak $0.15/$0.60, while <code>V4.1-Flash-20260910</code> and the <code>V4-Pro</code> family are listed at peak $0.30/$1.20 and $1.32/$3.96. Comparing across rows means comparing one model's peak against another's off-peak.</li>
-<li><b>Calendar events (promo expiry).</b> <code>GLM-5.3-Flash</code>'s board price $0.05/$0.18 was a launch promo that <b>ended 2026-09-09</b>; the current price is $0.15/$0.50 (~2.9×). The 11-11 snapshot still uses the promo price, so its $0.15 Cost/Task is really ~$0.44.</li>
+<li><b>Calendar events (promo expiry).</b> The 11-11 snapshot listed <code>GLM-5.3-Flash</code> at a launch promo ($0.05/$0.18) that had already ended 2026-09-09 ($0.15/$0.50 real, ~2.9×) — the tool corrected it. The 11-20 snapshot lists $0.02/$0.07 (below the post-promo price; likely a new promo), so the correction no longer matches and the rule was retired on 2026-11-22. Each correction is matched against the exact listed price; when the board moves on, the rule drops out instead of distorting the cost.</li>
 </ul>
 <p><b>Conversion:</b> <code>Cost/Task = token usage × unit price</code>; usage doesn't change with price, so the correction = scale by the <b>weighted unit-price ratio</b>:
 <code>scale = [pin'·(1−w) + pout'·w] ÷ [pin·(1−w) + pout·w]</code>, where <code>w</code> = output token share, default <b>8%</b>
 (from the Agent board: median inferred input/output ratio ≈ 11:1 across 14 models; range 3.8–17.9×; adjustable via slider).
-DeepSeek's peak/off-peak moves input and output <b>proportionally</b>, so it is insensitive to <code>w</code>; <code>w</code> only matters for corrections like GLM's input ×3 / output ×2.8.</p>
+DeepSeek's peak/off-peak moves input and output <b>proportionally</b>, so it is insensitive to <code>w</code>; <code>w</code> only matters for corrections that shift input and output by different factors.</p>
 <p><b>Losslessly reversible:</b> every model keeps <code>cRaw</code> (the raw board value); all scenarios are derived from it, and switching toggles off restores it exactly — no "edits drifting from truth".</p>
 <p><b>Conclusions actually change with the hour — that's the point:</b> off-peak, DeepSeek's older version is half price and <b>kicks <code>Hy3</code> and <code>MiMo-V2.5</code> off the Pareto frontier</b> (fully dominated);
 the T=1500 winner changes from Hy3 $0.04 to DeepSeek-V4.1-Flash-20260910 $0.03; conversely at peak, <code>20261017</code> rises from $0.12 to $0.24.
@@ -65,7 +65,7 @@ Arena's <code>Cost/Task</code> is computed at <b>cache-miss prices</b>, so for a
 Cache discounts only apply to <b>input</b> tokens; output is always full price:
 <code>effective input price = (1−h)·input price·write multiplier + h·input price·cache ratio</code>, where <code>h</code> is the hit rate.
 Two easily-missed details: ① <b>cache read prices are stored as a ratio of the input price, not absolute values</b>, so peak/off-peak, promo expiry and future hikes move cache prices automatically
-(DeepSeek peak $0.006 → off-peak automatically $0.003; GLM promo $0.01 → $0.03 after);
+(DeepSeek peak $0.006 → off-peak automatically $0.003);
 ② <b>write multiplier</b>: Anthropic (5-min tier) and OpenAI (30-min tier) bill cache writes separately at 1.25× input price, and the missed share is paid at the write price,
 so at the same 95% hit rate Claude's discount is thinner than DeepSeek's; DeepSeek / Z.ai / Xiaomi / Tencent / Google (implicit cache) / xAI don't charge a write fee.
 39 models use published ratios (DeepSeek 2%–3.3%, MiMo 0.8%–2%, Kimi 10%–20%, GLM 18.3%–20%, Hy3 25%, Grok 25%,

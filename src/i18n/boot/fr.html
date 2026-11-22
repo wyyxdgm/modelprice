@@ -43,12 +43,12 @@ Le <code>Price $/M</code> du classement est un <b>instantané du prix catalogue 
 <ul>
 <li><b>Rythme intrajournalier (heures pleines/creuses).</b> La pointe DeepSeek = jours ouvrés 01:00–04:00 et 06:00–10:00 UTC ; toutes les autres heures (y compris tout le week-end) sont à demi-prix.
 La gêne : le classement <b>mélange les deux conventions dans un même tableau</b> — <code>V4.1-Flash-20261017</code> est listé à 0,15/0,60 $ en heures creuses, tandis que <code>V4.1-Flash-20260910</code> et la famille <code>V4-Pro</code> sont listés à 0,30/1,20 $ et 1,32/3,96 $ en heures pleines. Comparer entre les lignes revient à comparer la pointe d'un modèle aux heures creuses d'un autre.</li>
-<li><b>Événements calendaires (expiration des promos).</b> Le prix du classement de <code>GLM-5.3-Flash</code> à 0,05/0,18 $ était une promo de lancement qui <b>s'est terminée le 2026-09-09</b> ; le prix actuel est 0,15/0,50 $ (~2,9×). L'instantané du 11-11 utilise encore le prix promo, donc son Cost/Task de 0,15 $ est en réalité ~0,44 $.</li>
+<li><b>Événements calendaires (expiration des promos).</b> L'instantané du 11-11 listait <code>GLM-5.3-Flash</code> au prix promo de lancement (0,05/0,18 $) déjà expiré le 2026-09-09 (prix réel 0,15/0,50 $, ~2,9×) — l'outil le corrigeait. L'instantané du 11-20 liste 0,02/0,07 $ (sous le prix post-promo, probablement une nouvelle promo) ; la correction ne correspond plus et la règle a été retirée le 2026-11-22. Chaque correction ne s'applique que sur correspondance exacte du prix listé ; quand le classement évolue, la règle sort sans fausser le coût.</li>
 </ul>
 <p><b>Conversion :</b> <code>Cost/Task = utilisation de tokens × prix unitaire</code> ; l'utilisation ne change pas avec le prix, donc la correction = mise à l'échelle par le <b>rapport de prix unitaire pondéré</b> :
 <code>scale = [pin'·(1−w) + pout'·w] ÷ [pin·(1−w) + pout·w]</code>, où <code>w</code> = part des tokens de sortie, défaut <b>8 %</b>
 (depuis le classement Agent : rapport inférencé entrée/sortie médian ≈ 11:1 sur 14 modèles ; plage 3,8–17,9× ; ajustable par curseur).
-Les heures pleines/creuses de DeepSeek déplacent entrée et sortie de façon <b>proportionnelle</b>, donc insensible à <code>w</code> ; <code>w</code> ne compte que pour des corrections comme l'entrée ×3 / sortie ×2,8 de GLM.</p>
+Les heures pleines/creuses de DeepSeek déplacent entrée et sortie de façon <b>proportionnelle</b>, donc insensible à <code>w</code> ; <code>w</code> ne compte que pour des corrections où entrée et sortie bougent d'un facteur différent.</p>
 <p><b>Réversible sans perte :</b> chaque modèle conserve <code>cRaw</code> (la valeur brute du classement) ; tous les scénarios en dérivent, et couper les interrupteurs le restaure exactement — aucune « dérive des modifications par rapport à la vérité ».</p>
 <p><b>Les conclusions changent réellement avec l'heure — c'est tout l'intérêt :</b> en heures creuses, l'ancienne version de DeepSeek est à demi-prix et <b>éjecte <code>Hy3</code> et <code>MiMo-V2.5</code> de la frontière de Pareto</b> (totalement dominés) ;
 le vainqueur à T=1500 passe de Hy3 0,04 $ à DeepSeek-V4.1-Flash-20260910 0,03 $ ; inversement en pointe, <code>20261017</code> monte de 0,12 $ à 0,24 $.
@@ -65,7 +65,7 @@ Le <code>Cost/Task</code> d'Arena est calculé aux <b>prix de cache manqué</b>,
 Les remises de cache ne s'appliquent qu'aux tokens d'<b>entrée</b> ; la sortie est toujours au prix plein :
 <code>prix d'entrée effectif = (1−h)·prix d'entrée·multiplicateur d'écriture + h·prix d'entrée·ratio de cache</code>, où <code>h</code> est le taux de réussite.
 Deux détails faciles à manquer : ① <b>les prix de lecture de cache sont stockés comme un ratio du prix d'entrée, pas des valeurs absolues</b>, donc pleines/creuses, expiration de promo et hausses futures déplacent automatiquement les prix de cache
-(DeepSeek pointe 0,006 $ → creuse automatiquement 0,003 $ ; promo GLM 0,01 $ → 0,03 $ après) ;
+(DeepSeek pointe 0,006 $ → creuse automatiquement 0,003 $) ;
 ② le <b>multiplicateur d'écriture</b> : Anthropic (palier 5 min) et OpenAI (palier 30 min) facturent séparément les écritures de cache à 1,25× le prix d'entrée, et la part manquée est payée au prix d'écriture,
 donc au même taux de réussite de 95 %, la remise de Claude est plus mince que celle de DeepSeek ; DeepSeek / Z.ai / Xiaomi / Tencent / Google (cache implicite) / xAI ne facturent pas de frais d'écriture.
 39 modèles utilisent des ratios publiés (DeepSeek 2 %–3,3 %, MiMo 0,8 %–2 %, Kimi 10 %–20 %, GLM 18,3 %–20 %, Hy3 25 %, Grok 25 %,

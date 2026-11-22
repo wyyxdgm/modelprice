@@ -19,7 +19,7 @@
 </ul>
 
 <h2>价格是时间的函数</h2>
-<p>标价随时段和日历变化。默认生效的已核实规则：<b>DeepSeek 峰谷价</b>（峰 = 工作日 01:00&ndash;04:00 与 06:00&ndash;10:00 UTC，2×；其余 ½×）—— 榜面本身就把同一家族的峰价行与谷价行混在一张表；<b>GLM-5.3-Flash 促销到期</b>（2026-09-09：$0.05/$0.18 &rarr; $0.15/$0.50）；<b>Gemini 4 Carbon/Argon 2026-12-01 涨价</b>（$2/$10 &rarr; $4/$20）。存疑规则（DeepSeek V4-Flash 是否分峰谷；两个模型与第三方指数差 2×）收录但默认关闭。</p>
+<p>标价随时段和日历变化。默认生效的已核实规则：<b>DeepSeek 峰谷价</b>（峰 = 工作日 01:00&ndash;04:00 与 06:00&ndash;10:00 UTC，2×；其余 ½×）—— 榜面本身就把同一家族的峰价行与谷价行混在一张表；<b>Gemini 4 Carbon/Argon 2026-12-01 涨价</b>（$2/$10 &rarr; $4/$20）。存疑规则（DeepSeek V4-Flash 是否分峰谷；两个模型与第三方指数差 2×）收录但默认关闭。</p>
 
 <h2>缓存模型</h2>
 <p>榜单成本假设 0% 缓存命中，对 agent 负载是系统性高估。有效输入价 = <code>(1&minus;h)&middot;pin&middot;wm + h&middot;pin&middot;ratio</code>；输出永不打折。缓存读取价存为标价输入价的比例（DeepSeek 2&ndash;3.3%、MiMo 0.8&ndash;2%、Kimi 10&ndash;20%、GLM 18&ndash;20%、Hy3/Grok 25%、Anthropic 2.5&ndash;10%、OpenAI 5&ndash;10%、Gemini 5%、Mistral 10.3%；未知 &rarr; 10% 估算并标注）。写入倍率 <code>wm</code>：Anthropic/OpenAI（模型名以 Claude/GPT- 开头）为 1.25×，其余 1.0×。h=95% 时头部模型有效成本下降 59&ndash;79%，前沿本身也会重排。</p>

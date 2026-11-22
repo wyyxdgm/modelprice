@@ -163,7 +163,7 @@
     "sources": "データソース・手法・免責事項"
   },
   "footer": {
-    "html": "静的ビルド · ランタイム依存ゼロ · データはビルド時に arena.ai スナップショットから埋め込み（<span class=\"mono\">/api/*</span> エンドポイントは 403 を返すためリアルタイム照会は不可能 —— これは<b>時点スナップショット</b>です）。Arena 公式パレート表示：<a href=\"https://arena.ai/leaderboard/code/webdev/pareto\" target=\"_blank\" rel=\"noopener\">arena.ai/leaderboard/code/webdev/pareto</a>。<br>リーダーボードデータ © LMArena (arena.ai)、スナップショット 2026-11-11 · 価格は各ベンダーの価格ページから、2026-11-14 時点で確認 · <a href=\"%METHOD%\">手法</a> · <a href=\"/data/v1/all.json\">JSON</a> · <a href=\"/llms.txt\">llms.txt</a> · <a href=\"/sitemap.xml\">サイトマップ</a>"
+    "html": "静的ビルド · ランタイム依存ゼロ · データはビルド時に arena.ai スナップショットから埋め込み（<span class=\"mono\">/api/*</span> エンドポイントは 403 を返すためリアルタイム照会は不可能 —— これは<b>時点スナップショット</b>です）。Arena 公式パレート表示：<a href=\"https://arena.ai/leaderboard/code/webdev/pareto\" target=\"_blank\" rel=\"noopener\">arena.ai/leaderboard/code/webdev/pareto</a>。<br>リーダーボードデータ © LMArena (arena.ai)、スナップショット %CAPTURED% · 価格は各ベンダーの価格ページから、2026-11-14 時点で確認 · <a href=\"%METHOD%\">手法</a> · <a href=\"/data/v1/all.json\">JSON</a> · <a href=\"/llms.txt\">llms.txt</a> · <a href=\"/sitemap.xml\">サイトマップ</a>"
   },
   "data": {
     "licAll": "全ライセンス · ",
@@ -320,11 +320,6 @@
       "name": "DeepSeek ピーク/オフピーク価格",
       "desc": "ピーク = 平日 01:00–04:00 と 06:00–10:00 UTC；その他の時間帯（週末含む）は半額。ボードは 20261017 をオフピーク、20260910 と V4-Pro ファミリーをピークで掲載 —— 同一ファミリーで2つの基準が1つの表に混在。",
       "src": "DeepSeek 公式価格ページ；datacamp / justinmckelvey / felloai / okamomedia の4独立ソースで確認"
-    },
-    "glm_promo": {
-      "name": "GLM-5.3-Flash ローンチプロモ終了",
-      "desc": "ローンチプロモは 2026-09-09 に終了：$0.05/$0.18 → $0.15/$0.50。ボード（11-11 スナップショット）はまだプロモ価格なので、その $0.15 Cost/Task は実際には約 $0.44。",
-      "src": "benchr.org/pricing（2026-09-11 スナップショット、プロモ終了日を記載）"
     },
     "gem_dec1": {
       "name": "Gemini 4 Carbon/Argon 12-01 値上げ（発表済み）",

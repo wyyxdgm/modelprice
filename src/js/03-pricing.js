@@ -4,7 +4,7 @@ const BASELINE=1200; // Arena BT 分数的实用地板：低于此基本等于�
 /* ==================== 价格情景引擎 ====================
    Arena 榜面的 Price $/M 是「某个时刻的标价」，而标价本身是a function of time：
      · DeepSeek 自 2026-08-16 起峰谷两档价，peak = 工作日 01:00–04:00 与 06:00–10:00 UTC，其余时段（含整个周末）半价
-     · GLM-5.3-Flash 榜上仍是首发促销价，促销已于 2026-09-09 结束，现价约为其 3 倍
+     · 促销/调价类事件按「榜面价 = 事件前价」匹配后做日期修正；榜面价已更新的事件必须下线（glm_promo 于 2026-11-22 下线，见 PRICE_EVENTS 内注释）
    Cost/Task = token 用量 × 单价，而 token 用量不随价格变，所以换算 = 按「加权单价比例」缩放榜面成本。
    m.cRaw 永远是榜面原值，任何情景都从它换算 → 切换无损、可反复。 */
 const PRICE_EVENTS=[
@@ -18,10 +18,8 @@ const PRICE_EVENTS=[
      'DeepSeek-V4-Pro':                   {listed:'peak',peak:[1.32,3.96], off:[0.66,1.98]},
      'DeepSeek-V4-Pro (High, 20260813)':  {listed:'peak',peak:[1.32,3.96], off:[0.66,1.98]},
      'DeepSeek-V4-Pro Preview (High)':    {listed:'peak',peak:[1.32,3.96], off:[0.66,1.98]}}},
-  {id:'glm_promo', kind:'date', conf:'official', name:'GLM-5.3-Flash launch promo expired', date:'2026-09-09',
-   desc:'Launch promo ended 2026-09-09: $0.05/$0.18 → $0.15/$0.50. The board (11-11 snapshot) still uses the promo price, so its $0.15 Cost/Task is really ~$0.44.',
-   src:'benchr.org/pricing (2026-09-11 snapshot, states the promo end date)',
-   entries:{'GLM-5.3-Flash':{listed:'before', before:[0.05,0.18], after:[0.15,0.50]}}},
+  // glm_promo 下线（2026-11-22 刷新发现）: 11-20 榜面价已是 $0.02/$0.07，不再是旧 promo 价 $0.05/$0.18
+  //（09-09 到期）→「榜面=promo 价」修正前提失效，继续修正会输出假价格。GLM 新价性质待人工核实。
   {id:'gem_dec1', kind:'date', conf:'official', future:true, name:'Gemini 4 Carbon/Argon hike on 12-01 (announced)', date:'2026-12-01',
    desc:'Intro pricing $2/$10 ends 2026-11-30; from 12-01 it is $4/$20 with cache read price $0.10 → $0.20. The board (11-11 snapshot) uses intro pricing. Drag the pricing date into December to watch Carbon collapse out of the overall_all frontier.',
    src:'Google Gemini API pricing page (benchlm.ai / munderdiffl.in / datastudios.org all agree; checked 2026-11-12/13)',

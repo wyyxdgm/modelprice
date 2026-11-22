@@ -19,7 +19,7 @@
 </ul>
 
 <h2>시간의 함수로서의 가격</h2>
-<p>정가는 시간대와 캘린더에 따라 바뀝니다. 기본 적용되는 검증된 규칙: <b>DeepSeek 피크/비피크</b>(피크 = 평일 01:00&ndash;04:00 및 06:00&ndash;10:00 UTC, 2×; 그 외 ½×) —— 보드 자체가 같은 계열의 피크 가격 행과 비피크 가격 행을 한 표에 섞어 놓음; <b>GLM-5.3-Flash 프로모션 만료</b>(2026-09-09: $0.05/$0.18 &rarr; $0.15/$0.50); <b>Gemini 4 Carbon/Argon 2026-12-01 인상</b>($2/$10 &rarr; $4/$20). 불확실한 규칙(DeepSeek V4-Flash 피크 분할; 두 모델이 제3자 인덱스와 2× 차이)은 수록했지만 기본 꺼짐.</p>
+<p>정가는 시간대와 캘린더에 따라 바뀝니다. 기본 적용되는 검증된 규칙: <b>DeepSeek 피크/비피크</b>(피크 = 평일 01:00&ndash;04:00 및 06:00&ndash;10:00 UTC, 2×; 그 외 ½×) —— 보드 자체가 같은 계열의 피크 가격 행과 비피크 가격 행을 한 표에 섞어 놓음; <b>Gemini 4 Carbon/Argon 2026-12-01 인상</b>($2/$10 &rarr; $4/$20). 불확실한 규칙(DeepSeek V4-Flash 피크 분할; 두 모델이 제3자 인덱스와 2× 차이)은 수록했지만 기본 꺼짐.</p>
 
 <h2>캐시 모델</h2>
 <p>리더보드 비용은 0% 캐시 히트를 가정하여 agent 워크로드를 체계적으로 과대평가합니다. 실효 입력 가격 = <code>(1&minus;h)&middot;pin&middot;wm + h&middot;pin&middot;ratio</code>; 출력은 절대 할인되지 않습니다. 캐시 읽기 가격은 정가 입력 가격에 대한 비율로 저장됩니다(DeepSeek 2&ndash;3.3%, MiMo 0.8&ndash;2%, Kimi 10&ndash;20%, GLM 18&ndash;20%, Hy3/Grok 25%, Anthropic 2.5&ndash;10%, OpenAI 5&ndash;10%, Gemini 5%, Mistral 10.3%; 미지 &rarr; 10% 추정, 라벨 표시). 쓰기 배율 <code>wm</code>: Anthropic/OpenAI(모델명이 Claude/GPT-로 시작)는 1.25×, 그 외 1.0×. h=95%에서 상위 모델 실효 비용은 59&ndash;79% 하락하고 경계선 자체가 재정렬됩니다.</p>

@@ -85,6 +85,7 @@ def lang_nav(lc):
 def render(lc, domain, i18n):
     tpl = TPL.read_text(encoding="utf-8")
     raw = json.loads(DATA.read_text(encoding="utf-8"))
+    raw_captured, raw_scraped = raw.get("captured", ""), raw.get("scraped", "")
     payload = json.dumps(raw, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
     i18n_payload = json.dumps(i18n, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
 
@@ -104,6 +105,8 @@ def render(lc, domain, i18n):
     # 路径 token：在字典值替换后再做一轮（字典值里可以引用站内路径）
     html = html.replace("%METHOD%", locale_path(lc, "method.html"))
     html = html.replace("%ROOT%", locale_path(lc))
+    # 日期 token：footer 等构建期注入的串里快照/抓取日期跟数据走（不再硬编码）
+    html = html.replace("%CAPTURED%", raw_captured).replace("%SCRAPED%", raw_scraped)
     html = html.replace("__DATA__", payload)
     # I18N JSON 里的字典值同样做路径 token 替换（字典值可能被 JS 引用）
     html = html.replace("__I18N__", i18n_payload

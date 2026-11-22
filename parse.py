@@ -127,10 +127,21 @@ DATASETS = [
 
 FIELDS = ["n", "u", "lab", "lic", "r", "or", "s", "u95", "d95", "pre", "ae", "v", "c", "pin", "pout", "ctx"]
 
-out = {"captured": "2026-11-11", "scraped": "2026-11-14", "source": "arena.ai/leaderboard", "fields": FIELDS, "datasets": {}}
+# captured/scraped/meta/note 可由 refresh-data.sh 生成的 meta.json 覆盖（缺省 = 2026-11-14 首次人工抓取口径）
+META_FILE = RAW.parent / "scripts" / ".scrape" / "meta.json"
+overrides = {}
+captured, scraped = "2026-11-11", "2026-11-14"
+if META_FILE.exists():
+    m = json.loads(META_FILE.read_text(encoding="utf-8"))
+    captured, scraped = m.get("captured", captured), m.get("scraped", scraped)
+    overrides = m.get("boards", {})
+
+out = {"captured": captured, "scraped": scraped, "source": "arena.ai/leaderboard", "fields": FIELDS, "datasets": {}}
 
 for key, label, path, license_, hor, meta, note in DATASETS:
     f = RAW / f"{key}.md"
+    ov = overrides.get(key, {})
+    meta, note = ov.get("meta", meta), ov.get("note", note)
     rows = parse_table(f.read_text(encoding="utf-8"), hor)
     scored = [r for r in rows if r["s"]]
     withcost = [r for r in scored if r["c"] is not None]
@@ -150,13 +161,14 @@ assert "</" not in payload, "JSON 里出现 </ 会提前闭合 <script>，需要
 OUT.write_text(payload, encoding="utf-8")
 print("\nwrote", OUT, f"{OUT.stat().st_size:,} bytes")
 
-# --- 注入 index.html（保持单文件、离线可用） ---
+# --- 注入根级 index.html（旧单文件时代遗留；src/ 工程重构后无此文件则跳过） ---
 HTML = OUT.parent.parent / "index.html"
-BLOCK = re.compile(r'(<script id="DATA" type="application/json">)(.*?)(</script>)', re.S)
-html = HTML.read_text(encoding="utf-8")
-m = BLOCK.search(html)
-if not m:
-    raise SystemExit(f"!! {HTML} 里找不到 <script id=\"DATA\"> 块")
-HTML.write_text(html[:m.start(2)] + payload + html[m.end(2):], encoding="utf-8")
-print(f"injected into {HTML}  ({HTML.stat().st_size:,} bytes)")
-print("下一步： python3 test/build.py && node --max-old-space-size=4096 test/run.js")
+if HTML.exists():
+    BLOCK = re.compile(r'(<script id="DATA" type="application/json">)(.*?)(</script>)', re.S)
+    html = HTML.read_text(encoding="utf-8")
+    m = BLOCK.search(html)
+    if not m:
+        raise SystemExit(f"!! {HTML} 里找不到 <script id=\"DATA\"> 块")
+    HTML.write_text(html[:m.start(2)] + payload + html[m.end(2):], encoding="utf-8")
+    print(f"injected into {HTML}  ({HTML.stat().st_size:,} bytes)")
+print("下一步： python3 scripts/build_page.py && python3 build_site.py https://modelprice.damolabs.app")

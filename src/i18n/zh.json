@@ -163,7 +163,7 @@
     "sources": "数据来源、方法与免责声明"
   },
   "footer": {
-    "html": "纯静态构建 · 零运行时依赖 · 数据在构建时从 arena.ai 快照内嵌（<span class=\"mono\">/api/*</span> 端点返回 403，无法实时查询 —— 这是<b>时点快照</b>）。Arena 官方 Pareto 视图：<a href=\"https://arena.ai/leaderboard/code/webdev/pareto\" target=\"_blank\" rel=\"noopener\">arena.ai/leaderboard/code/webdev/pareto</a>。<br>榜单数据 © LMArena (arena.ai)，快照 2026-11-11 · 价格来自各厂商定价页，核对于 2026-11-14 · <a href=\"%METHOD%\">方法</a> · <a href=\"/data/v1/all.json\">JSON</a> · <a href=\"/llms.txt\">llms.txt</a> · <a href=\"/sitemap.xml\">站点地图</a>"
+    "html": "纯静态构建 · 零运行时依赖 · 数据在构建时从 arena.ai 快照内嵌（<span class=\"mono\">/api/*</span> 端点返回 403，无法实时查询 —— 这是<b>时点快照</b>）。Arena 官方 Pareto 视图：<a href=\"https://arena.ai/leaderboard/code/webdev/pareto\" target=\"_blank\" rel=\"noopener\">arena.ai/leaderboard/code/webdev/pareto</a>。<br>榜单数据 © LMArena (arena.ai)，快照 %CAPTURED% · 价格来自各厂商定价页，核对于 2026-11-14 · <a href=\"%METHOD%\">方法</a> · <a href=\"/data/v1/all.json\">JSON</a> · <a href=\"/llms.txt\">llms.txt</a> · <a href=\"/sitemap.xml\">站点地图</a>"
   },
   "data": {
     "licAll": "含闭源 · ",
@@ -320,11 +320,6 @@
       "name": "DeepSeek 峰谷定价",
       "desc": "峰时 = 工作日 01:00–04:00 与 06:00–10:00 UTC；其余时段（含周末）半价。榜面把 20261017 标为谷价、20260910 与 V4-Pro 系列标为峰价 —— 同一个家族、两种口径、一张表。",
       "src": "DeepSeek 官方定价页；四个独立来源交叉确认：datacamp / justinmckelvey / felloai / okamomedia"
-    },
-    "glm_promo": {
-      "name": "GLM-5.3-Flash 首发促销已过期",
-      "desc": "首发促销 2026-09-09 结束：$0.05/$0.18 → $0.15/$0.50。榜面（11-11 快照）仍是促销价，所以它的 $0.15 Cost/Task 实际约 $0.44。",
-      "src": "benchr.org/pricing（2026-09-11 快照，注明促销结束日期）"
     },
     "gem_dec1": {
       "name": "Gemini 4 Carbon/Argon 12-01 涨价（已公告）",

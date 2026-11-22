@@ -39,9 +39,19 @@ docs/deploy/            nginx vhost (CSP: script-src 'self', JS/CSS are external
 ## Update the data
 
 ```bash
-# 1. Save a fresh arena.ai leaderboard table into raw/<board>.md (same column layout)
-# 2. Re-parse:
-python3 parse.py
+# One-shot (2026-11-22): scrape arena.ai via the real browser (Cloudflare-safe) → raw/*.md →
+# parse → diff report → build → 64-case regression → auto-commit → deploy → smoke.
+# Exit 0 = clean, 2 = green but price changes detected (PRICE_EVENTS need review), 1 = failed.
+scripts/refresh-data.sh            # add --no-deploy / --no-commit to skip stages
+```
+
+Requirements: Mac host with the gstack browse daemon Chrome running (headless/other hosts can't pass Cloudflare; arena rate-limits rapid fetches — the script spaces requests 10 s apart). Manual fallback:
+
+```bash
+# 1. Scrape one board into scripts/.scrape/<name>.json (browser session must be past the challenge):
+browse eval "$(sed 's|__BOARD_URL__|/leaderboard/code/webdev|' scripts/arena_extract.js)"
+# 2. Regenerate raw/*.md from scrape JSON, then parse → datasets.json:
+python3 scripts/gen_raw_md.py && python3 parse.py
 # 3. Rebuild everything into dist/ (pass the live domain so llms.txt/sitemap get absolute URLs):
 python3 scripts/build_page.py
 python3 build_site.py https://modelprice.damolabs.app
@@ -50,6 +60,8 @@ python3 test/build.py && node --max-old-space-size=4096 test/run.js
 # 5. Local preview (one-off server; render probe with a real browser):
 python3 -m http.server 8080 -d dist    # Ctrl-C when done
 ```
+
+**Price-event review** (the only non-programmatic step): `scripts/diff_report.py` lists models whose board price changed since the last commit — those are PRICE_EVENTS candidates. Verify against the vendor pricing page, then update `PRICE_EVENTS` in `src/js/03-pricing.js` + its mirror in `build_site.py` + the `ev.*` strings in all five `src/i18n/<locale>.json` dicts. Rules are matched against the exact listed price, so a rule whose "board price" no longer matches must be retired (see the glm_promo retirement note, 2026-11-22).
 
 ## Test suite
 

@@ -2,3 +2,4 @@ dist/
 test/run.js
 .DS_Store
 __pycache__/
+scripts/.scrape/

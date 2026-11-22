@@ -163,7 +163,7 @@
     "sources": "Data sources, methodology &amp; disclaimers"
   },
   "footer": {
-    "html": "Static build · zero runtime dependencies · data embedded at build time from arena.ai snapshots (the <span class=\"mono\">/api/*</span> endpoints return 403, so live queries are impossible — this is <b>a point-in-time snapshot</b>). Arena's built-in Pareto view: <a href=\"https://arena.ai/leaderboard/code/webdev/pareto\" target=\"_blank\" rel=\"noopener\">arena.ai/leaderboard/code/webdev/pareto</a>.<br>Leaderboard data © LMArena (arena.ai), snapshot 2026-11-11 · prices from vendor pricing pages, checked 2026-11-14 · <a href=\"%METHOD%\">Method</a> · <a href=\"/data/v1/all.json\">JSON</a> · <a href=\"/llms.txt\">llms.txt</a> · <a href=\"/sitemap.xml\">Sitemap</a>"
+    "html": "Static build · zero runtime dependencies · data embedded at build time from arena.ai snapshots (the <span class=\"mono\">/api/*</span> endpoints return 403, so live queries are impossible — this is <b>a point-in-time snapshot</b>). Arena's built-in Pareto view: <a href=\"https://arena.ai/leaderboard/code/webdev/pareto\" target=\"_blank\" rel=\"noopener\">arena.ai/leaderboard/code/webdev/pareto</a>.<br>Leaderboard data © LMArena (arena.ai), snapshot %CAPTURED% · prices from vendor pricing pages, checked %SCRAPED% · <a href=\"%METHOD%\">Method</a> · <a href=\"/data/v1/all.json\">JSON</a> · <a href=\"/llms.txt\">llms.txt</a> · <a href=\"/sitemap.xml\">Sitemap</a>"
   },
   "data": {
     "licAll": "All-license · ",
@@ -320,11 +320,6 @@
       "name": "DeepSeek peak/off-peak pricing",
       "desc": "Peak = weekdays 01:00–04:00 and 06:00–10:00 UTC; all other hours (incl. weekends) are half price. The board lists 20261017 at off-peak and 20260910 / the V4-Pro family at peak — one family, two conventions, one table.",
       "src": "DeepSeek official pricing page; confirmed by four independent sources: datacamp / justinmckelvey / felloai / okamomedia"
-    },
-    "glm_promo": {
-      "name": "GLM-5.3-Flash launch promo expired",
-      "desc": "Launch promo ended 2026-09-09: $0.05/$0.18 → $0.15/$0.50. The board (11-11 snapshot) still uses the promo price, so its $0.15 Cost/Task is really ~$0.44.",
-      "src": "benchr.org/pricing (2026-09-11 snapshot, states the promo end date)"
     },
     "gem_dec1": {
       "name": "Gemini 4 Carbon/Argon hike on 12-01 (announced)",

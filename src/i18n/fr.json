@@ -163,7 +163,7 @@
     "sources": "Sources de données, méthodologie et avertissements"
   },
   "footer": {
-    "html": "Build statique · zéro dépendance d'exécution · données intégrées à la construction depuis des instantanés d'arena.ai (les points de terminaison <span class=\"mono\">/api/*</span> renvoient 403, les requêtes en direct sont impossibles — ceci est un <b>instantané ponctuel</b>). Vue Pareto intégrée d'Arena : <a href=\"https://arena.ai/leaderboard/code/webdev/pareto\" target=\"_blank\" rel=\"noopener\">arena.ai/leaderboard/code/webdev/pareto</a>.<br>Données du classement © LMArena (arena.ai), instantané du 2026-11-11 · prix des pages tarifaires des fournisseurs, vérifiés le 2026-11-14 · <a href=\"%METHOD%\">Méthode</a> · <a href=\"/data/v1/all.json\">JSON</a> · <a href=\"/llms.txt\">llms.txt</a> · <a href=\"/sitemap.xml\">Plan du site</a>"
+    "html": "Build statique · zéro dépendance d'exécution · données intégrées à la construction depuis des instantanés d'arena.ai (les points de terminaison <span class=\"mono\">/api/*</span> renvoient 403, les requêtes en direct sont impossibles — ceci est un <b>instantané ponctuel</b>). Vue Pareto intégrée d'Arena : <a href=\"https://arena.ai/leaderboard/code/webdev/pareto\" target=\"_blank\" rel=\"noopener\">arena.ai/leaderboard/code/webdev/pareto</a>.<br>Données du classement © LMArena (arena.ai), instantané du %CAPTURED% · prix des pages tarifaires des fournisseurs, vérifiés le %SCRAPED% · <a href=\"%METHOD%\">Méthode</a> · <a href=\"/data/v1/all.json\">JSON</a> · <a href=\"/llms.txt\">llms.txt</a> · <a href=\"/sitemap.xml\">Plan du site</a>"
   },
   "data": {
     "licAll": "Toutes licences · ",
@@ -320,11 +320,6 @@
       "name": "Tarification heures pleines/creuses de DeepSeek",
       "desc": "Pleine = jours ouvrés 01:00–04:00 et 06:00–10:00 UTC ; toutes les autres heures (week-ends inclus) sont à demi-prix. Le classement liste 20261017 en heures creuses et 20260910 / la famille V4-Pro en heures pleines — une même famille, deux conventions, un seul tableau.",
       "src": "Page tarifaire officielle DeepSeek ; confirmée par quatre sources indépendantes : datacamp / justinmckelvey / felloai / okamomedia"
-    },
-    "glm_promo": {
-      "name": "Promotion de lancement GLM-5.3-Flash expirée",
-      "desc": "La promotion de lancement s'est terminée le 2026-09-09 : 0,05/0,18 $ → 0,15/0,50 $. Le classement (instantané du 11-11) utilise encore le prix promo, donc son Cost/Task de 0,15 $ est en réalité ~0,44 $.",
-      "src": "benchr.org/pricing (instantané du 2026-09-11, indique la date de fin de la promo)"
     },
     "gem_dec1": {
       "name": "Hausse Gemini 4 Carbon/Argon le 01-12 (annoncée)",
