@@ -19,7 +19,7 @@ const PRICE_EVENTS=[
      'DeepSeek-V4-Pro (High, 20260813)':  {listed:'peak',peak:[1.32,3.96], off:[0.66,1.98]},
      'DeepSeek-V4-Pro Preview (High)':    {listed:'peak',peak:[1.32,3.96], off:[0.66,1.98]}}},
   // glm_promo 下线（2026-11-22 刷新发现）: 11-20 榜面价已是 $0.02/$0.07，不再是旧 promo 价 $0.05/$0.18
-  //（09-09 到期）→「榜面=promo 价」修正前提失效，继续修正会输出假价格。GLM 新价性质待人工核实。
+  //（09-09 到期）→「榜面=promo 价」修正前提失效，继续修正会输出假价格。已核实：z.ai 现价 $0.15/$0.50、$0.02/$0.07 无公告无起止 → 见 glm53flash_nov（suspected）。
   {id:'gem_dec1', kind:'date', conf:'official', future:true, name:'Gemini 4 Carbon/Argon hike on 12-01 (announced)', date:'2026-12-01',
    desc:'Intro pricing $2/$10 ends 2026-11-30; from 12-01 it is $4/$20 with cache read price $0.10 → $0.20. The board (11-11 snapshot) uses intro pricing. Drag the pricing date into December to watch Carbon collapse out of the overall_all frontier.',
    src:'Google Gemini API pricing page (benchlm.ai / munderdiffl.in / datastudios.org all agree; checked 2026-11-12/13)',
@@ -38,7 +38,33 @@ const PRICE_EVENTS=[
    src:'benchr.org/pricing comparison',
    entries:{
      'Mistral Medium 3.5':{listed:'before',before:[0.75,3.75],after:[1.50,7.50]},
-     'GPT-6 Sol (Max)':   {listed:'before',before:[1.00,5.00],after:[2.00,10.00]}}}
+     'GPT-6 Sol (Max)':   {listed:'before',before:[1.00,5.00],after:[2.00,10.00]}}},
+  /* —— 2026-11-22 核对（11-20 榜 diff 检出的 8 个模型）：以下 6 个榜面价与厂商官方现价不符且官方无促销公告/起止日期 → 一律 conf:'suspected'，默认关闭。
+     另 2 个不登记：Hy3 新价 $0.14/$0.58 = 腾讯官方 ¥1/¥4 的 USD 折算（=OpenRouter 现价，厂商现价口径成立）；Beam 1.0 厂商无公开价目表，榜面 $0.25/$1.00 是唯一可验证的渠道现价。 */
+  {id:'glm53flash_nov', kind:'date', conf:'suspected', name:'GLM-5.3-Flash $0.02/$0.07 vs official $0.15/$0.50, no promo notice (uncertain)', date:'2026-11-20',
+   desc:'The 11-20 board lists $0.02/$0.07 — 87%/86% below the Z.ai pricing page ($0.15/$0.50, checked 2026-11-22). No promo announcement or end date anywhere; the launch blog only says (discounted) for $0.045/task. $0.02/$0.07 closely matches the OpenRouter batch tier ($0.023/$0.068), so this may be a mis-scraped tier or a short unannounced promo. Off by default.',
+   src:'docs.z.ai/guides/overview/pricing + z.ai/blog/glm-5.3-flash (checked 2026-11-22); openrouter.ai/api/v1/models',
+   entries:{'GLM-5.3-Flash':{listed:'before',before:[0.02,0.07],after:[0.15,0.50]}}},
+  {id:'glm47_nov', kind:'date', conf:'suspected', name:'GLM-4.7 $0.40/$1.75 matches neither official nor aggregator (uncertain)', date:'2026-11-20',
+   desc:'The 11-20 board lists $0.40/$1.75, but the Z.ai pricing page still shows $0.60/$2.20 (checked 2026-11-22) and OpenRouter agrees at $0.60/$2.20. The board price is 33%/20% below both, with no promo announcement or end date. Off by default.',
+   src:'docs.z.ai/guides/overview/pricing (checked 2026-11-22); openrouter.ai/api/v1/models',
+   entries:{'GLM-4.7':{listed:'before',before:[0.40,1.75],after:[0.60,2.20]}}},
+  {id:'qwen35_channel', kind:'date', conf:'suspected', name:'Qwen3.5-397B-A17B listed below Alibaba official $0.60/$3.60 (uncertain)', date:'2026-11-20',
+   desc:'The board moved $0.60/$3.60 → $0.45/$3.00, but Alibaba Cloud Model Studio still lists qwen3.5-397b-a17b at $0.6/$3.6 (international, 0-256K, checked 2026-11-22) — no price cut announced. $0.45/$3.00 is the OpenRouter aggregator price, so this looks like a channel switch, not a vendor hike. Off by default.',
+   src:'alibabacloud.com/help/en/model-studio/model-pricing (checked 2026-11-22); openrouter.ai/api/v1/models',
+   entries:{'Qwen3.5-397B-A17B':{listed:'before',before:[0.45,3.00],after:[0.60,3.60]}}},
+  {id:'kimi27_channel', kind:'date', conf:'suspected', name:'Kimi K2.7 Code listed below Moonshot official $0.95/$4.00 (uncertain)', date:'2026-11-20',
+   desc:'The board moved $0.60/$3.50 → $0.60/$3.00, but Moonshot still lists kimi-k2.7-code at $0.95/$4.00 (checked 2026-11-22) and has announced K2-series retirement by end of December 2026. The board price matches OpenRouter exactly ($0.60/$3.00) — an aggregator channel price, 37%/25% below official, no promo notice. Off by default.',
+   src:'platform.kimi.ai/docs/pricing/chat (checked 2026-11-22); openrouter.ai/api/v1/models',
+   entries:{'Kimi K2.7 Code':{listed:'before',before:[0.60,3.00],after:[0.95,4.00]}}},
+  {id:'mimo25_retired', kind:'date', conf:'suspected', name:'MiMo-V2.5-Pro retired by Xiaomi; board price has no official anchor (uncertain)', date:'2026-11-20',
+   desc:'Xiaomi officially delisted MiMo-V2.5-Pro API on 2026-10-21 (switch to V2.6 required). The board price jumped $0.43/$0.87 → $0.48/$1.80; the old price matched the official overseas rate ($0.435/$0.87, carried over to mimo-v2.6-pro since the launch blog promised no pricing change), the new one only exists on third-party hosting (OpenRouter $0.48/$1.80). Off by default.',
+   src:'mimo.mi.com/docs/price/pay-as-you-go + platform.xiaomimimo.com delisting banner (checked 2026-11-22); mimo.xiaomi.com/mimo-v2-5-pro',
+   entries:{'MiMo-V2.5-Pro':{listed:'before',before:[0.48,1.80],after:[0.435,0.87]}}},
+  {id:'hy3p_channel', kind:'date', conf:'suspected', name:'Hy3 preview listed below Tencent official $0.18/$0.60 (uncertain)', date:'2026-11-20',
+   desc:'The board moved Hy3 preview $0.18/$0.60 → $0.14/$0.58. Tencent Cloud bills Hy3 preview from ¥1.2/¥4 per 1M tokens (≈$0.17/$0.56), and third-party trackers record the official USD rate as $0.18/$0.60 — the old board price. The new price equals the Hy3 non-preview rate and the OpenRouter listing, so either Tencent aligned preview pricing with the GA model (unannounced) or the board merged the two entries. Off by default.',
+   src:'cloud.tencent.com Hy Token Plan article 2676264 + activepieces.com Tencent pricing tracker (checked 2026-11-22); openrouter.ai/api/v1/models',
+   entries:{'Hy3 preview':{listed:'before',before:[0.14,0.58],after:[0.18,0.60]}}}
 ];
 S.evState={}; PRICE_EVENTS.forEach(e=>{ S.evState[e.id] = (e.conf==='official'); });
 S.hour=new Date().getUTCHours();          // 默认就是「now」

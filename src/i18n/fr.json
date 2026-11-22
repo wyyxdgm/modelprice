@@ -335,6 +335,36 @@
       "name": "Écart de 2× vs un index tiers, sans explication promo (incertain)",
       "desc": "Mistral Medium 3.5 (0,75/3,75 $ vs index 1,50/7,50 $) et GPT-6 Sol (1/5 $ vs 2/10 $) sont listés à exactement la moitié d'un index tiers. Peut-être une promo, ou l'index est périmé. Désactivé par défaut.",
       "src": "comparaison benchr.org/pricing"
+    },
+    "glm53flash_nov": {
+      "name": "GLM-5.3-Flash $0.02/$0.07 — très en dessous du tarif officiel $0.15/$0.50, sans annonce promo (incertain)",
+      "desc": "Le tableau du 11-20 affiche $0.02/$0.07 — 87 %/86 % en dessous de la page tarifaire Z.ai ($0.15/$0.50, vérifié 2026-11-22). Aucune annonce promo ni date de fin ; le billet de lancement ne mentionne que $0.045/task (discounted). $0.02/$0.07 correspond presque exactement au palier batch OpenRouter ($0.023/$0.068) — palier mal scrapé ou promo courte non annoncée. Désactivé par défaut.",
+      "src": "docs.z.ai/guides/overview/pricing + z.ai/blog/glm-5.3-flash (vérifié 2026-11-22) ; openrouter.ai/api/v1/models"
+    },
+    "glm47_nov": {
+      "name": "GLM-4.7 $0.40/$1.75 — ne correspond ni au tarif officiel ni à l’agrégateur (incertain)",
+      "desc": "Le tableau du 11-20 affiche $0.40/$1.75, mais la page tarifaire Z.ai indique toujours $0.60/$2.20 (vérifié 2026-11-22) et OpenRouter confirme $0.60/$2.20. Le prix du tableau est 33 %/20 % en dessous des deux, sans annonce promo ni date de fin. Désactivé par défaut.",
+      "src": "docs.z.ai/guides/overview/pricing (vérifié 2026-11-22) ; openrouter.ai/api/v1/models"
+    },
+    "qwen35_channel": {
+      "name": "Qwen3.5-397B-A17B affiché sous le tarif officiel Alibaba $0.60/$3.60 (incertain)",
+      "desc": "Le tableau est passé de $0.60/$3.60 à $0.45/$3.00, mais Alibaba Cloud Model Studio liste toujours qwen3.5-397b-a17b à $0.6/$3.6 (international, 0–256K, vérifié 2026-11-22) — aucune baisse annoncée. $0.45/$3.00 correspond exactement à OpenRouter : plutôt un changement de canal qu’une hausse/ baisse du vendeur. Désactivé par défaut.",
+      "src": "alibabacloud.com/help/en/model-studio/model-pricing (vérifié 2026-11-22) ; openrouter.ai/api/v1/models"
+    },
+    "kimi27_channel": {
+      "name": "Kimi K2.7 Code affiché sous le tarif officiel Moonshot $0.95/$4.00 (incertain)",
+      "desc": "Le tableau est passé de $0.60/$3.50 à $0.60/$3.00, mais Moonshot liste toujours kimi-k2.7-code à $0.95/$4.00 (vérifié 2026-11-22) et a annoncé le retrait de la série K2 d’ici fin décembre 2026. Le prix du tableau correspond exactement à OpenRouter ($0.60/$3.00) — un prix de canal 37 %/25 % sous le tarif officiel, sans annonce promo. Désactivé par défaut.",
+      "src": "platform.kimi.ai/docs/pricing/chat (vérifié 2026-11-22) ; openrouter.ai/api/v1/models"
+    },
+    "mimo25_retired": {
+      "name": "MiMo-V2.5-Pro retiré par Xiaomi ; le prix du tableau n’a plus d’ancrage officiel (incertain)",
+      "desc": "Xiaomi a officiellement retiré l’API MiMo-V2.5-Pro le 2026-10-21 (migration vers V2.6). Le prix du tableau a sauté de $0.43/$0.87 à $0.48/$1.80 ; l’ancien correspondait au tarif officiel international ($0.435/$0.87, repris par mimo-v2.6-pro puisque le billet de lancement promettait aucun changement de tarif), le nouveau n’existe que chez des hébergeurs tiers (OpenRouter $0.48/$1.80). Désactivé par défaut.",
+      "src": "mimo.mi.com/docs/price/pay-as-you-go + bannière de retrait platform.xiaomimimo.com (vérifié 2026-11-22) ; mimo.xiaomi.com/mimo-v2-5-pro"
+    },
+    "hy3p_channel": {
+      "name": "Hy3 preview affiché sous le tarif officiel Tencent $0.18/$0.60 (incertain)",
+      "desc": "Le tableau est passé de $0.18/$0.60 à $0.14/$0.58 pour Hy3 preview. Tencent Cloud facture Hy3 preview à partir de ¥1.2/¥4 par million de tokens (≈$0.17/$0.56), et les suivis tiers enregistrent le tarif officiel USD à $0.18/$0.60 — l’ancien prix du tableau. Le nouveau prix égale le tarif Hy3 GA et la cote OpenRouter : soit Tencent a aligné la preview sur le modèle GA sans annonce, soit le tableau a fusionné les deux entrées. Désactivé par défaut.",
+      "src": "cloud.tencent.com article Hy Token Plan 2676264 + suivi de tarifs Tencent activepieces.com (vérifié 2026-11-22) ; openrouter.ai/api/v1/models"
     }
   },
   "peakTag": {

@@ -76,3 +76,5 @@ python3 -m http.server 8080 -d dist    # Ctrl-C when done
 ## Attribution
 
 Leaderboard data © LMArena (arena.ai). Prices from vendor pricing pages, verified against benchr.org/pricing. Independent analysis, no affiliation.
+
+**11-20 board caveat** (checked 2026-11-22): of the 8 models whose board price changed on 11-20, 6 now match the OpenRouter aggregator rate instead of the vendor's official price (Qwen3.5-397B-A17B, Kimi K2.7 Code, MiMo-V2.5-Pro, Hy3 preview, GLM-4.7, GLM-5.3-Flash) with no vendor price-change announcement. Registered as 6 `conf:'suspected'` events (off by default); Hy3 GA (= Tencent official ¥1/¥4 converted) and Beam 1.0 (no published vendor rate card) were verified and intentionally not registered. Per-model evidence lives in the `PRICE_EVENTS` block of `src/js/03-pricing.js`.

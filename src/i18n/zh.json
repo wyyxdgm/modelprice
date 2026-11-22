@@ -335,6 +335,36 @@
       "name": "与第三方指数差 2×，无促销解释（存疑）",
       "desc": "Mistral Medium 3.5（$0.75/$3.75 vs 指数 $1.50/$7.50）与 GPT-6 Sol（$1/$5 vs $2/$10）恰好是某第三方指数的一半。可能是促销，也可能指数过时。默认关闭。",
       "src": "benchr.org/pricing 对比"
+    },
+    "glm53flash_nov": {
+      "name": "GLM-5.3-Flash 榜面 $0.02/$0.07 远低于官方 $0.15/$0.50，无促销公告（存疑）",
+      "desc": "11-20 榜面价 $0.02/$0.07，比 Z.ai 定价页现价（$0.15/$0.50，2026-11-22 核对）低 87%/86%。全网无促销公告、无到期日；发布博客只写了 $0.045/task (discounted)。$0.02/$0.07 与 OpenRouter batch 档（$0.023/$0.068）几乎一致，可能是误抓档位或短促未公告促销。默认关闭。",
+      "src": "docs.z.ai/guides/overview/pricing + z.ai/blog/glm-5.3-flash（2026-11-22 核对）；openrouter.ai/api/v1/models"
+    },
+    "glm47_nov": {
+      "name": "GLM-4.7 榜面 $0.40/$1.75 与官方价、聚合渠道价都不符（存疑）",
+      "desc": "11-20 榜面价 $0.40/$1.75，但 Z.ai 定价页仍是 $0.60/$2.20（2026-11-22 核对），OpenRouter 也是 $0.60/$2.20。榜面价比两边都低 33%/20%，无促销公告、无到期日。默认关闭。",
+      "src": "docs.z.ai/guides/overview/pricing（2026-11-22 核对）；openrouter.ai/api/v1/models"
+    },
+    "qwen35_channel": {
+      "name": "Qwen3.5-397B-A17B 榜面价低于阿里官方 $0.60/$3.60（存疑）",
+      "desc": "榜面从 $0.60/$3.60 降到 $0.45/$3.00，但阿里云 Model Studio 国际站 qwen3.5-397b-a17b 仍是 $0.6/$3.6（0–256K 档，2026-11-22 核对），官方未宣布降价。$0.45/$3.00 与 OpenRouter 完全一致，更像聚合渠道切换而非厂商调价。默认关闭。",
+      "src": "alibabacloud.com/help/en/model-studio/model-pricing（2026-11-22 核对）；openrouter.ai/api/v1/models"
+    },
+    "kimi27_channel": {
+      "name": "Kimi K2.7 Code 榜面价低于 Moonshot 官方 $0.95/$4.00（存疑）",
+      "desc": "榜面从 $0.60/$3.50 变为 $0.60/$3.00，但 Moonshot 官方 kimi-k2.7-code 仍是 $0.95/$4.00（2026-11-22 核对），且已公告 K2 系列将于 2026 年 12 月底退役。榜面价与 OpenRouter 完全一致（$0.60/$3.00），比官方低 37%/25%，无促销公告。默认关闭。",
+      "src": "platform.kimi.ai/docs/pricing/chat（2026-11-22 核对）；openrouter.ai/api/v1/models"
+    },
+    "mimo25_retired": {
+      "name": "MiMo-V2.5-Pro 已被小米下线，榜面价无官方锚点（存疑）",
+      "desc": "小米已于 2026-10-21 正式下线 MiMo-V2.5-Pro API（要求切换 V2.6）。榜面价从 $0.43/$0.87 跳到 $0.48/$1.80：旧价恰为官方海外价（$0.435/$0.87，发布博客承诺价格不变，现由 mimo-v2.6-pro 承接），新价只存在于第三方托管（OpenRouter $0.48/$1.80）。默认关闭。",
+      "src": "mimo.mi.com/docs/price/pay-as-you-go + platform.xiaomimimo.com 下线横幅（2026-11-22 核对）；mimo.xiaomi.com/mimo-v2-5-pro"
+    },
+    "hy3p_channel": {
+      "name": "Hy3 preview 榜面价低于腾讯官方 $0.18/$0.60（存疑）",
+      "desc": "榜面 Hy3 preview 从 $0.18/$0.60 降到 $0.14/$0.58。腾讯云 Hy3 preview 按量计费为 ¥1.2/¥4 每百万 tokens 起（≈$0.17/$0.56），第三方追踪记录的官方美元价为 $0.18/$0.60（即旧榜面价）。新价与 Hy3 正式版价、OpenRouter 挂牌一致——要么腾讯未公告地把 preview 与正式版对齐，要么榜单把两个条目并了价。默认关闭。",
+      "src": "cloud.tencent.com Hy Token Plan 文章 2676264 + activepieces.com 腾讯定价追踪（2026-11-22 核对）；openrouter.ai/api/v1/models"
     }
   },
   "peakTag": {

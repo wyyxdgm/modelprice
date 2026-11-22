@@ -335,6 +335,36 @@
       "name": "第三者インデックスとの差が 2×、プロモの説明なし（不確実）",
       "desc": "Mistral Medium 3.5（$0.75/$3.75 vs インデックス $1.50/$7.50）と GPT-6 Sol（$1/$5 vs $2/$10）は、ある第三者インデックスのちょうど半分で掲載。プロモの可能性も、インデックスが古い可能性も。デフォルトオフ。",
       "src": "benchr.org/pricing 比較"
+    },
+    "glm53flash_nov": {
+      "name": "GLM-5.3-Flash $0.02/$0.07 は公式 $0.15/$0.50 を大きく下回る、プロモ告知なし（不確実）",
+      "desc": "11-20 のボードは $0.02/$0.07。Z.ai の料金ページ（$0.15/$0.50、2026-11-22 確認）より 87%/86% 低い。プロモ告知も終了日も anywhere に存在せず、公開ブログは $0.045/task (discounted) に触れるのみ。$0.02/$0.07 は OpenRouter の batch 階層（$0.023/$0.068）とほぼ一致し、誤取得階層か短期無告知プロモの可能性。デフォルトはオフ。",
+      "src": "docs.z.ai/guides/overview/pricing + z.ai/blog/glm-5.3-flash（2026-11-22 確認）；openrouter.ai/api/v1/models"
+    },
+    "glm47_nov": {
+      "name": "GLM-4.7 $0.40/$1.75 は公式・アグリゲータのどちらとも不一致（不確実）",
+      "desc": "11-20 のボードは $0.40/$1.75。しかし Z.ai の料金ページは $0.60/$2.20 のまま（2026-11-22 確認）で、OpenRouter も $0.60/$2.20。ボード価格は両方より 33%/20% 低く、プロモ告知・終了日なし。デフォルトはオフ。",
+      "src": "docs.z.ai/guides/overview/pricing（2026-11-22 確認）；openrouter.ai/api/v1/models"
+    },
+    "qwen35_channel": {
+      "name": "Qwen3.5-397B-A17B は Alibaba 公式 $0.60/$3.60 を下回る表示（不確実）",
+      "desc": "ボードは $0.60/$3.60 → $0.45/$3.00 に変動。しかし Alibaba Cloud Model Studio 国際サイトの qwen3.5-397b-a17b は $0.6/$3.6 のまま（0–256K、2026-11-22 確認）で、値下げ告知はない。$0.45/$3.00 は OpenRouter の表示と完全一致 — ベンダー調整ではなくチャネル切り替えの可能性。デフォルトはオフ。",
+      "src": "alibabacloud.com/help/en/model-studio/model-pricing（2026-11-22 確認）；openrouter.ai/api/v1/models"
+    },
+    "kimi27_channel": {
+      "name": "Kimi K2.7 Code は Moonshot 公式 $0.95/$4.00 を下回る表示（不確実）",
+      "desc": "ボードは $0.60/$3.50 → $0.60/$3.00。しかし Moonshot 公式の kimi-k2.7-code は $0.95/$4.00 のまま（2026-11-22 確認）で、K2 シリーズは 2026 年 12 月末で退役予定と告知済み。ボード価格は OpenRouter（$0.60/$3.00）と完全一致 — 公式より 37%/25% 低いチャネル価格、プロモ告知なし。デフォルトはオフ。",
+      "src": "platform.kimi.ai/docs/pricing/chat（2026-11-22 確認）；openrouter.ai/api/v1/models"
+    },
+    "mimo25_retired": {
+      "name": "MiMo-V2.5-Pro は Xiaomi が提供終了、ボード価格に公式の基準なし（不確実）",
+      "desc": "Xiaomi は 2026-10-21 に MiMo-V2.5-Pro API を正式提供終了（V2.6 への切替を告知）。ボード価格は $0.43/$0.87 → $0.48/$1.80 に跳躍。旧価格は公式海外レート（$0.435/$0.87、公開ブログは価格据え置きを約束、現行は mimo-v2.6-pro が継承）と一致、新価格はサードパーティホスティング（OpenRouter $0.48/$1.80）にのみ存在。デフォルトはオフ。",
+      "src": "mimo.mi.com/docs/price/pay-as-you-go + platform.xiaomimimo.com の提供終了バナー（2026-11-22 確認）；mimo.xiaomi.com/mimo-v2-5-pro"
+    },
+    "hy3p_channel": {
+      "name": "Hy3 preview は Tencent 公式 $0.18/$0.60 を下回る表示（不確実）",
+      "desc": "ボードの Hy3 preview は $0.18/$0.60 → $0.14/$0.58。Tencent Cloud の Hy3 preview 従量課金は 100万トークンあたり ¥1.2/¥4〜（≈$0.17/$0.56）で、サードパーティ追跡の公式 USD レートは $0.18/$0.60（旧ボード価格）。新価格は Hy3 正式版レート・OpenRouter の表示と一致 — Tencent が無告知で preview を正式版に合わせたか、ボードが両エントリを統合した可能性。デフォルトはオフ。",
+      "src": "cloud.tencent.com Hy Token Plan 記事 2676264 + activepieces.com Tencent 料金追跡（2026-11-22 確認）；openrouter.ai/api/v1/models"
     }
   },
   "peakTag": {

@@ -60,6 +60,32 @@ PRICE_EVENTS = [
      "rule":"Mistral Medium 3.5 ($0.75/$3.75 vs index $1.50/$7.50) and GPT-6 Sol ($1/$5 vs $2/$10). Off by default.",
      "models_affected":["Mistral Medium 3.5","GPT-6 Sol"],
      "source":"benchr.org/pricing comparison"},
+    # —— 2026-11-22 核对（11-20 榜 diff 检出 8 模型）：6 个榜面价与厂商官方现价不符且无促销公告 → suspected，默认关闭；
+    #    Hy3（=腾讯官方 ¥1/¥4 折算）与 Beam 1.0（厂商无价目表）不登记。
+    {"id":"glm53flash_nov","name":"GLM-5.3-Flash $0.02/$0.07 vs official $0.15/$0.50, no promo notice","confidence":"uncertain","default":False,
+     "rule":"Board 11-20 lists $0.02/$0.07; Z.ai pricing page still $0.15/$0.50 (no promo/end date). $0.02/$0.07 ~ OpenRouter batch tier. Off by default.",
+     "models_affected":["GLM-5.3-Flash"],
+     "source":"docs.z.ai/guides/overview/pricing + z.ai/blog/glm-5.3-flash (checked 2026-11-22); openrouter.ai"},
+    {"id":"glm47_nov","name":"GLM-4.7 $0.40/$1.75 matches neither official nor aggregator","confidence":"uncertain","default":False,
+     "rule":"Board 11-20 lists $0.40/$1.75; Z.ai pricing page and OpenRouter both still $0.60/$2.20. No promo notice. Off by default.",
+     "models_affected":["GLM-4.7"],
+     "source":"docs.z.ai/guides/overview/pricing (checked 2026-11-22); openrouter.ai"},
+    {"id":"qwen35_channel","name":"Qwen3.5-397B-A17B listed below Alibaba official $0.60/$3.60","confidence":"uncertain","default":False,
+     "rule":"Board moved $0.60/$3.60 -> $0.45/$3.00; Alibaba Model Studio still $0.6/$3.6 (intl, 0-256K). Board price = OpenRouter channel price. Off by default.",
+     "models_affected":["Qwen3.5-397B-A17B"],
+     "source":"alibabacloud.com/help/en/model-studio/model-pricing (checked 2026-11-22); openrouter.ai"},
+    {"id":"kimi27_channel","name":"Kimi K2.7 Code listed below Moonshot official $0.95/$4.00","confidence":"uncertain","default":False,
+     "rule":"Board moved $0.60/$3.50 -> $0.60/$3.00; Moonshot still $0.95/$4.00, K2 series retires end of Dec 2026. Board = OpenRouter price. Off by default.",
+     "models_affected":["Kimi K2.7 Code"],
+     "source":"platform.kimi.ai/docs/pricing/chat (checked 2026-11-22); openrouter.ai"},
+    {"id":"mimo25_retired","name":"MiMo-V2.5-Pro retired by Xiaomi; board price has no official anchor","confidence":"uncertain","default":False,
+     "rule":"Xiaomi delisted V2.5-Pro API 2026-10-21. Board jumped $0.43/$0.87 -> $0.48/$1.80 (third-party hosting only); official rate carried to mimo-v2.6-pro at $0.435/$0.87. Off by default.",
+     "models_affected":["MiMo-V2.5-Pro"],
+     "source":"mimo.mi.com/docs/price/pay-as-you-go + platform.xiaomimimo.com delisting banner (checked 2026-11-22)"},
+    {"id":"hy3p_channel","name":"Hy3 preview listed below Tencent official $0.18/$0.60","confidence":"uncertain","default":False,
+     "rule":"Board moved $0.18/$0.60 -> $0.14/$0.58; Tencent bills preview from CNY 1.2/4 per 1M, official USD rate tracked at $0.18/$0.60. New price = Hy3 GA rate / OpenRouter. Off by default.",
+     "models_affected":["Hy3 preview"],
+     "source":"cloud.tencent.com Hy Token Plan article 2676264 + activepieces.com tracker (checked 2026-11-22); openrouter.ai"},
 ]
 
 def row_to_model(r):

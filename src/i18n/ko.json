@@ -335,6 +335,36 @@
       "name": "제3자 인덱스와 2× 차이, 프로모션 설명 없음(불확실)",
       "desc": "Mistral Medium 3.5($0.75/$3.75 vs 인덱스 $1.50/$7.50)와 GPT-6 Sol($1/$5 vs $2/$10)은 어떤 제3자 인덱스의 정확히 절반으로 게재됨. 프로모션일 수도, 인덱스가 오래됐을 수도. 기본 꺼짐.",
       "src": "benchr.org/pricing 비교"
+    },
+    "glm53flash_nov": {
+      "name": "GLM-5.3-Flash $0.02/$0.07 — 공식 $0.15/$0.50 대비 크게 낮음, 프로모 공지 없음(불확실)",
+      "desc": "11-20 보드는 $0.02/$0.07. Z.ai 가격 페이지($0.15/$0.50, 2026-11-22 확인)보다 87%/86% 낮다. 프로모 공지나 종료일이 어디에도 없으며 출시 블로그는 $0.045/task (discounted)에만 언급. $0.02/$0.07은 OpenRouter batch 등급($0.023/$0.068)과 거의 일치 — 잘못 긁은 등급이거나 짧은 무공지 프로모일 가능성. 기본값 꺼짐.",
+      "src": "docs.z.ai/guides/overview/pricing + z.ai/blog/glm-5.3-flash(2026-11-22 확인); openrouter.ai/api/v1/models"
+    },
+    "glm47_nov": {
+      "name": "GLM-4.7 $0.40/$1.75 — 공식·애그리게이터 어느 쪽과도 불일치(불확실)",
+      "desc": "11-20 보드는 $0.40/$1.75. 그러나 Z.ai 가격 페이지는 여전히 $0.60/$2.20(2026-11-22 확인)이고 OpenRouter도 $0.60/$2.20. 보드 가격은 양쪽보다 33%/20% 낮으며 프로모 공지·종료일 없음. 기본값 꺼짐.",
+      "src": "docs.z.ai/guides/overview/pricing(2026-11-22 확인); openrouter.ai/api/v1/models"
+    },
+    "qwen35_channel": {
+      "name": "Qwen3.5-397B-A17B — Alibaba 공식 $0.60/$3.60 아래 표시(불확실)",
+      "desc": "보드는 $0.60/$3.60 → $0.45/$3.00. 그러나 Alibaba Cloud Model Studio 국제 사이트의 qwen3.5-397b-a17b는 여전히 $0.6/$3.6(0–256K, 2026-11-22 확인)이며 인하 공지는 없다. $0.45/$3.00은 OpenRouter 표시와 정확히 일치 — 벤더 조정이 아닌 채널 전환으로 보임. 기본값 꺼짐.",
+      "src": "alibabacloud.com/help/en/model-studio/model-pricing(2026-11-22 확인); openrouter.ai/api/v1/models"
+    },
+    "kimi27_channel": {
+      "name": "Kimi K2.7 Code — Moonshot 공식 $0.95/$4.00 아래 표시(불확실)",
+      "desc": "보드는 $0.60/$3.50 → $0.60/$3.00. 그러나 Moonshot 공식 kimi-k2.7-code는 여전히 $0.95/$4.00(2026-11-22 확인)이며 K2 시리즈는 2026년 12월 말 은퇴 예정을 공지했다. 보드 가격은 OpenRouter($0.60/$3.00)와 정확히 일치 — 공식보다 37%/25% 낮은 채널 가격, 프로모 공지 없음. 기본값 꺼짐.",
+      "src": "platform.kimi.ai/docs/pricing/chat(2026-11-22 확인); openrouter.ai/api/v1/models"
+    },
+    "mimo25_retired": {
+      "name": "MiMo-V2.5-Pro — Xiaomi 제공 종료, 보드 가격에 공식 기준 없음(불확실)",
+      "desc": "Xiaomi는 2026-10-21에 MiMo-V2.5-Pro API를 정식 제공 종료(V2.6 전환 안내). 보드 가격은 $0.43/$0.87 → $0.48/$1.80로 점프. 구 가격은 공식 해외 요금($0.435/$0.87, 출시 블로그는 가격 동결 약속, 현재는 mimo-v2.6-pro가 승계)과 일치, 신 가격은 서드파티 호스팅(OpenRouter $0.48/$1.80)에만 존재. 기본값 꺼짐.",
+      "src": "mimo.mi.com/docs/price/pay-as-you-go + platform.xiaomimimo.com 제공 종료 배너(2026-11-22 확인); mimo.xiaomi.com/mimo-v2-5-pro"
+    },
+    "hy3p_channel": {
+      "name": "Hy3 preview — Tencent 공식 $0.18/$0.60 아래 표시(불확실)",
+      "desc": "보드의 Hy3 preview는 $0.18/$0.60 → $0.14/$0.58. Tencent Cloud의 Hy3 preview 종량 과금은 100만 토큰당 ¥1.2/¥4부터(≈$0.17/$0.56)이며 서드파티 추적의 공식 USD 요금은 $0.18/$0.60(구 보드 가격). 신 가격은 Hy3 정식 버전 요금·OpenRouter 표시와 일치 — Tencent가 무공지로 preview를 정식 버전에 맞췄거나 보드가 두 항목을 병합했을 가능성. 기본값 꺼짐.",
+      "src": "cloud.tencent.com Hy Token Plan 글 2676264 + activepieces.com Tencent 요금 추적(2026-11-22 확인); openrouter.ai/api/v1/models"
     }
   },
   "peakTag": {
