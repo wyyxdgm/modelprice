@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Which AI model is cheapest for your quality bar? An interactive Pareto ladder of Arena (LMArena) WebDev scores vs. real cost per task — with peak/off-peak pricing, cache-hit discounts, and strict CI merging. Free, no signup.">
+<meta property="og:title" content="Cheapest AI models at every quality level — Arena Score vs. real cost per task">
+<meta property="og:description" content="Set your minimum acceptable Arena Score and see the cheapest model that clears it, how much the next tier costs per point, and how peak/off-peak and cache pricing change the answer.">
+<meta property="og:type" content="website">
+<meta name="robots" content="index,follow">
+<title>Arena Leaderboard Value Analyzer · Score Range → Best-Value Model</title>
+<link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <div>
+    <h1>Arena Leaderboard Value Analyzer <span class="sub">score range → best-value model in range</span></h1>
+    <div class="tagline">
+      Drag the capability threshold from highest to lowest and watch each tier's winner update live. This is the 
+      <b style="color:var(--good)">lower envelope / Pareto frontier</b> — Your intuition "every capability tier has a best-value model" is mathematically sound, but it needs the right definition (see below). Data: <a href="https://arena.ai/leaderboard/code/webdev" target="_blank" rel="noopener">arena.ai/leaderboard</a>, scraped <span class="mono" id="scraped"></span> (leaderboard dated <span class="mono" id="captured"></span>).
+    </div>
+  </div>
+  <div class="badge-row" id="topBadges"></div>
+</header>
+
+<section class="intro" style="margin:14px 0 18px;padding:14px 16px;border:1px solid var(--line);border-radius:10px;background:var(--panel2)">
+  <h2 style="margin:0 0 8px;font-size:17px">Cheapest AI models at every quality level — Arena Score vs. real cost per task</h2>
+  <p style="margin:0 0 6px;color:var(--dim)">Model comparison sites show prices. Leaderboards show scores. This tool joins them: <b style="color:var(--text)">set the minimum Arena Score you can accept, and it names the cheapest model that clears the bar</b> — plus the marginal $/point to the next tier. Arena's official leaderboard prices hide three traps that this tool corrects: DeepSeek peak/off-peak pricing (the board mixes both conventions in one table), expired promo prices (GLM-5.3-Flash), and cache-miss bias (leaderboard costs assume 0% cache hits; real agent workloads hit often).</p>
+  <p style="margin:0;color:var(--dim2);font-size:12.5px">Three definitions of "best value" (threshold / score-per-$ / excess-score-per-$) · strict 95% CI mode merges statistically indistinguishable tiers · prices modeled as a function of time over a 168-hour week · <a href="/method.html">Method &amp; data sources</a> · <a href="/data/v1/all.json">JSON (AI-readable)</a> · <a href="/llms.txt">llms.txt</a></p>
+</section>
+<div class="grid">
+  <!-- ============ 左：控制台 ============ -->
+  <div>
+    <div class="panel">
+      <h2>Leaderboard dataset</h2>
+      <select id="ds"></select>
+      <div class="hint" id="dsNote"></div>
+      <div class="hint" style="margin-top:6px;border-left:2px solid var(--gold);padding-left:8px">
+        <b>Open-source-only and all-license are two different boards; their scores are not comparable.</b>
+        Open-source board (<span class="mono">?license=open-source</span>) maxes out at  <b class="mono">1687</b> (Kimi K3.1 Pro); the all-license board tops out at  <b class="mono">1838</b> (Claude Fable 5.2 xHigh, $11.04/task) — Claude Opus 5.5 1815, Sonnet 5.5 1772, Gemini 4 Carbon 1768, GPT-6 Astra 1764 are all there. Switch the dataset to the <b>All-license</b> entry.<br>
+        <span style="color:var(--dim2)">Note: the all-license board only has the top 41 scraped (Score 1590–1838); the long tail beyond rank 41 is missing. The high-score frontier is unaffected, but "cheapest overall" and "excess score/$" baselines will skew.</span>
+      </div>
+
+      <h2>Definition of "best value"</h2>
+      <div class="seg" id="mode">
+        <button data-v="pareto" class="on" title="cheapest among models with score ≥ T (= lower envelope, your original idea)">① Threshold</button>
+        <button data-v="ratio" title="max Score ÷ Cost">② Score / $</button>
+        <button data-v="baseline" title="max (Score − 1200) ÷ Cost">③ Excess score / $</button>
+      </div>
+      <div class="hint" id="modeHint"></div>
+
+      <h2>Score range (capability acceptance)</h2>
+      <div class="rng" id="rng">
+        <div class="track"></div><div class="fill" id="fill"></div><div class="hi" id="hiFill"></div>
+        <div class="h" id="hLo"></div><div class="h max" id="hHi"></div>
+        <div class="lab" id="labLo"></div><div class="lab" id="labHi"></div>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <div style="flex:1"><label class="fld">Lower lo</label><input type="number" id="inLo" step="1"></div>
+        <div style="flex:1"><label class="fld">Upper hi</label><input type="number" id="inHi" step="1"></div>
+      </div>
+      <div class="chips" style="margin-top:9px">
+        <button class="btn" data-p="full">Full domain [min, max]</button>
+        <button class="btn" data-p="sweep">[T, max] sweep</button>
+        <button class="btn" data-p="top10">Top10 tiers</button>
+        <button class="btn" data-p="mid">Mid band 1400–1550</button>
+      </div>
+      <div class="playbar">
+        <button class="btn primary" id="play">▶ Play: sweep the threshold from highest to lowest</button>
+        <input type="range" class="spd" id="spd" min="1" max="20" value="8" title="speed">
+        <span class="pill" id="playState">Stop</span>
+      </div>
+
+      <h2>Significance mode</h2>
+      <div class="seg" id="ci">
+        <button data-v="point" class="on">Point estimate</button>
+        <button data-v="strict">Strict (win only if 95% CIs don't overlap)</button>
+      </div>
+      <div class="hint">Strict mode only accepts a gap where A's CI lower bound &gt; B's CI upper bound, so noise never becomes a conclusion. Low-vote  <span class="pill warn" style="padding:0 5px">Preliminary</span>  model CIs often reach ±20–55.</div>
+
+      <h2>Price scenarios: making list prices <b>a function of time</b></h2>
+      <div class="row" style="gap:10px;flex-wrap:wrap">
+        <div style="flex:1;min-width:118px"><label class="fld">Display timezone</label>
+          <select id="tz">
+            <option value="0">UTC ±0</option>
+            <option value="1">CET +1</option>
+            <option value="2">EET +2</option>
+            <option value="8">Beijing +8</option>
+            <option value="9">Tokyo +9</option>
+            <option value="-5">US East −5</option>
+            <option value="-8">US West −8</option>
+          </select></div>
+        <div style="flex:1;min-width:96px"><label class="fld">Day (UTC)</label>
+          <select id="dow">
+            <option value="1">Mon</option><option value="2">Tue</option><option value="3">Wed</option>
+            <option value="4">Thu</option><option value="5">Fri</option><option value="6">Sat</option>
+            <option value="0">Sun</option>
+          </select></div>
+      </div>
+      <label class="fld" style="margin-top:9px">UTC hour <span class="mono" id="hourUtc">--:00</span>
+        <span class="pill" id="peakPill" style="padding:0 6px">—</span>
+        <span style="color:var(--dim);font-weight:400">· Your local time is  <span class="mono" id="hourLocal">--:00</span></span></label>
+      <input type="range" id="hour" min="0" max="23" step="1" value="12" style="width:100%;accent-color:var(--accent)">
+      <div class="chips" style="margin-top:8px">
+        <button class="btn" data-pk="now">now</button>
+        <button class="btn" data-pk="peak">Priciest hour</button>
+        <button class="btn" data-pk="off">Cheapest hour</button>
+        <button class="btn" data-pk="sat">Saturday (all off-peak)</button>
+        <button class="btn" data-pk="board">As listed (all off)</button>
+        <button class="btn" data-pk="all">Enable all (incl. uncertain)</button>
+      </div>
+      <div class="row" style="gap:10px;margin-top:10px;flex-wrap:wrap">
+        <div style="flex:1;min-width:140px"><label class="fld">Pricing date</label><input type="date" id="dateIso"></div>
+        <div style="flex:1;min-width:150px"><label class="fld">Output token share <span class="mono" id="osLab">8%</span></label>
+          <input type="range" id="outShare" min="0" max="60" step="1" value="8" style="width:100%;accent-color:var(--accent)"></div>
+      </div>
+      <div class="hint" id="osHint"></div>
+
+      <h2 style="margin-top:14px">Cache hit rate <span class="pill" id="cachePill" style="padding:0 6px">95%</span></h2>
+      <div class="row" style="gap:10px;align-items:flex-end">
+        <div style="flex:1;min-width:150px">
+          <input type="range" id="cacheHit" min="0" max="100" step="1" value="95" style="width:100%;accent-color:var(--accent)"></div>
+        <div style="width:92px"><label class="fld">Exact %</label>
+          <input type="number" id="cacheHitN" min="0" max="100" step="1" value="95"></div>
+      </div>
+      <div class="chips" style="margin-top:8px">
+        <button class="btn" data-ch="0">0% (board prices)</button>
+        <button class="btn" data-ch="50">50%</button>
+        <button class="btn" data-ch="85">85%</button>
+        <button class="btn" data-ch="95">95% (default)</button>
+        <button class="btn" data-ch="99">99%</button>
+      </div>
+      <label class="fld" style="margin-top:9px">Cache read-price source</label>
+      <select id="cacheSrc">
+        <option value="pub">Published cache prices (missing → estimated at 10% of input)</option>
+        <option value="flat">Flat 10% of input price for all (uniform conservative)</option>
+        <option value="off">Disable cache discount (= Arena board prices)</option>
+      </select>
+      <div class="hint" id="cacheHint"></div>
+
+      <div id="evList" style="margin-top:10px"></div>
+      <div class="hint" id="adjNote"></div>
+
+      <h2>Filters</h2>
+      <label class="fld">Min votes ≥ <span class="mono" id="vLab">0</span></label>
+      <input type="range" id="minVotes" min="0" max="25000" step="250" value="0" style="width:100%;accent-color:var(--accent)">
+      <div class="row" style="margin-top:9px;flex-wrap:wrap;gap:12px">
+        <label class="row" style="gap:6px;font-size:12.5px;color:var(--dim)"><input type="checkbox" id="exPrelim" style="width:auto"> Exclude Preliminary</label>
+        <label class="row" style="gap:6px;font-size:12.5px;color:var(--dim)"><input type="checkbox" id="exAuto" checked style="width:auto"> Exclude AutoEval</label>
+        <label class="row" style="gap:6px;font-size:12.5px;color:var(--dim)"><input type="checkbox" id="onlyCost" checked style="width:auto"> Only models with Cost/Task</label>
+      </div>
+      <label class="fld" style="margin-top:11px">Cost/Task cap ≤ $<span class="mono" id="cLab">∞</span>(budget cap)</label>
+      <input type="range" id="maxCost" min="0" max="100" step="1" value="100" style="width:100%;accent-color:var(--accent)">
+      <div class="hint">Budget cap + score threshold = two independent real-world constraints. Set to max for no limit.</div>
+
+      <h2>Export / extend data</h2>
+      <div class="row">
+        <button class="btn" id="expCsv">Export CSV (current table)</button>
+        <button class="btn" id="expTiers">Export tier-ladder CSV</button>
+        <button class="btn" id="copyLink">Copy state link</button>
+      </div>
+      <div class="hint">To add another board (e.g.  <span class="mono">code/terminal</span>、<span class="mono">text</span>、<span class="mono">vision</span>): open the board's page on arena.ai, select the table, copy, and paste below (columns are auto-detected).</div>
+      <textarea id="paste" placeholder="Paste an arena.ai leaderboard's markdown / table text…"></textarea>
+      <div class="row" style="margin-top:8px">
+        <input type="text" id="pasteName" placeholder="New dataset name (optional)" style="flex:1">
+        <button class="btn primary" id="addDs">Add</button>
+      </div>
+      <div class="hint" id="pasteMsg"></div>
+    </div>
+  </div>
+
+  <!-- ============ 右：结果 ============ -->
+  <div>
+    <div class="win" id="winCard"></div>
+
+    <div class="chart" style="margin-top:16px">
+      <div class="ttl"><span>① Scatter: Score (x) × Cost/Task (y, log)</span>
+        <span class="lg">◆ Pareto frontier · gray dots = dominated · vertical bars = CI · shade = current score band · gold dashed line = threshold T (drag it)</span></div>
+      <svg id="scat" viewBox="0 0 900 430" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+
+    <div class="chart" style="margin-top:14px">
+      <div class="ttl"><span>② Step chart: threshold T → cheapest model clearing T (the "winner of every tier" you asked for)</span>
+        <span class="lg">Each bar = one model ruling that score range · click any bar to jump to it</span></div>
+      <svg id="steps" viewBox="0 0 900 250" preserveAspectRatio="xMidYMid meet"></svg>
+    </div>
+
+    <div class="chart" style="margin-top:14px">
+      <div class="ttl"><span>③ 168 hours of the week: minimum cost at threshold T <span class="mono">C(T)</span> change over time</span>
+        <span class="lg">Gray = peak windows · line jumps = champion changes · gold dashed = your selected hour · click anywhere to jump to that hour</span></div>
+      <svg id="tl" viewBox="0 0 900 300" preserveAspectRatio="xMidYMid meet"></svg>
+      <div class="hint" id="tlNote"></div>
+    </div>
+
+    <div class="panel" style="margin-top:14px">
+      <h2>Tier ladder <span class="pill" id="tierCount"></span></h2>
+      <div class="scroll" style="max-height:300px">
+        <table class="tierstable" id="tiersT"><thead><tr>
+          <th>#</th><th>Score range</th><th>Winner in range</th><th class="num">Score</th><th class="num">Cost/Task</th>
+          <th class="num">↑ Marginal cost of the next tier ($/pt)</th><th class="num">Votes</th><th>Notes</th>
+        </tr></thead><tbody></tbody></table>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:14px">
+      <h2>Model table <span class="pill" id="tblCount"></span></h2>
+      <div class="scroll">
+        <table id="tbl"><thead><tr>
+          <th data-k="r">Board #</th><th data-k="or">Overall #</th><th data-k="n">Model</th>
+          <th class="num" data-k="s">Score</th><th class="num" data-k="ci">±CI</th>
+          <th class="num" data-k="c">Cost/Task</th><th class="num" data-k="ratio"> pts/$</th>
+          <th class="num" data-k="base">Excess score/$</th><th class="num" data-k="v">Votes</th>
+          <th class="num" data-k="pin">$/M in</th><th class="num" data-k="pout">$/M out</th>
+          <th data-k="ctx">Context</th><th data-k="lic">License</th>
+        </tr></thead><tbody></tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<details open id="method">
+  <summary>Methodology: does this approach hold? (Verdict: yes — with 5 corrections)</summary>
+  <div class="bd"><div class="note" id="methodBody"></div></div>
+</details>
+
+<details>
+  <summary>Data sources, methodology & disclaimers</summary>
+  <div class="bd"><div class="note" id="sourceBody"></div></div>
+</details>
+
+<div class="footer">
+  Single-file offline tool · no external dependencies · data embedded. Arena.ai has no public JSON API (<span class="mono">/api/*</span> returns 403), so this tool's data comes from scraped snapshots of the public pages — it is <b>a point-in-time snapshot</b>. Arena's built-in Pareto view: <a href="https://arena.ai/leaderboard/code/webdev/pareto" target="_blank" rel="noopener">arena.ai/leaderboard/code/webdev/pareto</a>.<br>Leaderboard data © LMArena (arena.ai), snapshot 2026-11-11 · prices from vendor pricing pages, checked 2026-11-14 · <a href="/method.html">Method</a> · <a href="/data/v1/all.json">JSON</a> · <a href="/llms.txt">llms.txt</a> · <a href="/sitemap.xml">Sitemap</a>
+</div>
+</div>
+
+<script id="DATA" type="application/json">__DATA__</script>
+<script src="/assets/js/01-util.js"></script>
+<script src="/assets/js/02-data.js"></script>
+<script src="/assets/js/03-pricing.js"></script>
+<script src="/assets/js/04-core.js"></script>
+<script src="/assets/js/05-timeline.js"></script>
+<script src="/assets/js/06-scenarios.js"></script>
+<script src="/assets/js/07-render.js"></script>
+<script src="/assets/js/08-interact.js"></script>
+<script src="/assets/js/09-boot.js"></script>
+</body>
+</html>

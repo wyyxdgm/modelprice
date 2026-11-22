@@ -1,0 +1,3 @@
+dist/
+test/run.js
+.DS_Store

@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Build the deployable site artifacts from data/datasets.json.
 
-Usage: python3 build_site.py [domain]     # e.g. python3 build_site.py https://modelprice.damolabs.dev
-Emits:  data/v1/all.json (AI-readable dataset), method.html, llms.txt, robots.txt, sitemap.xml
+Usage: python3 build_site.py [domain]     # e.g. python3 build_site.py https://modelprice.damolabs.app
+Emits into dist/:  data/v1/all.json (AI-readable dataset), method.html, llms.txt, robots.txt, sitemap.xml
+页面本身（dist/index.html + assets/）由 scripts/build_page.py 负责。
 """
 import json, pathlib, sys, datetime, re
 
@@ -159,9 +160,9 @@ payload = {
     "leaderboards": boards,
 }
 
-out_dir = ROOT / "data" / "v1"; out_dir.mkdir(parents=True, exist_ok=True)
+out_dir = ROOT / "dist" / "data" / "v1"; out_dir.mkdir(parents=True, exist_ok=True)
 (out_dir / "all.json").write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
-print("wrote data/v1/all.json", (out_dir / "all.json").stat().st_size, "bytes")
+print("wrote dist/data/v1/all.json", (out_dir / "all.json").stat().st_size, "bytes")
 for b in payload["leaderboards"]:
     print(f"  {b['id']:15s} tiers={len(b['frontier'])}  top={b['frontier'][0]['model']}")
 
@@ -176,22 +177,20 @@ llms = f"""# {payload['meta']['name']}
 - [Interactive tool]({DOMAIN}/): drag the score threshold, toggle price scenarios and cache hit rate, strict CI mode.
 - [Method & data sources]({DOMAIN}/method.html): definitions, formulas, price verification, limitations.
 """
-(ROOT / "llms.txt").write_text(llms)
+(ROOT / "dist" / "llms.txt").write_text(llms)
 
 # ---------- robots.txt / sitemap.xml ----------
-(ROOT / "robots.txt").write_text(f"User-agent: *\nAllow: /\n\nSitemap: {DOMAIN}/sitemap.xml\n")
+(ROOT / "dist" / "robots.txt").write_text(f"User-agent: *\nAllow: /\n\nSitemap: {DOMAIN}/sitemap.xml\n")
 today = payload["meta"]["generated"]
 urls = [("/", "1.0", "weekly"), ("/method.html", "0.8", "monthly"), ("/data/v1/all.json", "0.5", "weekly")]
 sm = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
 for u, pr, freq in urls:
     sm.append(f"  <url><loc>{DOMAIN}{u}</loc><lastmod>{today}</lastmod><changefreq>{freq}</changefreq><priority>{pr}</priority></url>")
 sm.append("</urlset>")
-(ROOT / "sitemap.xml").write_text("\n".join(sm))
+(ROOT / "dist" / "sitemap.xml").write_text("\n".join(sm))
 
 # ---------- method.html ----------
-CSS = open(ROOT / "index.html").read()
-m = re.search(r"<style>(.*?)</style>", CSS, re.S)
-style = m.group(1) if m else ""
+style = (ROOT / "src" / "css" / "style.css").read_text(encoding="utf-8")
 method_body = """
 <h1>Method &amp; data sources</h1>
 <p class="tagline">How the frontier is computed, where every number comes from, and what this tool deliberately does <i>not</i> claim.</p>
@@ -248,5 +247,5 @@ method_html = f"""<!DOCTYPE html>
 <body><div class="wrap" style="max-width:860px">
 {method_body}
 </div></body></html>"""
-(ROOT / "method.html").write_text(method_html)
+(ROOT / "dist" / "method.html").write_text(method_html)
 print("wrote method.html, llms.txt, robots.txt, sitemap.xml  (domain:", DOMAIN + ")")
