@@ -5,22 +5,30 @@
       分数跳变(>30 分) / 新进掉出(top40 & OS 榜) / 价格跳变(标 PRICE_CHANGE, 触发人工核对)。
 关注点: git 仓库无 HEAD（首次跑）或旧文件缺失时降级为「首次基线」; 输出保持纯文本,
         refresh-data.sh 用 grep 'PRICE_CHANGE' 判定退出码 2。"""
+import argparse
 import json
 import pathlib
 import subprocess
 import sys
 
 ROOT = pathlib.Path(__file__).parent.parent
+ap = argparse.ArgumentParser()
+ap.add_argument("--old", help="对照旧 datasets.json 路径（缺省 = git HEAD:data/datasets.json）")
+args = ap.parse_args()
+
 NEW = json.loads((ROOT / "data" / "datasets.json").read_text(encoding="utf-8"))
 
 old_raw = None
-try:
-    old_raw = subprocess.run(
-        ["git", "show", "HEAD:data/datasets.json"],
-        capture_output=True, text=True, cwd=ROOT, timeout=20,
-    ).stdout
-except Exception:
-    pass
+if args.old:
+    old_raw = pathlib.Path(args.old).read_text(encoding="utf-8")
+else:
+    try:
+        old_raw = subprocess.run(
+            ["git", "show", "HEAD:data/datasets.json"],
+            capture_output=True, text=True, cwd=ROOT, timeout=20,
+        ).stdout
+    except Exception:
+        pass
 OLD = json.loads(old_raw) if old_raw else None
 
 lines = [f"captured: {OLD['captured'] if OLD else '(首次基线)'} → {NEW['captured']}"]
