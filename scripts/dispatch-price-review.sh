@@ -12,7 +12,7 @@ AO_BASE_URL="${AO_BASE_URL:-http://127.0.0.1:13000}"
 AO=/Users/damo/workspace/agent-orchestrator/scripts/ao
 
 # 模型名含空格（Beam 1.0 501B A23B）, awk 切列必错 — python regex 解析
-TABLE=$(python3 scripts/diff_report.py "${ARGS[@]}" 2>/dev/null | python3 -c "
+TABLE=$(python3 scripts/diff_report.py ${ARGS[@]+"${ARGS[@]}"} 2>/dev/null | python3 -c "
 import re, sys
 for line in sys.stdin:
     m = re.match(r'^  PRICE_CHANGE (.+?): (\\$\S+ → \\$\S+)', line)
