@@ -144,3 +144,28 @@ Kimi K3.1 Pro <span class="mono">$2/$10</span>, Kimi K3 <span class="mono">$3/$1
   if(p.get('lo')&&p.get('hi')){ S.lo=+p.get('lo'); S.hi=+p.get('hi'); }
   recompute();
 })();
+
+/* ---------- responsive boot ----------
+   手机（≤720px）：答案区已用 CSS order 沉到控制台之前，这里再把控制台分组全部收起，
+   需要时展开 —— 首屏只看到 header + 赢家卡 + 图表。宽屏恢复 HTML 里的默认开合状态。
+   window/matchMedia 都做了存在性守卫，fake DOM 测试环境直接跳过。 */
+(function(){
+  const grps=document.querySelectorAll('.panel details.grp');
+  grps.forEach(d=>{ d.dataset.dopen=d.hasAttribute('open')?'1':'0'; });
+  const method=document.getElementById('method');
+  if(typeof matchMedia==='undefined') return;
+  const mq=matchMedia('(max-width:720px)');
+  const apply=()=>{
+    grps.forEach(d=>{ d.open = !mq.matches && d.dataset.dopen==='1'; });
+    /* 页面级「Methodology」大折叠：手机同样默认收起，宽屏保持 HTML 的 open */
+    if(method) method.open = !mq.matches;
+  };
+  apply();
+  if(mq.addEventListener) mq.addEventListener('change',apply);
+  else if(mq.addListener) mq.addListener(apply);
+})();
+/* 图表按容器宽度渲染 → 窗口尺寸变化后重画一次（防抖）。 */
+if(typeof window!=='undefined'&&window.addEventListener){
+  let rT=null;
+  window.addEventListener('resize',()=>{ clearTimeout(rT); rT=setTimeout(()=>{ if(cur)render(); },180); });
+}

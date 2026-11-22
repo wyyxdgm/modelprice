@@ -23,6 +23,16 @@ function dragSetup(handle,get){
   handle.addEventListener('pointerup',()=>on=false);
   handle.addEventListener('pointercancel',()=>on=false);
 }
+/* 手机友好：点/按轨道空白处 → 把更近的把手跳到该分数（把手自身的拖拽仍走 dragSetup 的
+   pointer capture 逻辑；closest('.h') 保证把手按下不会在这里重复触发）。 */
+rng.addEventListener('pointerdown',e=>{
+  if(e.target&&e.target.closest&&e.target.closest('.h')) return;
+  const r=rng.getBoundingClientRect();
+  const f=clamp((e.clientX-r.left)/r.width,0,1); const [mn,mx]=scoreExtent();
+  const v=Math.round(mn+f*(mx-mn)); stopPlay();
+  if(Math.abs(v-S.lo)<=Math.abs(v-S.hi)) S.lo=Math.min(v,S.hi); else S.hi=Math.max(v,S.lo);
+  recompute();
+});
 dragSetup($('#hLo'),v=>{S.lo=Math.min(v,S.hi);});
 dragSetup($('#hHi'),v=>{S.hi=Math.max(v,S.lo);});
 $('#inLo').onchange=e=>{S.lo=clamp(+e.target.value||0,...scoreExtent());if(S.lo>S.hi)S.hi=S.lo;stopPlay();recompute();};

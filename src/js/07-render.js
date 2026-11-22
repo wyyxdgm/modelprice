@@ -110,11 +110,16 @@ function renderWinner(){
   v.innerHTML=html; c.appendChild(v);
 }
 
-/* ---------- render: scatter ---------- */
+/* ---------- render: charts ----------
+   三张图都按容器实际宽度渲染：viewBox 宽 = 容器宽（svg.clientWidth，fake DOM 下回退 900），
+   文字字号用 SVG attribute 而非 CSS 固定值 —— 手机窄容器同倍缩放后 CSS 字号会变得不可读，
+   所以窄容器用更大的基准字号（FS），标签预算/截断长度也随宽度收紧。 */
 const LX={w:900,h:430,m:{t:18,r:16,b:38,l:60}};
 const NS='http://www.w3.org/2000/svg';
 const mk=(t,a)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e;};
-const tx=(x,y,str,cls,anchor)=>{const t=mk('text',{x,y,class:cls||'','text-anchor':anchor||'start'});t.textContent=str;return t;};
+const tx=(x,y,str,cls,anchor,fs)=>{const t=mk('text',{x,y,class:cls||'','text-anchor':anchor||'start'});t.textContent=str;if(fs)t.setAttribute('font-size',fs);return t;};
+/* 图表字号三元组：FS 基准 / LFS 标签 / WFS 白色高亮标签 */
+function chartFS(w){ const FS=w<620?12.5:9.5; return {FS,LFS:FS+0.5,WFS:FS+1}; }
 function logScale(v,lo,hi){ const a=Math.log10(lo),b=Math.log10(hi); return (Math.log10(v)-a)/(b-a); }
 function niceTicks(lo,hi){
   const out=[]; const e0=Math.floor(Math.log10(lo)), e1=Math.ceil(Math.log10(hi));
@@ -125,8 +130,11 @@ let scatGeo=null;
 function renderScatter(){
   const svg=$('#scat'); svg.innerHTML='';
   const pts=cur.filter(m=>m.c!=null&&m.c>0);
-  if(pts.length<2){ svg.appendChild(tx(20,40,'Need at least 2 models with cost data','lbl')); return; }
-  const {w,h,m}=LX, x0=m.l, x1=w-m.r, y0=h-m.b, y1=m.t;
+  if(pts.length<2){ svg.appendChild(tx(20,40,'Need at least 2 models with cost data','lbl','start',12)); return; }
+  const w=Math.max(340,Math.round(svg.clientWidth||LX.w)), h=LX.h, m=LX.m, {FS,LFS,WFS}=chartFS(w);
+  svg.setAttribute('viewBox',`0 0 ${w} ${h}`);   // viewBox 跟随容器宽，否则画布坐标与视口错位
+  const narrow=w<620;
+  const x0=m.l, x1=w-m.r, y0=h-m.b, y1=m.t;
   const sLo=Math.min(...cur.map(v=>v.sLo)), sHi=Math.max(...cur.map(v=>v.sHi));
   const pad=(sHi-sLo)*0.05||10, dMin=sLo-pad, dMax=sHi+pad;
   const sx=v=>x0+(v-dMin)/(dMax-dMin)*(x1-x0);
@@ -141,18 +149,18 @@ function renderScatter(){
   niceTicks(cMin,cMax).forEach(t=>{
     const y=sy(t);
     svg.appendChild(mk('line',{x1:x0,x2:x1,y1:y,y2:y,class:'grid-l'}));
-    svg.appendChild(tx(x0-8,y+3,fmt$(t),'','end'));
+    svg.appendChild(tx(x0-8,y+3,fmt$(t),'','end',FS));
   });
   const step=Math.max(10,Math.round((dMax-dMin)/9/10)*10);
   for(let t=Math.ceil(dMin/step)*step;t<=dMax;t+=step){
     const x=sx(t);
     svg.appendChild(mk('line',{x1:x,x2:x,y1:y0,y2:y0+5,class:'ax'}));
-    svg.appendChild(tx(x,y0+17,String(t),'','middle'));
+    svg.appendChild(tx(x,y0+17,String(t),'','middle',FS));
   }
   svg.appendChild(mk('line',{x1:x0,x2:x1,y1:y0,y2:y0,class:'ax'}));
-  const yl=tx(16,(y0+y1)/2,'Cost / Task (P50) · log axis','','middle');
+  const yl=tx(16,(y0+y1)/2,'Cost / Task (P50) · log axis','','middle',LFS);
   yl.setAttribute('transform',`rotate(-90 16 ${(y0+y1)/2})`); svg.appendChild(yl);
-  svg.appendChild(tx((x0+x1)/2,h-3,'Arena Score (stronger → right)','','middle'));
+  svg.appendChild(tx((x0+x1)/2,h-3,'Arena Score (stronger → right)','','middle',FS));
 
   // Pareto 前沿（阶梯折线）
   if(frontier.length>1){
@@ -180,7 +188,7 @@ function renderScatter(){
 
   // 数据点
   const wn = view&&view.w?view.w.n:null;
-  const labelBudget = frontier.length<=16;
+  const labelBudget = frontier.length<=(narrow?5:16);
   pts.forEach(mm=>{
     const g=mk('g',{class:'dot'});
     const isW = mm.n===wn;
@@ -193,9 +201,9 @@ function renderScatter(){
     if(mm.adj) g.appendChild(mk('circle',{cx:sx(mm.s),cy:sy(mm.c),r:(isW?7.5:(mm.pareto?4.8:3))+4,
       fill:'none',stroke:'var(--gold)','stroke-width':1.2,'stroke-dasharray':'3 3',opacity:.85}));
     if(isW||(mm.pareto&&labelBudget)){
-      const anchor = sx(mm.s) > x1-190 ? 'end' : 'start';
+      const anchor = sx(mm.s) > x1-(narrow?110:190) ? 'end' : 'start';
       const dx = anchor==='end'? -10 : 9;
-      g.appendChild(tx(sx(mm.s)+dx, sy(mm.c)+3.5, mm.n.length>28?mm.n.slice(0,27)+'…':mm.n, isW?'lblw':'lbl', anchor));
+      g.appendChild(tx(sx(mm.s)+dx, sy(mm.c)+3.5, mm.n.length>(narrow?18:28)?mm.n.slice(0,(narrow?17:27))+'…':mm.n, isW?'lblw':'lbl', anchor, isW?WFS:LFS));
     }
     const t=mk('title'); t.textContent=`${mm.n}\nScore ${mm.s} (+${mm.u95}/-${mm.d95})\nCost/Task ${fmt$(mm.c)}\nVotes ${fmtN(mm.v)}\nAPI ${mm.pin!=null?fmt$(mm.pin)+' / '+fmt$(mm.pout)+' $/M':'N/A'}\n${mm.pareto?'◆ Pareto frontier (undominated)':'Dominated: a higher-scoring, cheaper model exists'}\nclick = set the score range's upper bound to this model`; g.appendChild(t);
     g.addEventListener('click',()=>{ S.hi=mm.s; if(S.lo>mm.s)S.lo=mm.s; stopPlay(); recompute(); });
@@ -203,40 +211,45 @@ function renderScatter(){
   });
   // 分数线 T
   svg.appendChild(mk('line',{x1:sx(S.hi),x2:sx(S.hi),y1:y1-8,y2:y0,class:'tline'}));
-  svg.appendChild(tx(sx(S.hi)+5,y1-1,`Threshold T = ${S.hi}`,'lblw')).setAttribute('fill','#f5c542');
-  if(S.lo<S.hi) svg.appendChild(tx(sx(S.lo)-5,y1-1,`lo = ${S.lo}`,'lbl','end'));
+  svg.appendChild(narrow
+      ? tx(sx(S.hi)-5,y1-1,`T = ${S.hi}`,'lblw','end',WFS)
+      : tx(sx(S.hi)+5,y1-1,`T = ${S.hi}`,'lblw','start',WFS)).setAttribute('fill','#f5c542');
+  if(S.lo<S.hi) svg.appendChild(tx(sx(S.lo)-5,y1-1,`lo = ${S.lo}`,'lbl','end',LFS));
 }
 
 /* ---------- render: step chart ---------- */
 function renderSteps(){
   const svg=$('#steps'); svg.innerHTML='';
   if(!tiers.length){
-    svg.appendChild(tx(20,40,'The step chart only exists in ① Threshold mode — it is exactly the curve "threshold T → cheapest model of that tier"','lbl'));
+    svg.appendChild(tx(20,40,'The step chart only exists in ① Threshold mode — it is exactly the curve "threshold T → cheapest model of that tier"','lbl','start',12));
     return;
   }
-  const w=900,h=250,m={t:20,r:16,b:42,l:60},x0=m.l,x1=w-m.r,y0=h-m.b,y1=m.t;
+  const w=Math.max(340,Math.round(svg.clientWidth||900)),h=250,m={t:20,r:16,b:42,l:60};
+  svg.setAttribute('viewBox',`0 0 ${w} ${h}`);   // viewBox 跟随容器宽，否则画布坐标与视口错位
+  const {FS,LFS,WFS}=chartFS(w); const narrow=w<620;
+  const x0=m.l,x1=w-m.r,y0=h-m.b,y1=m.t;
   const sTop = DATASETS[S.ds].stats.score_max;
   const fr=[...tiers].sort((a,b)=>a.model.s-b.model.s);
   const sLo=Math.min(...fr.map(t=>t.model.s))-10, sHi=Math.max(sTop, Math.max(...fr.map(t=>t.upper||t.model.s)))+10;
   const cs=fr.map(t=>t.model.c).filter(c=>c>0);
-  if(!cs.length){ svg.appendChild(tx(20,40,'No model with cost data on the frontier','lbl')); return; }
+  if(!cs.length){ svg.appendChild(tx(20,40,'No model with cost data on the frontier','lbl','start',12)); return; }
   const cMin=Math.min(...cs)*0.72, cMax=Math.max(...cs)*1.45;
   const sx=v=>x0+(v-sLo)/(sHi-sLo)*(x1-x0);
   const sy=v=>y0-logScale(clamp(v,cMin,cMax),cMin,cMax)*(y0-y1);
   niceTicks(cMin,cMax).forEach(t=>{
     const y=sy(t);
     svg.appendChild(mk('line',{x1:x0,x2:x1,y1:y,y2:y,class:'grid-l'}));
-    svg.appendChild(tx(x0-8,y+3,fmt$(t),'','end'));
+    svg.appendChild(tx(x0-8,y+3,fmt$(t),'','end',FS));
   });
   const step=Math.max(10,Math.round((sHi-sLo)/9/10)*10);
   for(let t=Math.ceil(sLo/step)*step;t<=sHi;t+=step){
     const x=sx(t);
     svg.appendChild(mk('line',{x1:x,x2:x,y1:y0,y2:y0+5,class:'ax'}));
-    svg.appendChild(tx(x,y0+17,String(t),'','middle'));
+    svg.appendChild(tx(x,y0+17,String(t),'','middle',FS));
   }
   svg.appendChild(mk('line',{x1:x0,x2:x1,y1:y0,y2:y0,class:'ax'}));
-  svg.appendChild(tx((x0+x1)/2,h-4,'Threshold T ("at least this strong") → Cost/Task of the cheapest model clearing T','','middle'));
-  const yl=tx(16,(y0+y1)/2,'Cost / Task · log','','middle');
+  svg.appendChild(tx((x0+x1)/2,h-4,narrow?'Threshold T → cheapest Cost/Task':'Threshold T ("at least this strong") → Cost/Task of the cheapest model clearing T','','middle',FS));
+  const yl=tx(16,(y0+y1)/2,'Cost / Task · log','','middle',LFS);
   yl.setAttribute('transform',`rotate(-90 16 ${(y0+y1)/2})`); svg.appendChild(yl);
   svg.appendChild(mk('rect',{x:sx(S.lo),y:y1,width:Math.max(1,sx(S.hi)-sx(S.lo)),height:y0-y1,class:'band'}));
 
@@ -264,15 +277,19 @@ function renderSteps(){
     seg.addEventListener('click',()=>{ S.lo=Math.round(t.lower); S.hi=Math.round(up); stopPlay(); recompute(); });
     svg.appendChild(seg);
     svg.appendChild(mk('circle',{cx:xa,cy:y,r:isW?6.5:4,fill:isW?'#f5c542':'#4cc9f0',stroke:isW?'#fff':'none','stroke-width':isW?2:0}));
-    if(fr.length<=16||isW||i===cheapIdx){
-      const anchor = xa > x1-210 ? 'end':'start';
+    if(narrow? (isW||i===cheapIdx||i===fr.length-1) : (fr.length<=16||isW||i===cheapIdx)){
+      const anchor = xa > x1-(narrow?120:210) ? 'end':'start';
       const dx = anchor==='end'?-8:8;
-      const nm=t.model.n.length>24?t.model.n.slice(0,23)+'…':t.model.n;
-      svg.appendChild(tx(xa+dx, y-8, `${nm}  ${fmt$(t.model.c)}`, isW?'lblw':'lbl', anchor));
+      const nm=t.model.n.length>(narrow?14:24)?t.model.n.slice(0,(narrow?13:23))+'…':t.model.n;
+      /* 宽轴下右侧高分档密集，标签全部画在点上方会互叠 → 奇偶交错（上方/下方） */
+      const ty = (isW||i%2===0) ? y-8 : y+15;
+      svg.appendChild(tx(xa+dx, ty, `${nm}  ${fmt$(t.model.c)}`, isW?'lblw':'lbl', anchor, isW?WFS:LFS));
     }
   });
   svg.appendChild(mk('line',{x1:sx(S.hi),x2:sx(S.hi),y1:y1-6,y2:y0,class:'tline'}));
-  svg.appendChild(tx(sx(S.hi)+5,y1+2,`T = ${S.hi}`,'lblw')).setAttribute('fill','#f5c542');
+  svg.appendChild(narrow
+      ? tx(sx(S.hi)-5,y1+16,`T = ${S.hi}`,'lblw','end',WFS)   // 窄屏下移一行，避开顶档标签
+      : tx(sx(S.hi)+5,y1+2,`T = ${S.hi}`,'lblw','start',WFS)).setAttribute('fill','#f5c542');
 }
 
 /* ---------- render: tier table ---------- */
@@ -321,7 +338,7 @@ function renderTable(){
     const A=COLS[S.sortKey](a),B=COLS[S.sortKey](b);
     return (typeof A==='string'? A.localeCompare(B) : A-B)*S.sortDir;
   });
-  $('#tblCount').textContent=`${cur.length} / ${DATASETS[S.ds].stats.n} models (click headers to sort; gray rows are outside the current score range)`;
+  $('#tblCount').textContent=`${cur.length} / ${DATASETS[S.ds].stats.n} models · click headers to sort · dim rows = out of range`;
   const wn = view&&view.w?view.w.n:null;
   rows.forEach(m=>{
     const tr=el('tr',(inBand(m)?'in':'out')+(m.n===wn?' winner':'')+(m.pareto?' pareto':''));

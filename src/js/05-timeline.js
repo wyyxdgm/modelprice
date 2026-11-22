@@ -36,10 +36,13 @@ function renderTimeline(){
   const cs=pts.filter(p=>p.c!=null).map(p=>p.c);
   if(!cs.length){
     note.textContent=`No model qualifies at threshold T=${T} (filtered out, or no cost data above this score). Lower the threshold or relax the filters.`;
-    svg.appendChild(tx(20,40,'No model qualifies at the current threshold','lbl')); return;
+    svg.appendChild(tx(20,40,'No model qualifies at the current threshold','lbl','start',12)); return;
   }
   const baseC=baselineCostAt(T,models,S.hour,S.dow,S.dateISO);
-  const W=900,H=300,g={t:18,r:20,b:48,l:66},x0=g.l,x1=W-g.r,y0=H-g.b,y1=g.t;
+  const W=Math.max(340,Math.round(svg.clientWidth||900)),H=300,g={t:18,r:20,b:48,l:66};
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);   // viewBox 跟随容器宽，否则画布坐标与视口错位
+  const {FS,LFS,WFS}=chartFS(W); const narrow=W<620;
+  const x0=g.l,x1=W-g.r,y0=H-g.b,y1=g.t;
   const sx=i=>x0+(i/167)*(x1-x0);
   let lo=Math.min(...cs), hi=Math.max(...cs);
   if(baseC!=null){ lo=Math.min(lo,baseC); hi=Math.max(hi,baseC); }
@@ -54,19 +57,19 @@ function renderTimeline(){
   for(let d=0;d<7;d++){
     const i=d*24;
     svg.appendChild(mk('line',{x1:sx(i),y1:y1,x2:sx(i),y2:y0,stroke:'rgba(255,255,255,0.14)','stroke-width':1}));
-    svg.appendChild(tx(sx(i+12),y0+17,DOWS[dowHourOf(i).dow],'lbl','middle'));
+    svg.appendChild(tx(sx(i+12),y0+17,DOWS[dowHourOf(i).dow],'lbl','middle',LFS));
   }
   const ticks=niceTicks(Math.max(lo,1e-4),hi).filter(v=>v>=lo&&v<=hi);
   (ticks.length?ticks:[lo,hi]).forEach(v=>{
     svg.appendChild(mk('line',{x1:x0,y1:sy(v),x2:x1,y2:sy(v),stroke:'rgba(255,255,255,0.07)','stroke-width':1}));
-    svg.appendChild(tx(x0-8,sy(v)+4,fmt$(v),'lbl','end'));
+    svg.appendChild(tx(x0-8,sy(v)+4,fmt$(v),'lbl','end',FS));
   });
-  svg.appendChild(tx(x0-8,y1-8,'/task','lbl','end'));
-  svg.appendChild(tx(x0,y0+36,'Peak windows = weekdays 01:00–04:00 & 06:00–10:00 UTC (gray); weekends are all off-peak','lbl','start'));
+  svg.appendChild(tx(x0-8,y1-8,'/task','lbl','end',FS));
+  if(!narrow) svg.appendChild(tx(x0,y0+36,'Peak windows = weekdays 01:00–04:00 & 06:00–10:00 UTC (gray); weekends are all off-peak','lbl','start',FS));
 
   if(baseC!=null){
     svg.appendChild(mk('line',{x1:x0,y1:sy(baseC),x2:x1,y2:sy(baseC),stroke:'rgba(255,255,255,0.38)','stroke-width':1.2,'stroke-dasharray':'5 4'}));
-    svg.appendChild(tx(x1-2,sy(baseC)-6,'List price '+fmt$(baseC),'lbl','end'));
+    svg.appendChild(tx(x1-2,sy(baseC)-6,'List price '+fmt$(baseC),'lbl','end',LFS));
   }
   let dstr='';
   pts.forEach(p=>{ if(p.c==null)return; const Y=sy(p.c);
@@ -75,16 +78,16 @@ function renderTimeline(){
 
   let prev=null; const sw=[];
   pts.forEach(p=>{ if(p.n&&p.n!==prev){ if(prev!==null)sw.push(p); prev=p.n; } });
-  sw.slice(0,8).forEach((p,k)=>{
+  sw.slice(0,narrow?4:8).forEach((p,k)=>{
     svg.appendChild(mk('line',{x1:sx(p.i),y1:y1,x2:sx(p.i),y2:y0,stroke:'var(--gold)','stroke-width':1,'stroke-dasharray':'3 3',opacity:0.6}));
-    const nm=p.n.length>16?p.n.slice(0,15)+'…':p.n;
-    svg.appendChild(tx(sx(p.i)+3,y1+30+(k%2)*0,nm,'lbl','start'));
+    const nm=p.n.length>(narrow?10:16)?p.n.slice(0,(narrow?9:15))+'…':p.n;
+    svg.appendChild(tx(sx(p.i)+3,y1+30+(k%2)*0,nm,'lbl','start',LFS));
   });
 
   const nowI=idxOf(S.dow,S.hour), nowP=pts[nowI];
   svg.appendChild(mk('line',{x1:sx(nowI),y1:y1,x2:sx(nowI),y2:y0,stroke:'var(--gold)','stroke-width':1.6}));
   if(nowP&&nowP.c!=null) svg.appendChild(mk('circle',{cx:sx(nowI),cy:sy(nowP.c),r:4.2,fill:'var(--gold)'}));
-  svg.appendChild(tx(sx(nowI),y1-8,'now','lbl','middle'));
+  svg.appendChild(narrow ? tx(Math.min(sx(nowI),W-30),y1-8,'now','lbl','end',LFS) : tx(sx(nowI),y1-8,'now','lbl','middle',LFS));
 
   const hit=mk('rect',{x:x0,y:y1,width:x1-x0,height:y0-y1,fill:'transparent',style:'cursor:crosshair'});
   hit.addEventListener('pointerdown',e=>{
