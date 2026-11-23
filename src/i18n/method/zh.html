@@ -35,6 +35,16 @@
 <li>置信度：这里每个数字都能追溯到公开页面；每条修正在工具里带来源。</li>
 </ul>
 
+<h2 id="landscape">Arena × 价格：官方没有这份清单，谁在做</h2>
+<p>截至 2026-11-23 的市场格局（经 arena.ai 顾问会话核实）：<b>OpenRouter 官方没有发布过「Arena 榜 × 价格」的性价比报价清单</b> —— 模型分数榜与价格体系是两套独立数据，官方从未合并。官方最接近的三个入口：</p>
+<ul>
+<li><b>Rankings 页 Benchmarks 板块</b>：价格 × 智能指数散点图（加权平均输入价 × Artificial Analysis Intelligence Index），一键切换 Pareto 前沿 —— 官方页面里最接近「性价比」的视图，但质量轴是第三方智能指数，不是 Arena Elo。</li>
+<li><b>自建基准库</b> openrouter.ai/benchmarks：18 个基准、220 万+ 次任务评测，每个分数附成本与延迟数据，提供 Benchmarks API；Design Arena 的 ELO 榜自 2026-03 起嵌入其中。</li>
+<li><b>价格全量开放</b>：openrouter.ai/models 与 <code>/api/v1/models</code> 接口可程序化拉取每模型的输入/输出/缓存价。</li>
+</ul>
+<p><b>计费口径（本站为何用一方标价）</b>：聚合渠道对推理本身不加价，收费在充值环节（OpenRouter 约 5.5%，2026-11 核实）；同一模型各 provider 独立报价、价差可观，第三方清单一律取最低报价。本站用厂商一方 API 标价；经聚合渠道购买时实付 ≈ 渠道最低报价 + 充值费率，与本站数字存在个位数百分比的系统性偏差。</p>
+<p><b>在做「Arena × 价格」组合的第三方</b>：Artificial Analysis（智能指数 × 价格）、arena.atease.dev（中文，Arena 各榜 × OpenRouter 最低报价）、pricepertoken.com / cloudprice.net（端点价格聚合）。把 Arena 分数折算成<b>任务级成本 Pareto</b> 的目前只有第三方 —— 包括本站。</p>
+
 <h2>署名与合规</h2>
 <p>榜单数据 &copy; LMArena (arena.ai)。这是对公开数字的独立分析，与 arena.ai 无隶属关系。请勿高频抓取 arena.ai —— 自动化请用 Hugging Face 数据集。发布衍生结论时请注明来源与快照日期。</p>
 <p><a href="%ROOT%">← 返回分析工具</a> · <a href="/data/v1/all.json">JSON 导出</a> · <a href="/llms.txt">llms.txt</a></p>

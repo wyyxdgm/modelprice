@@ -35,6 +35,16 @@
 <li>Confiance : chaque chiffre ici remonte à une page publique ; les corrections portent leurs sources par règle dans l'outil.</li>
 </ul>
 
+<h2 id="landscape">Arena × prix : pas de liste officielle — qui comble le vide</h2>
+<p>Panorama du marché au 2026-11-23 (vérifié lors d'une session conseillère arena.ai) : <b>OpenRouter ne publie aucune liste officielle « classement Arena × prix »</b> — les tableaux de scores et la tarification sont deux jeux de données que l'entreprise ne joint jamais. Les trois surfaces officielles les plus proches :</p>
+<ul>
+<li><b>Section Benchmarks de la page Rankings</b> : un nuage de points prix × intelligence (prix d'entrée moyen pondéré × Artificial Analysis Intelligence Index) avec bascule Pareto en un clic — la vue la plus proche du « rapport qualité-prix » sur une page officielle, mais l'axe qualité est un indice d'intelligence tiers, pas l'Elo d'Arena.</li>
+<li><b>Bibliothèque de benchmarks interne</b> openrouter.ai/benchmarks : 18 benchmarks, 2,2 M+ évaluations de tâches, chaque score avec données de coût et de latence, plus une API Benchmarks ; le tableau ELO de Design Arena y est intégré depuis 2026-03.</li>
+<li><b>Tarification entièrement ouverte</b> : openrouter.ai/models et le point d'accès <code>/api/v1/models</code> exposent par programme les prix d'entrée/sortie/cache de chaque modèle.</li>
+</ul>
+<p><b>Base de facturation (pourquoi ce site utilise les prix catalogues internes)</b> : les canaux agrégateurs n'ajoutent pas de majoration par requête — les frais se situent à l'étape de rechargement (OpenRouter ≈5,5 %, vérifié 2026-11) ; chaque fournisseur cite le même modèle indépendamment et les listes tierces prennent toujours le devis le plus bas. Ce site utilise les prix catalogue API internes des fournisseurs ; en achetant via un agrégateur, vous payez ≈ devis de canal le plus bas + frais de rechargement, un écart systématique de quelques pour cent par rapport à ces chiffres.</p>
+<p><b>Tiers qui joignent déjà Arena × prix</b> : Artificial Analysis (indice d'intelligence × prix), arena.atease.dev (chinois ; tableaux Arena × devis OpenRouter les plus bas), pricepertoken.com / cloudprice.net (agrégation de prix par point d'accès). Convertir les scores Arena en une <b>frontière de coût par tâche</b> n'est fait que par des tiers — y compris ce site.</p>
+
 <h2>Attribution et conformité</h2>
 <p>Données du classement &copy; LMArena (arena.ai). Ceci est une analyse indépendante de chiffres publiquement listés ; aucune affiliation avec arena.ai. Ne scrapez pas arena.ai à haute fréquence — utilisez le jeu de données Hugging Face pour l'automatisation. Si vous publiez des conclusions dérivées, attribuez la source et les dates d'instantané.</p>
 <p><a href="%ROOT%">← Retour à l'outil</a> · <a href="/data/v1/all.json">Export JSON</a> · <a href="/llms.txt">llms.txt</a></p>

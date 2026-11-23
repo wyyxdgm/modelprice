@@ -35,6 +35,16 @@
 <li>Confidence: every number here traces to a public page; corrections carry per-rule sources in the tool.</li>
 </ul>
 
+<h2 id="landscape">Arena &times; prices: no official value list &mdash; who fills the gap</h2>
+<p>Market landscape as of 2026-11-23 (verified in an arena.ai advisor session): <b>OpenRouter publishes no official &ldquo;Arena leaderboard &times; price&rdquo; value list</b> &mdash; score boards and pricing are two datasets the company never joins. The three closest official surfaces:</p>
+<ul>
+<li><b>Benchmarks section on the Rankings page</b>: a price &times; intelligence scatter (weighted-average input price &times; Artificial Analysis Intelligence Index) with a one-click Pareto toggle &mdash; the closest thing to a &ldquo;value&rdquo; view on an official page, but the quality axis is a third-party intelligence index, not Arena Elo.</li>
+<li><b>First-party benchmark library</b> openrouter.ai/benchmarks: 18 benchmarks, 2.2M+ task evaluations, each score with cost &amp; latency data, plus a Benchmarks API; Design Arena&rsquo;s ELO board has been embedded there since 2026-03.</li>
+<li><b>Fully open pricing</b>: openrouter.ai/models and the <code>/api/v1/models</code> endpoint expose per-model input/output/cache prices programmatically.</li>
+</ul>
+<p><b>Billing basis (why this site uses first-party list prices)</b>: aggregator channels add no per-request markup &mdash; the fee sits in the top-up step (OpenRouter &asymp;5.5%, verified 2026-11); each provider quotes the same model independently and third-party lists always take the lowest quote. This site uses vendors&rsquo; first-party API list prices; buying through an aggregator lands you at &asymp; lowest channel quote + top-up fee, a single-digit-percent systematic offset from these numbers.</p>
+<p><b>Third parties already joining Arena &times; prices</b>: Artificial Analysis (intelligence index &times; price), arena.atease.dev (Chinese; Arena boards &times; lowest OpenRouter quotes), pricepertoken.com / cloudprice.net (endpoint price aggregation). Turning Arena scores into a <b>task-level cost Pareto</b> is done only by third parties &mdash; including this site.</p>
+
 <h2>Attribution &amp; compliance</h2>
 <p>Leaderboard data &copy; LMArena (arena.ai). This is an independent analysis of publicly listed numbers; no affiliation with arena.ai. Don&rsquo;t scrape arena.ai at high frequency &mdash; use the Hugging Face dataset for automation. If you publish derived conclusions, attribute the source and snapshot dates.</p>
 <p><a href="%ROOT%">← Back to the tool</a> · <a href="/data/v1/all.json">JSON export</a> · <a href="/llms.txt">llms.txt</a></p>

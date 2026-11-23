@@ -35,6 +35,16 @@
 <li>신뢰도: 여기의 모든 숫자는 공개 페이지로 소급됩니다; 각 보정에는 도구 안에 출처가 붙어 있습니다.</li>
 </ul>
 
+<h2 id="landscape">Arena × 가격: 공식 가성비 목록은 없다 —— 누가 채우고 있나</h2>
+<p>2026-11-23 기준 시장 구도(arena.ai 어드바이저 세션에서 검증): <b>OpenRouter는 공식적으로 「Arena 리더보드 × 가격」 가성비 목록을 공개하지 않았다</b> —— 점수 보드와 가격 체계는 별개 데이터이며 공식은 양자를 결합하지 않는다. 공식에서 가장 가까운 세 가지 입구:</p>
+<ul>
+<li><b>Rankings 페이지의 Benchmarks 섹션</b>: 가격 × 지능 지수 산점도(가중 평균 입력 가격 × Artificial Analysis Intelligence Index), 원클릭 파레토 전환 —— 공식 페이지에서 「가성비」에 가장 가까운 뷰지만, 품질 축은 Arena Elo가 아니라 제3자 지능 지수다.</li>
+<li><b>자체 벤치마크 라이브러리</b> openrouter.ai/benchmarks: 18개 벤치마크, 220만+ 태스크 평가, 각 점수에 비용·지연 데이터 포함, Benchmarks API 제공; Design Arena의 ELO 보드는 2026-03부터 여기에 삽입됨.</li>
+<li><b>가격 전량 공개</b>: openrouter.ai/models과 <code>/api/v1/models</code>로 모델별 입력/출력/캐시 가격을 프로그램 방식으로 가져올 수 있음.</li>
+</ul>
+<p><b>과금 기준(이 사이트가 1차 정가를 쓰는 이유)</b>: 집계 채널은 추론 자체에 마크업을 붙이지 않고 요금은 충전 단계에 있다(OpenRouter 약 5.5%, 2026-11 검증); 같은 모델도 provider별로 독립적으로 가격을 매기며 제3자 목록은 항상 최저가를 취한다. 이 사이트는 벤더 1차 API 정가를 사용; 집계 채널을 통해 구매하면 실지불 ≈ 채널 최저가 + 충전 수수료로, 이 사이트 숫자와 한 자릿수 %의 체계적 차이가 있다.</p>
+<p><b>「Arena × 가격」을 결합 중인 제3자</b>: Artificial Analysis(지능 지수 × 가격), arena.atease.dev(중국어, Arena 각 보드 × OpenRouter 최저가), pricepertoken.com / cloudprice.net(엔드포인트 가격 집계). Arena 점수를 <b>태스크 수준 비용 파레토</b>로 환산하는 것은 현재 제3자만 —— 이 사이트를 포함해서다.</p>
+
 <h2>귀속과 컴플라이언스</h2>
 <p>리더보드 데이터 &copy; LMArena (arena.ai). 이것은 공개 숫자에 대한 독립 분석이며 arena.ai와 제휴 관계가 없습니다. arena.ai를 고빈도로 수집하지 마세요 —— 자동화에는 Hugging Face 데이터셋을 사용하세요. 파생 결론을 게시할 때는 출처와 스냅샷 날짜를 명시하세요.</p>
 <p><a href="%ROOT%">← 도구로 돌아가기</a> · <a href="/data/v1/all.json">JSON 내보내기</a> · <a href="/llms.txt">llms.txt</a></p>
