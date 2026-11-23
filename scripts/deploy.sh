@@ -5,7 +5,7 @@
 #   --verify-only 不部署，只对线上跑冒烟清单
 # 环境变量 SMOKE_RESOLVE=<ip>：冒烟 curl 全部加 --resolve（本机 DNS 负缓存时绕过解析）
 # 前置（一次性，已随 2026-11-21 首次上线完成）：
-#   DNS  NameSilo A modelprice.damolabs.app -> <DEPLOY-SERVER-IP>
+#   DNS  NameSilo A modelprice.damolabs.app -> <部署机 IP，见本机 ~/.ssh/config 的 wd>
 #   SSL  ssh wd '~/.acme.sh/acme.sh --issue --dns dns_namesilo -d modelprice.damolabs.app --server letsencrypt'
 #        ssh wd '~/.acme.sh/acme.sh --install-cert -d modelprice.damolabs.app --ecc
 #                --key-file /var/www/ssl/modelprice.damolabs.app.key
@@ -19,7 +19,8 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-TARGET="wd:/www/wwwroot/modelprice.damolabs.app/"
+# 部署目标 = ssh 别名+路径；本机部署机配置不进仓库，用环境变量覆盖（见 .env.example）
+TARGET="${DEPLOY_TARGET:-wd:/www/wwwroot/modelprice.damolabs.app/}"
 DOMAIN="https://modelprice.damolabs.app"
 mode="${1:-deploy}"
 

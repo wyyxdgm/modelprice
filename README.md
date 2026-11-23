@@ -73,6 +73,14 @@ python3 -m http.server 8080 -d dist    # Ctrl-C when done
 
 `scripts/deploy.sh` builds `dist/`, `rsync --delete` it to `wd:/www/wwwroot/modelprice.damolabs.app/`, then runs smoke checks (root + 4 locale homes + 5 method pages all 200, page structure incl. rankView tab, CSP header, all.json boards=8 models=427 with the t2i board, zh title/hreflang/lang-nav spot checks). `--verify-only` skips the deploy. Price events / cache ratios live in `src/js/03-pricing.js` (`PRICE_EVENTS`, `CACHE_RATIO`) and are mirrored in `build_site.py` — keep both in sync when editing.
 
+## Feedback & corrections
+
+Prices drift and vendor pages change — corrections are welcome:
+
+- **Spotted a wrong price?** [Open a price-correction issue](https://github.com/wyyxdgm/modelprice/issues/new?template=price-correction.yml) with the model, the price shown here, the official price, and a link to the vendor's pricing page. Verified corrections update `data/datasets.json` / `PRICE_EVENTS` and go live with the next daily build.
+- **Prefer a PR?** The dataset is `data/datasets.json` (field docs in `build_site.py`). Edit, then `python3 build_site.py && python3 test/build.py` and open a PR.
+- Per-event verification notes (verified / suspected confidence, sources) live in the `PRICE_EVENTS` block of `src/js/03-pricing.js` and its mirror in `build_site.py`.
+
 ## Attribution
 
 Leaderboard data © LMArena (arena.ai). Prices from vendor pricing pages, verified against benchr.org/pricing. Independent analysis, no affiliation.

@@ -1,0 +1,56 @@
+name: 价格纠错 / Price correction
+description: 站上价格与厂商官方价不符 / A listed price doesn't match the vendor's official price
+title: "[价格纠错] 模型名 / model name"
+labels: ["price-correction"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢纠错！信息越全，核实越快。Thanks — the more complete the info, the faster we can verify.
+  - type: input
+    id: model
+    attributes:
+      label: 模型 / Model
+      description: 站上显示的完整模型名 / The full model name as shown on the site
+    validations:
+      required: true
+  - type: dropdown
+    id: board
+    attributes:
+      label: 榜单 / Board
+      options:
+        - "WebDev · Overall (open-source only)"
+        - "WebDev · Frontend (open-source only)"
+        - "WebDev · Fullstack (open-source only)"
+        - "WebDev · React (open-source only)"
+        - "WebDev · Reference-based (open-source only)"
+        - "Image-to-WebDev (open-source only)"
+        - "WebDev · Overall (all licenses)"
+        - "Text-to-Image"
+    validations:
+      required: true
+  - type: input
+    id: listed_price
+    attributes:
+      label: 站上显示价格 / Listed price
+      description: 例 / e.g. $0.60 / $2.20
+    validations:
+      required: true
+  - type: input
+    id: official_price
+    attributes:
+      label: 官方现价 / Official price
+      description: 厂商价目表上的现价 / The current price on the vendor's pricing page
+    validations:
+      required: true
+  - type: input
+    id: source_url
+    attributes:
+      label: 官方价目表链接 / Official pricing page URL
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: 备注 / Notes
+      description: 促销 / 缓存价 / 分时计价等特殊情况 / promos, cache pricing, time-of-day pricing, etc.

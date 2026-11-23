@@ -387,3 +387,15 @@ arena.ai **没有公开 JSON API**（`/api/*` 返回 403 Cloudflare 挑战），
 6. **缓存命中率是影响最大的变量**（默认 95%）：榜面成本按未命中价算，对 agent 负载系统性高估。
    开缓存后头部模型省 59–79%、排程套利空间 1.45×→1.00×，
    而 `h=100%` 的地板由**输出单价**决定 —— 详见「缓存命中率」一节。
+
+# 反馈与纠错
+
+价格天天变，欢迎纠错（[价格纠错 issue 模板](https://github.com/wyyxdgm/modelprice/issues/new?template=price-correction.yml)）：
+
+- **发现价格不对？** 提 issue 写清：模型名、站上显示的价格、官方现价、官方价目表链接。核实后更新 `data/datasets.json` / `PRICE_EVENTS`，随下一次每日构建上线。
+- **想直接改？** 数据源 = `data/datasets.json`（字段说明见 `build_site.py`）。改完跑 `python3 build_site.py && python3 test/build.py`，全绿再提 PR。
+- 每条价格变动的核查记录（verified / suspected 置信级 + 来源）在 `src/js/03-pricing.js` 的 `PRICE_EVENTS`（`build_site.py` 有镜像，两处要同步改）。
+
+## 许可
+
+代码 MIT；榜单数据 © LMArena (arena.ai)，价格来自各厂商官方价目表。独立分析，无隶属关系。
