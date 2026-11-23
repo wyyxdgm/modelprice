@@ -8,7 +8,7 @@
 | 6 | 0 | [GPT-Image-2.6 Flare (Medium)](https://x.com/OpenAI/status/2118124944928432327?s=20)<br>OpenAI · Proprietary | 1376+9/-9 | 7,042 | $0.0237 | N/A / N/A | N/A |
 | 7 | 1 | [MAI-Image-2.6](https://microsoft.ai/news/mai-image-2-6-launches-at-no-2-on-arena-ahead-of-google-meta-and-xai/)<br>Microsoft AI · Proprietary | 1329+5/-5 | 43,475 | $0.0876 | N/A / N/A | N/A |
 | 8 | 0 | [Grok Imagine Image 2.0](https://grok.com/imagine)<br>SpaceXAI · Proprietary | 1318+7/-7 | 9,877 | $0.04 | N/A / N/A | N/A |
-| 9 | 1 | [Gemini Nano Banana 2.1](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/nano-banana-2-1)<br>Google · Proprietary | 1305+5/-5 | 45,471 | $0.05 | N/A / N/A | N/A |
+| 9 | 1 | [Gemini Nano Banana 2.1](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/nano-banana-2-1)<br>Google · Proprietary | 1305+5/-5 | 45,471 | $0.0505 | N/A / N/A | N/A |
 | 10 | 0 | [Reve 2.1](http://reve.com/)<br>Reve · Proprietary | 1302+8/-8 | 7,896 | $0.024 | N/A / N/A | N/A |
 | 11 | 0 | [Grok Imagine Image 2.0 (20260801)](https://x.ai/news/grok-imagine-image-2)<br>SpaceXAI · Proprietary | 1288+5/-5 | 41,806 | $0.06 | N/A / N/A | N/A |
 | 12 | 1 | [Reve 2.0](http://reve.com/)<br>Reve · Proprietary | 1268+6/-6 | 15,283 | $0.024 | N/A / N/A | N/A |
