@@ -28,7 +28,8 @@ if [[ "$mode" != "--verify-only" ]]; then
   # 构建产物（dist/ 不进 git —— 仓库里只有源；每次发版从 src/ 重建）
   python3 scripts/build_page.py
   python3 build_site.py "$DOMAIN"
-  # 部署 = dist/ 整目录（index.html + assets/ + data/v1/all.json + method.html + llms/robots/sitemap）
+  python3 scripts/build_seo_pages.py "$DOMAIN"   # 程序化 SEO 子页（读 all.json + 追加 sitemap）
+  # 部署 = dist/ 整目录（index.html + assets/ + data/v1/all.json + method.html + seo 子页 + llms/robots/sitemap）
   rsync -az --delete dist/ "$TARGET" && echo "✅ rsync dist/ → $TARGET"
 fi
 
@@ -114,5 +115,13 @@ n_hf=$(echo "$zhhome" | grep -o 'rel="alternate" hreflang=' | wc -l | tr -d ' ')
 [[ "$zhhome" == *'application/ld+json'* ]] || { echo "❌ /zh/ 缺 JSON-LD 结构化数据"; fail=1; }
 [[ "$zhhome" == *'FAQPage'* ]] || { echo "❌ /zh/ JSON-LD 缺 FAQPage"; fail=1; }
 [[ "$home" == *'data-scene="coding"'* ]] || { echo "❌ 首页缺首屏场景卡（data-scene）"; fail=1; }
+
+# ⑨ 程序化 SEO 子页抽检（alternatives 平替页 + 场景着陆页，构建期纯静态）
+s1=$(smoke_curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$B/zh/alternatives/kimi-k3-1-pro-max.html")
+s2=$(smoke_curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$B/best-llm-for-coding.html")
+s3=$(smoke_curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$B/zh/best-llm-for-offpeak.html")
+[[ "$s1" == "200" && "$s2" == "200" && "$s3" == "200" ]] || { echo "❌ SEO 子页状态码: alt=$s1 coding=$s2 offpeak=$s3"; fail=1; }
+n_sm=$(smoke_curl -s --max-time 20 "$B/sitemap.xml" | grep -c 'alternatives/\|best-llm-for-' || true)
+[[ "$n_sm" -ge 40 ]] || { echo "❌ sitemap 缺 SEO 子页条目: $n_sm (期望 ≥40)"; fail=1; }
 
 [[ $fail -eq 0 ]] && echo "🎉 冒烟全过" || { echo "💥 冒烟有失败项"; exit 1; }

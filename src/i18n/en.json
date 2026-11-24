@@ -16,7 +16,8 @@
  "intro": {
   "h2": "Cheapest AI models at every quality level — Arena Score vs. real cost per task",
   "p1": "<b style=\"color:var(--text)\">Set the minimum Arena Score you can accept, and it names the cheapest model that clears the bar</b> — plus the marginal $/point to the next tier, corrected for DeepSeek peak/off-peak pricing, expired promos and cache-miss bias. Drag the gold threshold line (or hit ▶ Play) and watch every tier's winner update live.",
-  "lnk": "Three definitions of \"best value\" · strict 95% CI mode · prices modeled over a 168-hour week · <a href=\"%METHOD%\">Method &amp; data sources</a> · <a href=\"/data/v1/all.json\">JSON (AI-readable)</a> · <a href=\"/llms.txt\">llms.txt</a>"
+  "lnk": "Three definitions of \"best value\" · strict 95% CI mode · prices modeled over a 168-hour week · <a href=\"%METHOD%\">Method &amp; data sources</a> · <a href=\"/data/v1/all.json\">JSON (AI-readable)</a> · <a href=\"/llms.txt\">llms.txt</a>",
+  "seoLinks": "Static rankings: <a href=\"%ROOT%best-llm-for-coding.html\">cheapest for coding</a> · <a href=\"%ROOT%best-llm-for-agent.html\">heavy agent workloads</a> · <a href=\"%ROOT%best-llm-for-offpeak.html\">off-peak half-price guide</a>; cheaper alternatives: <a href=\"%ROOT%alternatives/kimi-k3-1-pro-max.html\">Kimi K3.1 Pro</a> · <a href=\"%ROOT%alternatives/deepseek-v4-1-flash-20261017-max.html\">DeepSeek-V4.1-Flash</a> · <a href=\"%ROOT%alternatives/minimax-m2-5.html\">MiniMax-M2.5</a>"
  },
  "grp": {
   "ds": {

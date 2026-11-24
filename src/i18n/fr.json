@@ -16,7 +16,8 @@
  "intro": {
   "h2": "Les modèles d'IA les moins chers à chaque niveau de qualité — Score Arena vs coût réel par tâche",
   "p1": "<b style=\"color:var(--text)\">Définissez le score Arena minimum que vous acceptez, et l'outil nomme le modèle le moins cher qui franchit la barre</b> — plus le $/point marginal vers le palier suivant, corrigé de la tarification heures pleines/creuses de DeepSeek, des promos expirées et du biais de cache manqué. Faites glisser la ligne de seuil dorée (ou appuyez sur ▶ Play) et regardez le vainqueur de chaque palier se mettre à jour en direct.",
-  "lnk": "Trois définitions du « meilleur rapport qualité-prix » · mode CI strict à 95 % · tarifs modélisés sur une semaine de 168 heures · <a href=\"%METHOD%\">Méthode et sources de données</a> · <a href=\"/data/v1/all.json\">JSON (lisible par IA)</a> · <a href=\"/llms.txt\">llms.txt</a>"
+  "lnk": "Trois définitions du « meilleur rapport qualité-prix » · mode CI strict à 95 % · tarifs modélisés sur une semaine de 168 heures · <a href=\"%METHOD%\">Méthode et sources de données</a> · <a href=\"/data/v1/all.json\">JSON (lisible par IA)</a> · <a href=\"/llms.txt\">llms.txt</a>",
+  "seoLinks": "Classements statiques : <a href=\"%ROOT%best-llm-for-coding.html\">le moins cher pour coder</a> · <a href=\"%ROOT%best-llm-for-agent.html\">agents intensifs</a> · <a href=\"%ROOT%best-llm-for-offpeak.html\">guide des demi-tarifs nocturnes</a> ; alternatives : <a href=\"%ROOT%alternatives/kimi-k3-1-pro-max.html\">Kimi K3.1 Pro</a> · <a href=\"%ROOT%alternatives/deepseek-v4-1-flash-20261017-max.html\">DeepSeek-V4.1-Flash</a> · <a href=\"%ROOT%alternatives/minimax-m2-5.html\">MiniMax-M2.5</a>"
  },
  "grp": {
   "ds": {

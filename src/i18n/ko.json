@@ -16,7 +16,8 @@
  "intro": {
   "h2": "모든 품질 구간에서 가장 저렴한 AI 모델 — Arena 점수 vs 실제 태스크당 비용",
   "p1": "<b style=\"color:var(--text)\">수용 가능한 최소 Arena 점수를 설정하면 그 선을 넘는 최저가 모델이 바로 나타납니다</b>—— 다음 티어까지의 한계 $/포인트에 더해, DeepSeek 피크/비피크 가격, 만료된 프로모션, 캐시 미스 편향까지 보정되어 있습니다. 금색 임계선을 드래그(또는 ▶ Play 클릭)하면 모든 티어의 승자가 실시간 갱신됩니다.",
-  "lnk": "「최고 가성비」의 세 가지 정의 · 엄격 95% CI 모드 · 주 168시간 가격 모델링 · <a href=\"%METHOD%\">방법론 및 데이터 출처</a> · <a href=\"/data/v1/all.json\">JSON(AI 가독)</a> · <a href=\"/llms.txt\">llms.txt</a>"
+  "lnk": "「최고 가성비」의 세 가지 정의 · 엄격 95% CI 모드 · 주 168시간 가격 모델링 · <a href=\"%METHOD%\">방법론 및 데이터 출처</a> · <a href=\"/data/v1/all.json\">JSON(AI 가독)</a> · <a href=\"/llms.txt\">llms.txt</a>",
+  "seoLinks": "정적 순위 페이지: <a href=\"%ROOT%best-llm-for-coding.html\">코딩 최저가</a> · <a href=\"%ROOT%best-llm-for-agent.html\">Agent 대량 호출</a> · <a href=\"%ROOT%best-llm-for-offpeak.html\">심야 할인 가이드</a>; 인기 모델 대안: <a href=\"%ROOT%alternatives/kimi-k3-1-pro-max.html\">Kimi K3.1 Pro</a> · <a href=\"%ROOT%alternatives/deepseek-v4-1-flash-20261017-max.html\">DeepSeek-V4.1-Flash</a> · <a href=\"%ROOT%alternatives/minimax-m2-5.html\">MiniMax-M2.5</a>"
  },
  "grp": {
   "ds": {
