@@ -822,6 +822,18 @@ TC('排行榜：页签状态机 + deep 重渲（fake DOM 烟雾）', ()=>{
   return '页签状态机 + deep 重渲 OK';
 });
 
+TC('排行榜：applyTabUI 单一来源（?tab=deep 深链恢复依赖它）', ()=>{
+  reset();
+  if(typeof applyTabUI!=='function') throw new Error('applyTabUI 未暴露到全局 —— 09-boot 恢复 URL ?tab=deep 会静默失效（深链停在排行榜页）');
+  S.tab='deep'; applyTabUI();
+  if($('#deepView').style.display!=='') throw new Error('applyTabUI 未显示 deepView（display==\'\' 才是可见）');
+  if($('#rankView').style.display!=='none') throw new Error('applyTabUI 未隐藏 rankView');
+  S.tab='rank'; applyTabUI();
+  if($('#rankView').style.display!=='') throw new Error('applyTabUI 未显示 rankView');
+  if($('#deepView').style.display!=='none') throw new Error('applyTabUI 未隐藏 deepView');
+  return 'applyTabUI 显隐双向 OK（boot URL 恢复可依赖）';
+});
+
 TC('首屏场景卡：applyScene 三场景参数展开（与 URL ?scene= 同映射）', ()=>{
   reset();
   if(applyScene('nope')!==false) throw new Error('非法 scene 应返回 false');

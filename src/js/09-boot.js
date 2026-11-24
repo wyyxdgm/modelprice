@@ -27,7 +27,10 @@ $('#sourceBody').innerHTML=bootSub(T('boot.sourceBody'));
   if(p.get('ev')!=null){ const on=new Set(p.get('ev').split(',').filter(Boolean));
     PRICE_EVENTS.forEach(e=>{ S.evState[e.id]=on.has(e.id); }); }
   /* —— 排行榜页签状态（tab=rank|deep；rk=画像预设；ri/ro=画像 in/out k；rd=每天次数；rt=质量门槛；rp=时段快捷） —— */
-  if(p.get('tab')==='deep'||p.get('tab')==='rank') S.tab=p.get('tab');
+  if(p.get('tab')==='deep'||p.get('tab')==='rank'){ S.tab=p.get('tab');
+    /* 10-rank 的初始显隐在更早加载时就按默认 rank 落了 DOM；URL 改了 S.tab 必须重 apply，
+       且要在下方 rAF 首渲之前 —— 深视图容器隐藏时量不到宽度。 */
+    if(typeof applyTabUI==='function') applyTabUI(); }
   if(p.get('rk')&&(['light','dev','heavy','board','custom'].includes(p.get('rk')))) S.rankPreset=p.get('rk');
   if(p.get('ri')!=null) S.rankIn=Math.max(0,+p.get('ri')||0);
   if(p.get('ro')!=null) S.rankOut=Math.max(0,+p.get('ro')||0);

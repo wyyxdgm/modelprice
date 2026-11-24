@@ -169,17 +169,21 @@ function renderRank(){
   $('#rankOut').onchange=e=>{ S.rankOut=Math.max(0,+e.target.value||0); syncPreset(); recompute(); };
   $('#rankDay').onchange=e=>{ S.rankPerDay=Math.max(1,+e.target.value||1); recompute(); };
   $('#rankMore').onclick=()=>{ S.rankShowAll=!S.rankShowAll; renderRank(); };
-  $('#tabs').onclick=e=>{ const b=e.target.closest('button'); if(!b)return;
-    S.tab=b.dataset.tab;
+  /* 页签显隐 + 高亮，一处定义三处用（点击 / 初始 / boot 恢复 URL ?tab= 后重调） */
+  function applyTabUI(){
     [...$('#tabs').children].forEach(x=>x.classList.toggle('on',x.dataset.tab===S.tab));
     $('#rankView').style.display=S.tab==='rank'?'':'none';
     $('#deepView').style.display=S.tab==='deep'?'':'none';
+  }
+  $('#tabs').onclick=e=>{ const b=e.target.closest('button'); if(!b)return;
+    S.tab=b.dataset.tab;
+    applyTabUI();
     if(S.tab==='deep') recompute();     // 隐藏容器里量不到宽度，切回来重渲图表
   };
-  /* 初始按 S.tab 显隐（URL 可带 tab=deep） */
-  $('#rankView').style.display=S.tab==='rank'?'':'none';
-  $('#deepView').style.display=S.tab==='deep'?'':'none';
-  [...$('#tabs').children].forEach(x=>x.classList.toggle('on',x.dataset.tab===S.tab));
+  /* 初始按 S.tab 显隐。⚠️ 本文件先于 09-boot 加载：此时 URL 还没恢复，
+     tab=deep 的显隐由 boot 恢复后回调 applyTabUI 补上（不补 = 深链停在排行榜页）。 */
+  applyTabUI();
+  globalThis.applyTabUI=applyTabUI;   // 09-boot（后加载）恢复 URL ?tab= 时回调；fake DOM 测试环境同样可达
   /* 首屏场景卡：一键设参 → 滚到答案区（?scene= 的 boot 解析走 applyScene，不滚动） */
   const scWrap=$('#sceneCards');
   if(scWrap) scWrap.onclick=e=>{
