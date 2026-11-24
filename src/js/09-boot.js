@@ -39,6 +39,8 @@ $('#sourceBody').innerHTML=bootSub(T('boot.sourceBody'));
     else { S.hour=12; S.dow=6; }
   }
   if(p.get('rt')!=null){ S.rankT=+p.get('rt')||0; S.rankTSet=true; }
+  /* 一键场景（与首屏卡片共用 SCENARIOS/applyScene）：?scene=coding|agent|offpeak */
+  if(p.get('scene')) applyScene(p.get('scene'));
   syncPriceUI();
   if(p.get('lo')&&p.get('hi')){ S.lo=+p.get('lo'); S.hi=+p.get('hi'); }
   /* 首渲延到首帧（布局稳定后再量容器宽）：fresh navigation 下同步首渲会在预布局期量错宽度。

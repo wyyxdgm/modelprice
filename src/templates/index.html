@@ -9,6 +9,7 @@
 <meta property="og:type" content="website">
 <meta name="robots" content="index,follow">
 <title>{{meta.title}}</title>
+__JSONLD__
 __HEAD_EXTRA__<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230b0e14'/%3E%3Cpath d='M7 23 L13 14 L19 18 L25 8' fill='none' stroke='%233ddc97' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='25' cy='8' r='2.6' fill='%23f5c542'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="/assets/style.css">
 </head>
@@ -30,6 +31,11 @@ __HEAD_EXTRA__<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www
   <h2>{{intro.h2}}</h2>
   <p>{{intro.p1}}</p>
   <p class="lnk">{{intro.lnk}}</p>
+  <div class="scene" id="sceneCards">
+    <button data-scene="coding"><b>{{scene.codingT}}</b><span>{{scene.codingD}}</span></button>
+    <button data-scene="agent"><b>{{scene.agentT}}</b><span>{{scene.agentD}}</span></button>
+    <button data-scene="offpeak"><b>{{scene.offT}}</b><span>{{scene.offD}}</span></button>
+  </div>
 </section>
 <div class="grid">
   <!-- ============ 左：控制台（分组可折叠；手机上整块沉底） ============ -->

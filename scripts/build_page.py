@@ -82,6 +82,28 @@ def lang_nav(lc):
     return "".join(parts)
 
 
+def jsonld_str(lc, domain, i18n, raw_captured):
+    """结构化数据：SoftwareApplication + FAQPage（FAQ 文案来自 i18n faq 段，构建期注入）。"""
+    app = {
+        "@type": "SoftwareApplication",
+        "name": i18n.get("meta.title", ""),
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Web",
+        "url": domain + locale_path(lc),
+        "description": i18n.get("meta.desc", ""),
+        "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
+        "dateModified": raw_captured,
+    }
+    main_entity = [
+        {"@type": "Question", "name": x["q"], "acceptedAnswer": {"@type": "Answer", "text": x["a"]}}
+        for x in i18n.get("faq", [])
+    ]
+    graph = [app] + ([{"@type": "FAQPage", "mainEntity": main_entity}] if main_entity else [])
+    payload = json.dumps({"@context": "https://schema.org", "@graph": graph},
+                         ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
+    return '<script type="application/ld+json">' + payload + "</script>"
+
+
 def render(lc, domain, i18n):
     tpl = TPL.read_text(encoding="utf-8")
     raw = json.loads(DATA.read_text(encoding="utf-8"))
@@ -107,11 +129,17 @@ def render(lc, domain, i18n):
     html = html.replace("%ROOT%", locale_path(lc))
     # 日期 token：footer 等构建期注入的串里快照/抓取日期跟数据走（不再硬编码）
     html = html.replace("%CAPTURED%", raw_captured).replace("%SCRAPED%", raw_scraped)
+    # 结构化数据（SoftwareApplication + FAQPage），FAQ 文案取自该 locale 字典 faq 段
+    html = html.replace("__JSONLD__", jsonld_str(lc, domain, i18n, raw_captured))
     html = html.replace("__DATA__", payload)
-    # I18N JSON 里的字典值同样做路径 token 替换（字典值可能被 JS 引用）
+    # I18N JSON 里的字典值同样做路径 token 替换（字典值可能被 JS 引用）；
+    # 日期 token 一并构建期替换（tagline 的抓取/榜单日期 + methodBody/sourceBody 正文）——
+    # 静态 HTML 直接带日期（SEO freshness 信号），运行时 bootSub 再替换一遍幂等无害。
     html = html.replace("__I18N__", i18n_payload
                        .replace("%METHOD%", locale_path(lc, "method.html"))
-                       .replace("%ROOT%", locale_path(lc)))
+                       .replace("%ROOT%", locale_path(lc))
+                       .replace("%CAPTURED%", raw_captured)
+                       .replace("%SCRAPED%", raw_scraped))
     return html, missing
 
 

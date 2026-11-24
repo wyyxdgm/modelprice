@@ -1,465 +1,487 @@
 {
-  "meta": {
-    "lang": "fr",
-    "locale_tag": "fr-FR",
-    "title": "Analyseur de valeur du classement Arena · Plage de scores → meilleur modèle qualité-prix",
-    "desc": "Quel modèle d'IA est le moins cher pour votre barre de qualité ? Une échelle de Pareto interactive des scores WebDev Arena (LMArena) vs le coût réel par tâche — avec tarification heures pleines/creuses, remises de cache et fusion CI stricte. Gratuit, sans inscription.",
-    "ogTitle": "Les modèles d'IA les moins chers à chaque niveau de qualité — Score Arena vs coût réel par tâche",
-    "ogDesc": "Définissez votre score Arena minimum acceptable et voyez le modèle le moins cher qui le franchit, combien coûte le palier suivant par point, et comment les tarifs pleines/creuses et le cache modifient la réponse."
+ "meta": {
+  "lang": "fr",
+  "locale_tag": "fr-FR",
+  "title": "Calculateur prix/performance LLM 2026 — Le moins cher par score Arena",
+  "desc": "Trouvez le LLM le moins cher qui franchit votre barreau de qualité. Calculateur interactif : scores Arena (LMArena) × coût réel par tâche, avec tarifs pointe/creux, remises de cache et fusion CI stricte. Gratuit, sans inscription.",
+  "ogTitle": "Le LLM le moins cher à chaque niveau de qualité — score Arena × coût réel",
+  "ogDesc": "Définissez votre score Arena minimum et voyez le modèle le moins cher qui le franchit, le coût par point du palier suivant, et comment pointe/creux et cache changent la réponse."
+ },
+ "dows": "dim,lun,mar,mer,jeu,ven,sam",
+ "header": {
+  "h1": "Calculateur prix/performance LLM",
+  "sub": "le modèle le moins cher par score Arena",
+  "tagline": "Faites glisser le seuil de capacité du plus haut au plus bas et regardez le vainqueur de chaque palier se mettre à jour en direct. C'est la <b style=\"color:var(--good)\">courbe inférieure / frontière de Pareto (lower envelope / Pareto frontier)</b> — votre intuition « chaque palier de capacité a un modèle offrant le meilleur rapport qualité-prix » est mathématiquement fondée, mais elle exige la bonne définition (voir ci-dessous). Données : <a href=\"https://arena.ai/leaderboard/code/webdev\" target=\"_blank\" rel=\"noopener\">arena.ai/leaderboard</a>, extraites le <span class=\"mono\" id=\"scraped\">%SCRAPED%</span> (classement daté du <span class=\"mono\" id=\"captured\">%CAPTURED%</span>)."
+ },
+ "intro": {
+  "h2": "Les modèles d'IA les moins chers à chaque niveau de qualité — Score Arena vs coût réel par tâche",
+  "p1": "<b style=\"color:var(--text)\">Définissez le score Arena minimum que vous acceptez, et l'outil nomme le modèle le moins cher qui franchit la barre</b> — plus le $/point marginal vers le palier suivant, corrigé de la tarification heures pleines/creuses de DeepSeek, des promos expirées et du biais de cache manqué. Faites glisser la ligne de seuil dorée (ou appuyez sur ▶ Play) et regardez le vainqueur de chaque palier se mettre à jour en direct.",
+  "lnk": "Trois définitions du « meilleur rapport qualité-prix » · mode CI strict à 95 % · tarifs modélisés sur une semaine de 168 heures · <a href=\"%METHOD%\">Méthode et sources de données</a> · <a href=\"/data/v1/all.json\">JSON (lisible par IA)</a> · <a href=\"/llms.txt\">llms.txt</a>"
+ },
+ "grp": {
+  "ds": {
+   "summary": "Jeu de données et définition",
+   "h2": "Jeu de données du classement",
+   "licHint": "<b>« Open-source uniquement » et « toutes licences » sont deux classements différents ; leurs scores ne sont pas comparables.</b> Le classement open-source (<span class=\"mono\">?license=open-source</span>) plafonne à <b class=\"mono\">1687</b> (Kimi K3.1 Pro) ; le classement toutes licences culmine à <b class=\"mono\">1838</b> (Claude Fable 5.2 xHigh, 11,04 $/tâche) — Claude Opus 5.5 à 1815, Sonnet 5.5 à 1772, Gemini 4 Carbon à 1768, GPT-6 Astra à 1764 s'y trouvent. Passez le jeu de données sur l'entrée <b>Toutes licences (All-license)</b>.<br><span style=\"color:var(--dim2)\">Remarque : le classement toutes licences n'a que le top 41 scrapé (scores 1590–1838) ; la longue traîne au-delà du rang 41 manque. La frontière haut de gamme n'est pas affectée, mais les références « moins cher au global » et « score excédentaire/$ » seront biaisées.</span>"
   },
-  "dows": "dim,lun,mar,mer,jeu,ven,sam",
-  "header": {
-    "h1": "Analyseur de valeur du classement Arena",
-    "sub": "plage de scores → meilleur modèle qualité-prix dans la plage",
-    "tagline": "Faites glisser le seuil de capacité du plus haut au plus bas et regardez le vainqueur de chaque palier se mettre à jour en direct. C'est la <b style=\"color:var(--good)\">courbe inférieure / frontière de Pareto (lower envelope / Pareto frontier)</b> — votre intuition « chaque palier de capacité a un modèle offrant le meilleur rapport qualité-prix » est mathématiquement fondée, mais elle exige la bonne définition (voir ci-dessous). Données : <a href=\"https://arena.ai/leaderboard/code/webdev\" target=\"_blank\" rel=\"noopener\">arena.ai/leaderboard</a>, extraites le <span class=\"mono\" id=\"scraped\"></span> (classement daté du <span class=\"mono\" id=\"captured\"></span>)."
+  "mode": {
+   "h2": "Définition du « meilleur rapport qualité-prix »",
+   "b1": "① Seuil",
+   "b1t": "le moins cher parmi les modèles de score ≥ T (= courbe inférieure, votre idée initiale)",
+   "b2": "② Score / $",
+   "b2t": "max Score ÷ Coût",
+   "b3": "③ Score excédentaire / $",
+   "b3t": "max (Score − 1200) ÷ Coût"
   },
-  "intro": {
-    "h2": "Les modèles d'IA les moins chers à chaque niveau de qualité — Score Arena vs coût réel par tâche",
-    "p1": "<b style=\"color:var(--text)\">Définissez le score Arena minimum que vous acceptez, et l'outil nomme le modèle le moins cher qui franchit la barre</b> — plus le $/point marginal vers le palier suivant, corrigé de la tarification heures pleines/creuses de DeepSeek, des promos expirées et du biais de cache manqué. Faites glisser la ligne de seuil dorée (ou appuyez sur ▶ Play) et regardez le vainqueur de chaque palier se mettre à jour en direct.",
-    "lnk": "Trois définitions du « meilleur rapport qualité-prix » · mode CI strict à 95 % · tarifs modélisés sur une semaine de 168 heures · <a href=\"%METHOD%\">Méthode et sources de données</a> · <a href=\"/data/v1/all.json\">JSON (lisible par IA)</a> · <a href=\"/llms.txt\">llms.txt</a>"
+  "ci": {
+   "h2": "Mode de signification",
+   "point": "Estimation ponctuelle",
+   "strict": "Strict (ne gagne que si les IC à 95 % ne se chevauchent pas)",
+   "hint": "Le mode strict n'accepte un écart que si la borne inférieure d'IC de A &gt; la borne supérieure d'IC de B, le bruit ne devient jamais une conclusion. Les IC des modèles <span class=\"pill warn\" style=\"padding:0 5px\">Preliminary (provisoire)</span> à faible nombre de votes atteignent souvent ±20–55."
   },
-  "grp": {
-    "ds": {
-      "summary": "Jeu de données et définition",
-      "h2": "Jeu de données du classement",
-      "licHint": "<b>« Open-source uniquement » et « toutes licences » sont deux classements différents ; leurs scores ne sont pas comparables.</b> Le classement open-source (<span class=\"mono\">?license=open-source</span>) plafonne à <b class=\"mono\">1687</b> (Kimi K3.1 Pro) ; le classement toutes licences culmine à <b class=\"mono\">1838</b> (Claude Fable 5.2 xHigh, 11,04 $/tâche) — Claude Opus 5.5 à 1815, Sonnet 5.5 à 1772, Gemini 4 Carbon à 1768, GPT-6 Astra à 1764 s'y trouvent. Passez le jeu de données sur l'entrée <b>Toutes licences (All-license)</b>.<br><span style=\"color:var(--dim2)\">Remarque : le classement toutes licences n'a que le top 41 scrapé (scores 1590–1838) ; la longue traîne au-delà du rang 41 manque. La frontière haut de gamme n'est pas affectée, mais les références « moins cher au global » et « score excédentaire/$ » seront biaisées.</span>"
-    },
-    "mode": {
-      "h2": "Définition du « meilleur rapport qualité-prix »",
-      "b1": "① Seuil",
-      "b1t": "le moins cher parmi les modèles de score ≥ T (= courbe inférieure, votre idée initiale)",
-      "b2": "② Score / $",
-      "b2t": "max Score ÷ Coût",
-      "b3": "③ Score excédentaire / $",
-      "b3t": "max (Score − 1200) ÷ Coût"
-    },
-    "ci": {
-      "h2": "Mode de signification",
-      "point": "Estimation ponctuelle",
-      "strict": "Strict (ne gagne que si les IC à 95 % ne se chevauchent pas)",
-      "hint": "Le mode strict n'accepte un écart que si la borne inférieure d'IC de A &gt; la borne supérieure d'IC de B, le bruit ne devient jamais une conclusion. Les IC des modèles <span class=\"pill warn\" style=\"padding:0 5px\">Preliminary (provisoire)</span> à faible nombre de votes atteignent souvent ±20–55."
-    },
-    "rng": {
-      "summary": "Plage de scores et balayage",
-      "h2": "Plage de scores (critère de capacité accepté)",
-      "lo": "Borne basse lo",
-      "hi": "Borne haute hi",
-      "pFull": "Domaine complet [min, max]",
-      "pSweep": "Balayage [T, max]",
-      "pTop10": "Top 10 des paliers",
-      "pMid": "Bande médiane 1400–1550",
-      "play": "▶ Play : balayer le seuil du plus haut au plus bas",
-      "speed": "vitesse",
-      "stop": "Arrêt"
-    },
-    "price": {
-      "summary": "Scénarios de prix et cache",
-      "h2": "Scénarios de prix : faire du prix catalogue une <b>fonction du temps</b>",
-      "tz": "Fuseau horaire d'affichage",
-      "tz0": "UTC ±0",
-      "tz1": "CET +1",
-      "tz2": "EET +2",
-      "tz8": "Pékin +8",
-      "tz9": "Tokyo +9",
-      "tzM5": "US Est −5",
-      "tzM8": "US Ouest −8",
-      "dow": "Jour (UTC)",
-      "d1": "lun",
-      "d2": "mar",
-      "d3": "mer",
-      "d4": "jeu",
-      "d5": "ven",
-      "d6": "sam",
-      "d0": "dim",
-      "utcHour": "Heure UTC",
-      "localTime": "· Votre heure locale est",
-      "now": "maintenant",
-      "peak": "Heure la plus chère",
-      "off": "Heure la moins chère",
-      "sat": "Samedi (tout en heures creuses)",
-      "board": "Comme publié (tout désactivé)",
-      "all": "Tout activer (y compris les incertains)",
-      "date": "Date de tarification",
-      "outShare": "Part des tokens de sortie",
-      "cacheH2": "Taux de réussite du cache",
-      "exact": "% exact",
-      "c0": "0 % (prix publiés)",
-      "c50": "50 %",
-      "c85": "85 %",
-      "c95": "95 % (défaut)",
-      "c99": "99 %",
-      "cacheSrc": "Source des prix de lecture du cache",
-      "srcPub": "Prix de cache publiés (manquants → estimés à 10 % de l'entrée)",
-      "srcFlat": "Forfait 10 % du prix d'entrée pour tous (conservateur uniforme)",
-      "srcOff": "Désactiver la remise de cache (= prix du classement Arena)"
-    },
-    "filters": {
-      "summary": "Filtres",
-      "h2": "Filtres",
-      "minVotes": "Votes minimum ≥",
-      "exPrelim": "Exclure Preliminary (provisoire)",
-      "exAuto": "Exclure AutoEval (auto-évalué)",
-      "onlyCost": "Uniquement les modèles avec Cost/Task",
-      "costCap": "Plafond Cost/Task ≤ <span class=\"mono\" id=\"cLab\">∞</span> $ (plafond budgétaire)",
-      "capHint": "Plafond budgétaire + seuil de score = deux contraintes réelles indépendantes. Au maximum = pas de limite."
-    },
-    "export": {
-      "summary": "Exportation et extension des données",
-      "h2": "Exporter / étendre les données",
-      "csv": "Exporter en CSV (table actuelle)",
-      "tiers": "Exporter la grille de paliers en CSV",
-      "copyLink": "Copier le lien d'état",
-      "hint": "Pour ajouter un autre classement (ex. <span class=\"mono\">code/terminal</span>, <span class=\"mono\">text</span>, <span class=\"mono\">vision</span>) : ouvrez la page du classement sur arena.ai, sélectionnez le tableau, copiez et collez ci-dessous (les colonnes sont détectées automatiquement).",
-      "pastePh": "Collez le markdown / le texte de tableau d'un classement arena.ai…",
-      "namePh": "Nom du nouveau jeu de données (facultatif)",
-      "add": "Ajouter"
-    }
+  "rng": {
+   "summary": "Plage de scores et balayage",
+   "h2": "Plage de scores (critère de capacité accepté)",
+   "lo": "Borne basse lo",
+   "hi": "Borne haute hi",
+   "pFull": "Domaine complet [min, max]",
+   "pSweep": "Balayage [T, max]",
+   "pTop10": "Top 10 des paliers",
+   "pMid": "Bande médiane 1400–1550",
+   "play": "▶ Play : balayer le seuil du plus haut au plus bas",
+   "speed": "vitesse",
+   "stop": "Arrêt"
   },
-  "charts": {
-    "steps": {
-      "ttl": "① Graphique en escalier : seuil T → modèle le moins cher franchissant T (le « vainqueur de chaque palier » que vous demandiez)",
-      "lg": "Chaque marche = un modèle régnant sur cette plage de scores · cliquez sur une marche pour y sauter"
-    },
-    "scat": {
-      "ttl": "② Nuage de points : Score (x) × Cost/Task (y, log)",
-      "lg": "◆ Frontière de Pareto · points gris = dominés · barres verticales = IC · ombre = bande de score actuelle · ligne dorée en pointillés = seuil T (faites-la glisser)"
-    },
-    "tl": {
-      "ttl": "③ Les 168 heures de la semaine : coût minimum au seuil T <span class=\"mono\">C(T)</span> au fil du temps",
-      "lg": "Gris = fenêtres de pointe · sauts de ligne = changement de champion · doré en pointillés = l'heure sélectionnée · cliquez n'importe où pour sauter à cette heure"
-    }
+  "price": {
+   "summary": "Scénarios de prix et cache",
+   "h2": "Scénarios de prix : faire du prix catalogue une <b>fonction du temps</b>",
+   "tz": "Fuseau horaire d'affichage",
+   "tz0": "UTC ±0",
+   "tz1": "CET +1",
+   "tz2": "EET +2",
+   "tz8": "Pékin +8",
+   "tz9": "Tokyo +9",
+   "tzM5": "US Est −5",
+   "tzM8": "US Ouest −8",
+   "dow": "Jour (UTC)",
+   "d1": "lun",
+   "d2": "mar",
+   "d3": "mer",
+   "d4": "jeu",
+   "d5": "ven",
+   "d6": "sam",
+   "d0": "dim",
+   "utcHour": "Heure UTC",
+   "localTime": "· Votre heure locale est",
+   "now": "maintenant",
+   "peak": "Heure la plus chère",
+   "off": "Heure la moins chère",
+   "sat": "Samedi (tout en heures creuses)",
+   "board": "Comme publié (tout désactivé)",
+   "all": "Tout activer (y compris les incertains)",
+   "date": "Date de tarification",
+   "outShare": "Part des tokens de sortie",
+   "cacheH2": "Taux de réussite du cache",
+   "exact": "% exact",
+   "c0": "0 % (prix publiés)",
+   "c50": "50 %",
+   "c85": "85 %",
+   "c95": "95 % (défaut)",
+   "c99": "99 %",
+   "cacheSrc": "Source des prix de lecture du cache",
+   "srcPub": "Prix de cache publiés (manquants → estimés à 10 % de l'entrée)",
+   "srcFlat": "Forfait 10 % du prix d'entrée pour tous (conservateur uniforme)",
+   "srcOff": "Désactiver la remise de cache (= prix du classement Arena)"
   },
-  "tables": {
-    "tier": {
-      "h2": "Grille de paliers",
-      "c1": "#",
-      "c2": "Plage de scores",
-      "c3": "Vainqueur dans la plage",
-      "c4": "Score",
-      "c5": "Cost/Task",
-      "c6": "↑ Coût marginal vers le palier suivant ($/pt)",
-      "c7": "Votes",
-      "c8": "Notes"
-    },
-    "model": {
-      "h2": "Table des modèles",
-      "boardNo": "# classement",
-      "overallNo": "# général",
-      "model": "Modèle",
-      "score": "Score",
-      "ci": "±IC",
-      "cost": "Cost/Task",
-      "pts": "pts/$",
-      "excess": "Score excédent./$",
-      "votes": "Votes",
-      "pin": "$/M entrée",
-      "pout": "$/M sortie",
-      "ctx": "Contexte",
-      "lic": "Licence"
-    }
+  "filters": {
+   "summary": "Filtres",
+   "h2": "Filtres",
+   "minVotes": "Votes minimum ≥",
+   "exPrelim": "Exclure Preliminary (provisoire)",
+   "exAuto": "Exclure AutoEval (auto-évalué)",
+   "onlyCost": "Uniquement les modèles avec Cost/Task",
+   "costCap": "Plafond Cost/Task ≤ <span class=\"mono\" id=\"cLab\">∞</span> $ (plafond budgétaire)",
+   "capHint": "Plafond budgétaire + seuil de score = deux contraintes réelles indépendantes. Au maximum = pas de limite."
   },
-  "bottom": {
-    "method": "Méthodologie : cette approche tient-elle ? (Verdict : oui — avec 5 corrections)",
-    "sources": "Sources de données, méthodologie et avertissements"
-  },
-  "footer": {
-    "html": "Build statique · zéro dépendance d'exécution · données intégrées à la construction depuis des instantanés d'arena.ai (les points de terminaison <span class=\"mono\">/api/*</span> renvoient 403, les requêtes en direct sont impossibles — ceci est un <b>instantané ponctuel</b>). Vue Pareto intégrée d'Arena : <a href=\"https://arena.ai/leaderboard/code/webdev/pareto\" target=\"_blank\" rel=\"noopener\">arena.ai/leaderboard/code/webdev/pareto</a>.<br>Données du classement © LMArena (arena.ai), instantané du %CAPTURED% · prix des pages tarifaires des fournisseurs, vérifiés le %SCRAPED% · <a href=\"%METHOD%\">Méthode</a> · <a href=\"/data/v1/all.json\">JSON</a> · <a href=\"/llms.txt\">llms.txt</a> · <a href=\"/sitemap.xml\">Plan du site</a>"
-  },
-  "data": {
-    "licAll": "Toutes licences · ",
-    "licOS": "Open-source uniquement · ",
-    "optTail": " modèles · Score ",
-    "dsNote": "{meta} · <b style=\"color:var(--dim)\">{note}</b><br>Plage de scores <span class=\"mono\">{min}–{max}</span> · Cost/Task <span class=\"mono\">{cmin}–{cmax}</span> · avec données de coût <span class=\"mono\">{wc}/{n}</span>",
-    "emptyNoCost": "Ce classement n'a pas de données Cost/Task — une colonne de coûts entièrement vide ne peut pas étayer une analyse de valeur (le classement WebDev · HTML d'arena.ai est exactement ainsi). Choisissez un classement avec colonne de coûts.",
-    "emptyFiltered": "Aucun modèle ne passe les filtres actuels — relâchez « Votes minimum », « Plafond Cost/Task » ou « Exclure Preliminary »."
-  },
-  "badges": {
-    "models": " modèles",
-    "withCost": " avec Cost/Task",
-    "inRange": " dans la plage",
-    "frontier": "Frontière de Pareto : ",
-    "frontierTiers": " paliers",
-    "peak": "Pleine",
-    "offpeak": "Creuse",
-    "timeAdj": "Prix ajustés dans le temps : ",
-    "timeAdjTail": " modèles",
-    "listPrice": "Prix catalogue (sans ajustement temporel)",
-    "cacheOff": "Remise de cache : désactivée",
-    "cacheHit": "Réussite cache ",
-    "strict": "Mode CI strict"
-  },
-  "winner": {
-    "modeName": {
-      "pareto": "Seuil : modèle le moins cher avec score ≥ T",
-      "ratio": "max Score/$",
-      "baseline": "max score excédentaire/$"
-    },
-    "currentMode": "Mode actuel · ",
-    "strictCI": "CI strict",
-    "pointEst": "estimation ponctuelle",
-    "licUnknown": "licence inconnue",
-    "preliminary": "Preliminary (provisoire)",
-    "autoEval": "AutoEval (auto-évalué)",
-    "pareto": "Frontière de Pareto",
-    "dominated": "dominé",
-    "kpiScore": "Score Arena",
-    "kpiCost": "Coût / tâche (P50)",
-    "kpiRatio": "Score / $",
-    "kpiExcess": "Score excédentaire / $",
-    "kpiBaseline": "Référence ",
-    "kpiVotes": "Votes",
-    "kpiApi": "Prix API $/M",
-    "kpiEffPin": "Prix d'entrée effectif (réussite ",
-    "kpiEffPinMid": " %",
-    "kpiEst": "·estim.",
-    "kpiList": ") · catalogue ",
-    "kpiInOut": "entrée / sortie",
-    "kpiCtx": "Contexte",
-    "kpiRank": "Rang général",
-    "listNoAdj": "Prix catalogue (sans ajustement temps/cache)",
-    "ptsPerDollar": "pts/$",
-    "verdict": "<b>Verdict :</b> sous le seuil <span class=\"mono\">T = {hi}</span> (plage <span class=\"mono\">[{lo}, {hi}]</span>), <span class=\"em\">{name}</span> est <b>le modèle le moins cher qui franchit la barre de capacité</b>.<br>Il règne sur la plage de scores <span class=\"mono\">[{cov0}, {cov1}]</span> — à l'intérieur, chaque modèle mieux noté coûte plus cher et chaque modèle moins cher a un score inférieur (mutuellement non dominés).<br>",
-    "degraded": "<span class=\"warn\">⚠ Votre seuil {hi} dépasse le score maximal {smax} de ce jeu de données ; aucun modèle ne qualifie — ce qui suit est le plus fort, relativement le moins cher.</span><br>",
-    "bandNotOk": "<span class=\"warn\">⚠ Son score {s} est sous votre borne basse {lo} : aucun modèle Pareto-optimal n'existe dans [{lo}, {hi}] car le palier plus fort coûte plus cher et le palier moins cher a un score inférieur. C'est l'angle mort des questions par plage — le mode seuil n'a besoin que d'un seul T.</span><br>",
-    "swing": "<b>Fluctuation hebdomadaire des prix :</b> le coût de ce champion descend à <span class=\"mono\">{lo}</span> le {loDow} à {loHr}:00 UTC et monte à <span class=\"mono\">{hi}</span> le {hiDow} à {hiHr}:00 UTC (écart de {spread}×). Programmer les tâches en heures creuses est une remise gratuite de <b>{pct} %</b> à ce seuil.<br>",
-    "nextUp": "<b>↑ Palier suivant :</b> {name} ({pts} pts, {cost}) → payer <b class=\"mono\">{dc}</b> de plus pour <b class=\"mono\">+{ds}</b> pts ; prix marginal <span class=\"mono\">{per}/pt</span>.",
-    "nextUpExpensive": " <span class=\"warn\">Ce palier est cher — il ne vaut la peine que si vous avez vraiment besoin de cette capacité.</span>",
-    "nextUpBargain": " <span class=\"em\">Cette mise à niveau est une bonne affaire.</span>",
-    "nextUpNormal": " — dans la fourchette normale.",
-    "nextUpNone": "<b>↑ Palier suivant :</b> aucun — c'est déjà le plafond de capacité de ce jeu de données.<br>",
-    "downOne": "<b>↓ Un palier plus bas :</b> {name} ({pts} pts, {cost}) → économiser <span class=\"mono\">{dc}</span> mais perdre <span class=\"mono\">{ds}</span> pts ; soit abandonner <span class=\"mono\">{per}</span> pts par dollar économisé.",
-    "downTooMuch": " <span class=\"warn\">Trop de capacité abandonnée — l'économie n'en vaut pas la peine.</span>",
-    "downAcceptable": " Si le budget est serré, ce palier est acceptable.",
-    "verdictRatio": "<b>Verdict :</b> dans la plage de scores <span class=\"mono\">[{lo}, {hi}]</span> ({n} modèles dans la plage), classé par {basis}, le premier modèle est <span class=\"em\">{name}</span> = <b class=\"mono\">{val}</b>.",
-    "basisRatio": "Score÷Coût",
-    "basisBaseline": "(Score−{base})÷Coût",
-    "noInBand": " <span class=\"warn\">Remarque : aucun modèle qualifié dans la plage ; ce résultat vient du domaine complet.</span>",
-    "butNote": "<b>Mais notez :</b> {name} obtient un score supérieur ({s}) à un prix marginal de <span class=\"mono\">{per}/pt</span>. Le modèle au top du « score par $ » n'est souvent pas celui que vous devriez utiliser — c'est juste le moins cher par point, et il peut manquer de capacité absolue.<br>",
-    "biasedWarn": "<span class=\"warn\">⚠ Les modes ② et ③ sont systématiquement biaisés :</span> le score Arena est une note de type Bradley-Terry avec un décalage de base d'environ 1000+, si bien que ② « score par $ » choisit presque toujours des modèles bon marché ; ③ soustrait le plancher pratique de 1200 pour annuler le décalage, se rapprochant de la valeur marginale réelle.",
-    "reliability": "<br><b>Fiabilité :</b> <span class=\"{cl}\">{rel}</span> ({votes} votes, IC ±{ci}).",
-    "rel_low": "faible",
-    "rel_mid": "moyenne",
-    "rel_high": "élevée",
-    "lowSampleWarn": " <span class=\"warn\">Échantillon trop petit — ce « champion de la valeur » peut être du pur bruit. Ne prenez pas de décisions d'achat dessus.</span>",
-    "costMissing": "<br><span class=\"warn\">Cost/Task manquant</span> — Arena ne publie pas le coût médian par tâche de ce modèle ; il ne peut pas participer aux comparaisons de valeur."
-  },
-  "scatter": {
-    "needTwo": "Il faut au moins 2 modèles avec données de coût",
-    "yAxis": "Coût / tâche (P50) · axe log",
-    "xAxis": "Score Arena (plus fort → droite)",
-    "dotTitle": "{name}\nScore {s} (+{u}/-{d})\nCost/Task {c}\nVotes {v}\nAPI {api}\n{pareto}\nclic = définir la borne haute de la plage de scores sur ce modèle",
-    "dotPareto": "◆ Frontière de Pareto (non dominé)",
-    "dotDominated": "Dominé : un modèle mieux noté et moins cher existe",
-    "dotApiNA": "N/D"
-  },
+  "export": {
+   "summary": "Exportation et extension des données",
+   "h2": "Exporter / étendre les données",
+   "csv": "Exporter en CSV (table actuelle)",
+   "tiers": "Exporter la grille de paliers en CSV",
+   "copyLink": "Copier le lien d'état",
+   "hint": "Pour ajouter un autre classement (ex. <span class=\"mono\">code/terminal</span>, <span class=\"mono\">text</span>, <span class=\"mono\">vision</span>) : ouvrez la page du classement sur arena.ai, sélectionnez le tableau, copiez et collez ci-dessous (les colonnes sont détectées automatiquement).",
+   "pastePh": "Collez le markdown / le texte de tableau d'un classement arena.ai…",
+   "namePh": "Nom du nouveau jeu de données (facultatif)",
+   "add": "Ajouter"
+  }
+ },
+ "charts": {
   "steps": {
-    "modeOnly": "Le graphique en escalier n'existe qu'en mode ① Seuil — c'est exactement la courbe « seuil T → modèle le moins cher de ce palier »",
-    "noCost": "Aucun modèle avec données de coût sur la frontière",
-    "xAxisNarrow": "Seuil T → Cost/Task le moins cher",
-    "xAxis": "Seuil T (« au moins aussi fort ») → Cost/Task du modèle le moins cher franchissant T",
-    "yAxis": "Coût / tâche · log",
-    "segTitle": "Plage de scores [{lo}, {up}]\nvainqueur : {name}\nScore {s} (+{u}/-{d})\nCost/Task {c} · {v} votes\nclic = définir la plage de scores sur ce palier"
+   "ttl": "① Graphique en escalier : seuil T → modèle le moins cher franchissant T (le « vainqueur de chaque palier » que vous demandiez)",
+   "lg": "Chaque marche = un modèle régnant sur cette plage de scores · cliquez sur une marche pour y sauter"
   },
-  "tiers": {
-    "count": "{n} paliers · frontière de seuils{strict}",
-    "countStrict": " · CI strict",
-    "modeOnly": "(construit uniquement en mode ① Seuil)",
-    "modeOnlyCell": "Passez en mode ① Seuil pour voir la grille complète : faites glisser le seuil du haut vers le bas et les vainqueurs sont ces modèles",
-    "notesPre": "Preliminary (provisoire) ",
-    "notesLow": "petit échantillon ",
-    "notesFrontier": "◆frontière",
-    "rowTitle": "clic = définir la plage de scores sur ce palier"
-  },
-  "table": {
-    "count": "{n} / {total} modèles · cliquez sur les en-têtes pour trier · lignes estompées = hors plage"
+  "scat": {
+   "ttl": "② Nuage de points : Score (x) × Cost/Task (y, log)",
+   "lg": "◆ Frontière de Pareto · points gris = dominés · barres verticales = IC · ombre = bande de score actuelle · ligne dorée en pointillés = seuil T (faites-la glisser)"
   },
   "tl": {
-    "noQualifies": "Aucun modèle ne qualifie au seuil T={t} (filtré, ou pas de données de coût au-dessus de ce score). Abaissez le seuil ou relâchez les filtres.",
-    "noQualifiesChart": "Aucun modèle ne qualifie au seuil actuel",
-    "perTask": "/tâche",
-    "peakLegend": "Fenêtres de pointe = jours ouvrés 01:00–04:00 et 06:00–10:00 UTC (gris) ; les week-ends sont entièrement en heures creuses",
-    "listPrice": "Prix catalogue ",
-    "now": "maintenant",
-    "noteHead": "Seuil <b class=\"mono\">T={t}</b> · <b>{peakH}</b> heures de pointe par semaine de 168 h · Actuellement {dow} {hr}:00 UTC → <b style=\"color:var(--accent)\">{c}</b>, champion <b>{champ}</b>{diff}<br>",
-    "hourSuffix": " h",
-    "diffPricier": "(prix catalogue {base}, {pct} % plus cher)",
-    "diffCheaper": "(prix catalogue {base}, {pct} % moins cher)",
-    "diffSame": "(identique au prix catalogue)",
-    "weekParts": "C(T) sur la semaine : ",
-    "cacheOn": "<br><span style=\"color:var(--dim2)\">Remise de cache active (réussite {h} %) : le cache ne s'applique qu'aux tokens d'entrée, compressant à la fois les niveaux absolus et l'amplitude pleine/creuse.</span>"
-  },
-  "cache": {
-    "off": "Désactivé → tous les tokens d'entrée sont facturés aux <b>prix de cache manqué</b> — exactement la <b>base Cost/Task du classement Arena</b>.",
-    "hitHead": "Taux de réussite <b class=\"mono\">{h} %</b> : {h} % des tokens d'entrée sont facturés aux prix de lecture du cache, {m} % aux prix de manque (multiplicateur d'écriture inclus) ; <b>les tokens de sortie ne sont jamais remisés</b>, donc même 100 % de réussite ne peut pas atteindre zéro.",
-    "srcCounts": "{pub} modèles du jeu de candidats utilisent des prix de cache publiés, {est} estimés à 10 %{na}.",
-    "srcNa": ", {na} sans prix publiés (N/D)",
-    "wmNote": "Anthropic / OpenAI facturent séparément les écritures de cache (= 1,25× le prix d'entrée) et la part manquée est payée au prix d'écriture ; les autres fournisseurs ne facturent pas d'écriture.",
-    "missBasis": "<br><b>Note</b> : le Cost/Task d'Arena est calculé aux <b>prix de cache manqué</b> (les prix catalogues $4/$20 inférés du classement Agent en sont la preuve), donc activer la remise de cache est une hypothèse — « si votre charge de travail atteint vraiment cette fréquence » — et non la signification propre du classement.",
-    "pillPeak": "pointe (2×)",
-    "pillOff": "creuse (½ prix)",
-    "pillOff2": "désactivé",
-    "osHintHead": "La part de sortie décide comment une « variation de prix unitaire » se convertit en « variation de Cost/Task ». Défaut <b class=\"mono\">8 %</b> = entrée:sortie 11:1, d'après l'inférence mesurée sur 14 modèles du classement Agent (ratios 3,8–17,9×).",
-    "osHintOff": "Remise de cache désactivée, les heures pleines/creuses de DeepSeek déplacent entrée et sortie de façon <b>proportionnelle</b> et ce curseur n'a <b>aucun effet</b> sur elles ; il ne compte que pour des corrections comme l'entrée ×3 / sortie ×2,8 de GLM.",
-    "osHintOn": "<b>Remise de cache active, ce curseur devient critique</b> : le cache ne remise que l'entrée, donc plus la part de sortie est élevée, plus la remise est mince. Au même taux de réussite de 95 %, DeepSeek-20261017 économise 86 % à w=2 %, 68 % à w=8 % (défaut), 55 % à w=15 %, 40 % à w=25 %, et seulement 25 % à w=40 %.",
-    "adjAllOff": "<span style=\"color:var(--dim2)\">Toutes les corrections désactivées → le classement tel quel. Cochez une règle ci-dessus pour voir les effets temporels.</span>",
-    "adjNone": "Aucun modèle du jeu de candidats actuel n'est affecté par les corrections activées ({rules}).",
-    "adjHead": "<b>{peak} · {dow} {hr}:00 UTC</b> : <b>{n}</b> modèles du jeu de candidats sont réécrits → ",
-    "evModels": " modèles",
-    "evSource": "Source : ",
-    "verified": "vérifié",
-    "uncertain": "incertain",
-    "costCellTitle": "Catalogue {raw} → scénario actuel {cur}",
-    "costCellWhy": "Réussite cache {h} % : prix de lecture {pc}/M ({src}), multiplicateur d'écriture {wm}×",
-    "costCellSrcEst": "estimation à 10 % de l'entrée",
-    "costCellSrcPub": "prix publié",
-    "costCellTotal": "Total ×{scale}",
-    "listPrice": "Prix catalogue"
-  },
-  "ev": {
-    "ds_tod": {
-      "name": "Tarification heures pleines/creuses de DeepSeek",
-      "desc": "Pleine = jours ouvrés 01:00–04:00 et 06:00–10:00 UTC ; toutes les autres heures (week-ends inclus) sont à demi-prix. Le classement liste 20261017 en heures creuses et 20260910 / la famille V4-Pro en heures pleines — une même famille, deux conventions, un seul tableau.",
-      "src": "Page tarifaire officielle DeepSeek ; confirmée par quatre sources indépendantes : datacamp / justinmckelvey / felloai / okamomedia"
-    },
-    "gem_dec1": {
-      "name": "Hausse Gemini 4 Carbon/Argon le 01-12 (annoncée)",
-      "desc": "Le tarif de lancement 2/10 $ se termine le 2026-11-30 ; à partir du 01-12 ce sera 4/20 $ avec prix de lecture de cache 0,10 → 0,20 $. Le classement (instantané du 11-11) utilise le tarif de lancement. Faites glisser la date de tarification en décembre pour voir Carbon sortir de la frontière overall_all ce jour-là.",
-      "src": "Page tarifaire Google Gemini API (benchlm.ai / munderdiffl.in / datastudios.org concordent ; vérifié les 12-13/11/2026)"
-    },
-    "ds_v4flash": {
-      "name": "DeepSeek V4-Flash distingue-t-il aussi pleines/creuses ? (incertain)",
-      "desc": "V4-Flash est retiré ; les sources publiques ne confirment la tarification pleines/creuses que pour V4.1-Flash et V4-Pro. Désactivé par défaut — cochez uniquement pour l'analyse de sensibilité.",
-      "src": "preuves insuffisantes"
-    },
-    "suspect2x": {
-      "name": "Écart de 2× vs un index tiers, sans explication promo (incertain)",
-      "desc": "Mistral Medium 3.5 (0,75/3,75 $ vs index 1,50/7,50 $) et GPT-6 Sol (1/5 $ vs 2/10 $) sont listés à exactement la moitié d'un index tiers. Peut-être une promo, ou l'index est périmé. Désactivé par défaut.",
-      "src": "comparaison benchr.org/pricing"
-    },
-    "glm53flash_nov": {
-      "name": "GLM-5.3-Flash $0.02/$0.07 — très en dessous du tarif officiel $0.15/$0.50, sans annonce promo (incertain)",
-      "desc": "Le tableau du 11-20 affiche $0.02/$0.07 — 87 %/86 % en dessous de la page tarifaire Z.ai ($0.15/$0.50, vérifié 2026-11-22). Aucune annonce promo ni date de fin ; le billet de lancement ne mentionne que $0.045/task (discounted). $0.02/$0.07 correspond presque exactement au palier batch OpenRouter ($0.023/$0.068) — palier mal scrapé ou promo courte non annoncée. Désactivé par défaut.",
-      "src": "docs.z.ai/guides/overview/pricing + z.ai/blog/glm-5.3-flash (vérifié 2026-11-22) ; openrouter.ai/api/v1/models"
-    },
-    "glm47_nov": {
-      "name": "GLM-4.7 $0.40/$1.75 — ne correspond ni au tarif officiel ni à l’agrégateur (incertain)",
-      "desc": "Le tableau du 11-20 affiche $0.40/$1.75, mais la page tarifaire Z.ai indique toujours $0.60/$2.20 (vérifié 2026-11-22) et OpenRouter confirme $0.60/$2.20. Le prix du tableau est 33 %/20 % en dessous des deux, sans annonce promo ni date de fin. Désactivé par défaut.",
-      "src": "docs.z.ai/guides/overview/pricing (vérifié 2026-11-22) ; openrouter.ai/api/v1/models"
-    },
-    "qwen35_channel": {
-      "name": "Qwen3.5-397B-A17B affiché sous le tarif officiel Alibaba $0.60/$3.60 (incertain)",
-      "desc": "Le tableau est passé de $0.60/$3.60 à $0.45/$3.00, mais Alibaba Cloud Model Studio liste toujours qwen3.5-397b-a17b à $0.6/$3.6 (international, 0–256K, vérifié 2026-11-22) — aucune baisse annoncée. $0.45/$3.00 correspond exactement à OpenRouter : plutôt un changement de canal qu’une hausse/ baisse du vendeur. Désactivé par défaut.",
-      "src": "alibabacloud.com/help/en/model-studio/model-pricing (vérifié 2026-11-22) ; openrouter.ai/api/v1/models"
-    },
-    "kimi27_channel": {
-      "name": "Kimi K2.7 Code affiché sous le tarif officiel Moonshot $0.95/$4.00 (incertain)",
-      "desc": "Le tableau est passé de $0.60/$3.50 à $0.60/$3.00, mais Moonshot liste toujours kimi-k2.7-code à $0.95/$4.00 (vérifié 2026-11-22) et a annoncé le retrait de la série K2 d’ici fin décembre 2026. Le prix du tableau correspond exactement à OpenRouter ($0.60/$3.00) — un prix de canal 37 %/25 % sous le tarif officiel, sans annonce promo. Désactivé par défaut.",
-      "src": "platform.kimi.ai/docs/pricing/chat (vérifié 2026-11-22) ; openrouter.ai/api/v1/models"
-    },
-    "mimo25_retired": {
-      "name": "MiMo-V2.5-Pro retiré par Xiaomi ; le prix du tableau n’a plus d’ancrage officiel (incertain)",
-      "desc": "Xiaomi a officiellement retiré l’API MiMo-V2.5-Pro le 2026-10-21 (migration vers V2.6). Le prix du tableau a sauté de $0.43/$0.87 à $0.48/$1.80 ; l’ancien correspondait au tarif officiel international ($0.435/$0.87, repris par mimo-v2.6-pro puisque le billet de lancement promettait aucun changement de tarif), le nouveau n’existe que chez des hébergeurs tiers (OpenRouter $0.48/$1.80). Désactivé par défaut.",
-      "src": "mimo.mi.com/docs/price/pay-as-you-go + bannière de retrait platform.xiaomimimo.com (vérifié 2026-11-22) ; mimo.xiaomi.com/mimo-v2-5-pro"
-    },
-    "hy3p_channel": {
-      "name": "Hy3 preview affiché sous le tarif officiel Tencent $0.18/$0.60 (incertain)",
-      "desc": "Le tableau est passé de $0.18/$0.60 à $0.14/$0.58 pour Hy3 preview. Tencent Cloud facture Hy3 preview à partir de ¥1.2/¥4 par million de tokens (≈$0.17/$0.56), et les suivis tiers enregistrent le tarif officiel USD à $0.18/$0.60 — l’ancien prix du tableau. Le nouveau prix égale le tarif Hy3 GA et la cote OpenRouter : soit Tencent a aligné la preview sur le modèle GA sans annonce, soit le tableau a fusionné les deux entrées. Désactivé par défaut.",
-      "src": "cloud.tencent.com article Hy Token Plan 2676264 + suivi de tarifs Tencent activepieces.com (vérifié 2026-11-22) ; openrouter.ai/api/v1/models"
-    }
-  },
-  "peakTag": {
-    "peak": "pleine",
-    "off": "creuse",
-    "afterPromo": "après promo",
-    "promo": "période promo",
-    "inEffect": "en vigueur",
-    "notYet": "pas encore en vigueur"
-  },
-  "interact": {
-    "play": "▶ Play : balayer le seuil du plus haut au plus bas",
-    "pause": "⏸ Pause",
-    "stop": "Arrêt",
-    "sweeping": "balayage en cours",
-    "modeHintPareto": "<b>Votre idée initiale.</b> Fixez le seuil T, prenez le modèle le moins cher parmi ceux de score ≥ T. Balayez T vers le bas et la séquence des vainqueurs est la <b>courbe inférieure de Pareto</b>. La seule définition mathématiquement auto-cohérente (= maximisation de capacité sous contrainte de coût).",
-    "modeHintRatio": "<b>Score ÷ Coût.</b> Fortement biaisé vers les modèles bon marché car les scores Arena portent un décalage de base d'environ 1200 (le numérateur est artificiellement gonflé). Pour comparaison grossière uniquement.",
-    "modeHintBaseline": "<b>(Score − 1200) ÷ Coût.</b> Les scores BT d'Arena ont un plancher pratique d'environ 1200 (en dessous ≈ aléatoire) ; le soustraire donne « combien de gain de capacité réel chaque dollar achète ». Toujours biaisé vers les modèles bon marché — c'est précisément pourquoi le mode Seuil est la définition de niveau décision.",
-    "alertTiers": "Passez d'abord en mode ① Seuil",
-    "copied": "✓ Copié",
-    "copyLink": "Copier le lien d'état",
-    "promptCopy": "Copier manuellement : ",
-    "pasteFirst": "<span style=\"color:var(--bad)\">Collez d'abord le texte du tableau</span>",
-    "tooFewRows": "<span style=\"color:var(--bad)\">Seulement {n} lignes analysées — vérifiez qu'il s'agit bien d'un tableau de classement arena.ai (colonnes Score / Cost/Task requises)</span>",
-    "customBoard": "Classement personnalisé",
-    "userPaste": " modèles · collé par l'utilisateur",
-    "customNote": "à partir des données que vous avez collées dans cette session",
-    "noCostParsed": "<span style=\"color:var(--bad)\">⚠ {n} modèles analysés, mais la colonne Cost/Task est entièrement vide</span> — sans coûts, pas d'analyse de valeur (le classement WebDev · HTML d'arena.ai est exactement ainsi). Le jeu de données a été ajouté : vous pouvez voir le classement par score, mais la frontière sera vide.",
-    "addedOk": "<span style=\"color:var(--good)\">✓ {n} modèles ajoutés</span> ({wc} avec données de coût). Les jeux personnalisés sont perdus au rechargement — sauvegardez-les avec « Exporter en CSV »."
-  },
-  "method": {
-    "title": "Méthode et sources de données — Analyseur de valeur du classement Arena",
-    "desc": "Comment la frontière coût-qualité de Pareto est calculée à partir des classements WebDev d'arena.ai : sources de données, vérification des prix, règles pleines/creuses, modèle de cache et limites."
-  },
-  "boot": {
-    "methodBody": "PLACEHOLDER_BOOT",
-    "sourceBody": "PLACEHOLDER_BOOT"
-  },
-  "tabs": {
-    "rank": "Classement éco",
-    "rankT": "Réponse directe : à votre barre de qualité et profil de tâche quotidien — qui coûte le moins par tâche, de combien de points, pour combien de $",
-    "deep": "Paliers & graphiques",
-    "deepT": "Carte du gagnant, escalier, nuage de points, courbe hebdo, tableaux des paliers et des modèles"
-  },
-  "rank": {
-    "ctrlH2": "Critères du classement",
-    "capability": "Plateau de capacité",
-    "threshold": "Barre de qualité",
-    "ge": "≥ ",
-    "period": "Période tarifaire",
-    "pkNow": "Maintenant",
-    "pkPeak": "Heures pleines",
-    "pkOff": "Heures creuses",
-    "profile": "Profil de tâche quotidien",
-    "presetLight": "Q&R léger",
-    "presetLightT": "≈2k entrée / 0,5k sortie tokens par tâche",
-    "presetDev": "Dev quotidien",
-    "presetDevT": "≈20k entrée / 2k sortie tokens par tâche",
-    "presetHeavy": "Agent lourd",
-    "presetHeavyT": "≈120k entrée / 12k sortie tokens par tâche",
-    "presetBoard": "Mesuré (classement)",
-    "presetBoardT": "Utiliser le coût médian mesuré par Arena tel quel",
-    "inTok": "Entrée k",
-    "outTok": "Sortie k",
-    "perDay": "Tâches/jour",
-    "tblH2": "Classement meilleur rapport",
-    "c1": "#",
-    "c2": "Modèle",
-    "c3": "Score",
-    "c4": "vs #1",
-    "c5": "Par tâche",
-    "c6": "×#1",
-    "c7": "Par mois",
-    "tblNote": "Modèles au-dessus de la barre, du moins cher au plus cher. * = coût ajusté selon le scénario heures pleines/creuses & cache. Cliquer une ligne déplace la barre sur ce modèle.",
-    "count": "{n} au-dessus de la barre · {all} avec coût",
-    "more": "Afficher les {n} restants",
-    "fewer": "Top 20 uniquement",
-    "rowTitle": "{name} · score {s} · {c} par tâche · API {api} · {v} votes",
-    "still": "Barre : score ≥ ",
-    "empty": "Aucun modèle n'atteint un score ≥ {t} (max du plateau {smax}) — baissez la barre.",
-    "standards": "Barre : score ≥ {t} · {cap} · {prof} · {period}",
-    "profileTag": "profil {in}k ent. / {out}k sort.",
-    "measured": "Coût mesuré Arena",
-    "perImage": "par image (mesuré)",
-    "perTask": "/tâche",
-    "kpiPer": "Par tâche",
-    "kpiMonth": "Par mois",
-    "kpiMonthTail": "{n}/jour × 30",
-    "upSell": "Meilleur score dans la barre : {name} ({s} pts) — +{dc}/tâche ({mult}×) achète +{ds} pts. ",
-    "upExpensive": "Paiement raide — seulement si ces points comptent.",
-    "upOk": "Montée pas chère si vous voulez de la marge.",
-    "topIsChamp": "Le moins cher de la barre en est aussi le meilleur score — pas besoin de monter.",
-    "adjNote": "Coût catalogue {board} ; ajusté selon le scénario heures pleines/creuses & cache. ",
-    "swing": "Amplitude hebdo : {lo} – {hi} ({pct}% moins cher en heures creuses).",
-    "unitHint": "Les plateaux d'images sont facturés à l'image : le classement utilise la médiane mesurée par image d'Arena ; la tarification token pleines/creuses ne s'applique pas.",
-    "hint": "Coût profil = tokens d'entrée × prix d'entrée (remise cache de {ch}% incluse) + tokens de sortie × prix de sortie, ajusté heures pleines/creuses & promos. Réglez le taux de cache dans le panneau de prix à gauche."
+   "ttl": "③ Les 168 heures de la semaine : coût minimum au seuil T <span class=\"mono\">C(T)</span> au fil du temps",
+   "lg": "Gris = fenêtres de pointe · sauts de ligne = changement de champion · doré en pointillés = l'heure sélectionnée · cliquez n'importe où pour sauter à cette heure"
   }
+ },
+ "tables": {
+  "tier": {
+   "h2": "Grille de paliers",
+   "c1": "#",
+   "c2": "Plage de scores",
+   "c3": "Vainqueur dans la plage",
+   "c4": "Score",
+   "c5": "Cost/Task",
+   "c6": "↑ Coût marginal vers le palier suivant ($/pt)",
+   "c7": "Votes",
+   "c8": "Notes"
+  },
+  "model": {
+   "h2": "Table des modèles",
+   "boardNo": "# classement",
+   "overallNo": "# général",
+   "model": "Modèle",
+   "score": "Score",
+   "ci": "±IC",
+   "cost": "Cost/Task",
+   "pts": "pts/$",
+   "excess": "Score excédent./$",
+   "votes": "Votes",
+   "pin": "$/M entrée",
+   "pout": "$/M sortie",
+   "ctx": "Contexte",
+   "lic": "Licence"
+  }
+ },
+ "bottom": {
+  "method": "Méthodologie : cette approche tient-elle ? (Verdict : oui — avec 5 corrections)",
+  "sources": "Sources de données, méthodologie et avertissements"
+ },
+ "footer": {
+  "html": "Build statique · zéro dépendance d'exécution · données intégrées à la construction depuis des instantanés d'arena.ai (les points de terminaison <span class=\"mono\">/api/*</span> renvoient 403, les requêtes en direct sont impossibles — ceci est un <b>instantané ponctuel</b>). Vue Pareto intégrée d'Arena : <a href=\"https://arena.ai/leaderboard/code/webdev/pareto\" target=\"_blank\" rel=\"noopener\">arena.ai/leaderboard/code/webdev/pareto</a>.<br>Données du classement © LMArena (arena.ai), instantané du %CAPTURED% · prix des pages tarifaires des fournisseurs, vérifiés le %SCRAPED% · <a href=\"%METHOD%\">Méthode</a> · <a href=\"/data/v1/all.json\">JSON</a> · <a href=\"/llms.txt\">llms.txt</a> · <a href=\"/sitemap.xml\">Plan du site</a>"
+ },
+ "data": {
+  "licAll": "Toutes licences · ",
+  "licOS": "Open-source uniquement · ",
+  "optTail": " modèles · Score ",
+  "dsNote": "{meta} · <b style=\"color:var(--dim)\">{note}</b><br>Plage de scores <span class=\"mono\">{min}–{max}</span> · Cost/Task <span class=\"mono\">{cmin}–{cmax}</span> · avec données de coût <span class=\"mono\">{wc}/{n}</span>",
+  "emptyNoCost": "Ce classement n'a pas de données Cost/Task — une colonne de coûts entièrement vide ne peut pas étayer une analyse de valeur (le classement WebDev · HTML d'arena.ai est exactement ainsi). Choisissez un classement avec colonne de coûts.",
+  "emptyFiltered": "Aucun modèle ne passe les filtres actuels — relâchez « Votes minimum », « Plafond Cost/Task » ou « Exclure Preliminary »."
+ },
+ "badges": {
+  "models": " modèles",
+  "withCost": " avec Cost/Task",
+  "inRange": " dans la plage",
+  "frontier": "Frontière de Pareto : ",
+  "frontierTiers": " paliers",
+  "peak": "Pleine",
+  "offpeak": "Creuse",
+  "timeAdj": "Prix ajustés dans le temps : ",
+  "timeAdjTail": " modèles",
+  "listPrice": "Prix catalogue (sans ajustement temporel)",
+  "cacheOff": "Remise de cache : désactivée",
+  "cacheHit": "Réussite cache ",
+  "strict": "Mode CI strict"
+ },
+ "winner": {
+  "modeName": {
+   "pareto": "Seuil : modèle le moins cher avec score ≥ T",
+   "ratio": "max Score/$",
+   "baseline": "max score excédentaire/$"
+  },
+  "currentMode": "Mode actuel · ",
+  "strictCI": "CI strict",
+  "pointEst": "estimation ponctuelle",
+  "licUnknown": "licence inconnue",
+  "preliminary": "Preliminary (provisoire)",
+  "autoEval": "AutoEval (auto-évalué)",
+  "pareto": "Frontière de Pareto",
+  "dominated": "dominé",
+  "kpiScore": "Score Arena",
+  "kpiCost": "Coût / tâche (P50)",
+  "kpiRatio": "Score / $",
+  "kpiExcess": "Score excédentaire / $",
+  "kpiBaseline": "Référence ",
+  "kpiVotes": "Votes",
+  "kpiApi": "Prix API $/M",
+  "kpiEffPin": "Prix d'entrée effectif (réussite ",
+  "kpiEffPinMid": " %",
+  "kpiEst": "·estim.",
+  "kpiList": ") · catalogue ",
+  "kpiInOut": "entrée / sortie",
+  "kpiCtx": "Contexte",
+  "kpiRank": "Rang général",
+  "listNoAdj": "Prix catalogue (sans ajustement temps/cache)",
+  "ptsPerDollar": "pts/$",
+  "verdict": "<b>Verdict :</b> sous le seuil <span class=\"mono\">T = {hi}</span> (plage <span class=\"mono\">[{lo}, {hi}]</span>), <span class=\"em\">{name}</span> est <b>le modèle le moins cher qui franchit la barre de capacité</b>.<br>Il règne sur la plage de scores <span class=\"mono\">[{cov0}, {cov1}]</span> — à l'intérieur, chaque modèle mieux noté coûte plus cher et chaque modèle moins cher a un score inférieur (mutuellement non dominés).<br>",
+  "degraded": "<span class=\"warn\">⚠ Votre seuil {hi} dépasse le score maximal {smax} de ce jeu de données ; aucun modèle ne qualifie — ce qui suit est le plus fort, relativement le moins cher.</span><br>",
+  "bandNotOk": "<span class=\"warn\">⚠ Son score {s} est sous votre borne basse {lo} : aucun modèle Pareto-optimal n'existe dans [{lo}, {hi}] car le palier plus fort coûte plus cher et le palier moins cher a un score inférieur. C'est l'angle mort des questions par plage — le mode seuil n'a besoin que d'un seul T.</span><br>",
+  "swing": "<b>Fluctuation hebdomadaire des prix :</b> le coût de ce champion descend à <span class=\"mono\">{lo}</span> le {loDow} à {loHr}:00 UTC et monte à <span class=\"mono\">{hi}</span> le {hiDow} à {hiHr}:00 UTC (écart de {spread}×). Programmer les tâches en heures creuses est une remise gratuite de <b>{pct} %</b> à ce seuil.<br>",
+  "nextUp": "<b>↑ Palier suivant :</b> {name} ({pts} pts, {cost}) → payer <b class=\"mono\">{dc}</b> de plus pour <b class=\"mono\">+{ds}</b> pts ; prix marginal <span class=\"mono\">{per}/pt</span>.",
+  "nextUpExpensive": " <span class=\"warn\">Ce palier est cher — il ne vaut la peine que si vous avez vraiment besoin de cette capacité.</span>",
+  "nextUpBargain": " <span class=\"em\">Cette mise à niveau est une bonne affaire.</span>",
+  "nextUpNormal": " — dans la fourchette normale.",
+  "nextUpNone": "<b>↑ Palier suivant :</b> aucun — c'est déjà le plafond de capacité de ce jeu de données.<br>",
+  "downOne": "<b>↓ Un palier plus bas :</b> {name} ({pts} pts, {cost}) → économiser <span class=\"mono\">{dc}</span> mais perdre <span class=\"mono\">{ds}</span> pts ; soit abandonner <span class=\"mono\">{per}</span> pts par dollar économisé.",
+  "downTooMuch": " <span class=\"warn\">Trop de capacité abandonnée — l'économie n'en vaut pas la peine.</span>",
+  "downAcceptable": " Si le budget est serré, ce palier est acceptable.",
+  "verdictRatio": "<b>Verdict :</b> dans la plage de scores <span class=\"mono\">[{lo}, {hi}]</span> ({n} modèles dans la plage), classé par {basis}, le premier modèle est <span class=\"em\">{name}</span> = <b class=\"mono\">{val}</b>.",
+  "basisRatio": "Score÷Coût",
+  "basisBaseline": "(Score−{base})÷Coût",
+  "noInBand": " <span class=\"warn\">Remarque : aucun modèle qualifié dans la plage ; ce résultat vient du domaine complet.</span>",
+  "butNote": "<b>Mais notez :</b> {name} obtient un score supérieur ({s}) à un prix marginal de <span class=\"mono\">{per}/pt</span>. Le modèle au top du « score par $ » n'est souvent pas celui que vous devriez utiliser — c'est juste le moins cher par point, et il peut manquer de capacité absolue.<br>",
+  "biasedWarn": "<span class=\"warn\">⚠ Les modes ② et ③ sont systématiquement biaisés :</span> le score Arena est une note de type Bradley-Terry avec un décalage de base d'environ 1000+, si bien que ② « score par $ » choisit presque toujours des modèles bon marché ; ③ soustrait le plancher pratique de 1200 pour annuler le décalage, se rapprochant de la valeur marginale réelle.",
+  "reliability": "<br><b>Fiabilité :</b> <span class=\"{cl}\">{rel}</span> ({votes} votes, IC ±{ci}).",
+  "rel_low": "faible",
+  "rel_mid": "moyenne",
+  "rel_high": "élevée",
+  "lowSampleWarn": " <span class=\"warn\">Échantillon trop petit — ce « champion de la valeur » peut être du pur bruit. Ne prenez pas de décisions d'achat dessus.</span>",
+  "costMissing": "<br><span class=\"warn\">Cost/Task manquant</span> — Arena ne publie pas le coût médian par tâche de ce modèle ; il ne peut pas participer aux comparaisons de valeur."
+ },
+ "scatter": {
+  "needTwo": "Il faut au moins 2 modèles avec données de coût",
+  "yAxis": "Coût / tâche (P50) · axe log",
+  "xAxis": "Score Arena (plus fort → droite)",
+  "dotTitle": "{name}\nScore {s} (+{u}/-{d})\nCost/Task {c}\nVotes {v}\nAPI {api}\n{pareto}\nclic = définir la borne haute de la plage de scores sur ce modèle",
+  "dotPareto": "◆ Frontière de Pareto (non dominé)",
+  "dotDominated": "Dominé : un modèle mieux noté et moins cher existe",
+  "dotApiNA": "N/D"
+ },
+ "steps": {
+  "modeOnly": "Le graphique en escalier n'existe qu'en mode ① Seuil — c'est exactement la courbe « seuil T → modèle le moins cher de ce palier »",
+  "noCost": "Aucun modèle avec données de coût sur la frontière",
+  "xAxisNarrow": "Seuil T → Cost/Task le moins cher",
+  "xAxis": "Seuil T (« au moins aussi fort ») → Cost/Task du modèle le moins cher franchissant T",
+  "yAxis": "Coût / tâche · log",
+  "segTitle": "Plage de scores [{lo}, {up}]\nvainqueur : {name}\nScore {s} (+{u}/-{d})\nCost/Task {c} · {v} votes\nclic = définir la plage de scores sur ce palier"
+ },
+ "tiers": {
+  "count": "{n} paliers · frontière de seuils{strict}",
+  "countStrict": " · CI strict",
+  "modeOnly": "(construit uniquement en mode ① Seuil)",
+  "modeOnlyCell": "Passez en mode ① Seuil pour voir la grille complète : faites glisser le seuil du haut vers le bas et les vainqueurs sont ces modèles",
+  "notesPre": "Preliminary (provisoire) ",
+  "notesLow": "petit échantillon ",
+  "notesFrontier": "◆frontière",
+  "rowTitle": "clic = définir la plage de scores sur ce palier"
+ },
+ "table": {
+  "count": "{n} / {total} modèles · cliquez sur les en-têtes pour trier · lignes estompées = hors plage"
+ },
+ "tl": {
+  "noQualifies": "Aucun modèle ne qualifie au seuil T={t} (filtré, ou pas de données de coût au-dessus de ce score). Abaissez le seuil ou relâchez les filtres.",
+  "noQualifiesChart": "Aucun modèle ne qualifie au seuil actuel",
+  "perTask": "/tâche",
+  "peakLegend": "Fenêtres de pointe = jours ouvrés 01:00–04:00 et 06:00–10:00 UTC (gris) ; les week-ends sont entièrement en heures creuses",
+  "listPrice": "Prix catalogue ",
+  "now": "maintenant",
+  "noteHead": "Seuil <b class=\"mono\">T={t}</b> · <b>{peakH}</b> heures de pointe par semaine de 168 h · Actuellement {dow} {hr}:00 UTC → <b style=\"color:var(--accent)\">{c}</b>, champion <b>{champ}</b>{diff}<br>",
+  "hourSuffix": " h",
+  "diffPricier": "(prix catalogue {base}, {pct} % plus cher)",
+  "diffCheaper": "(prix catalogue {base}, {pct} % moins cher)",
+  "diffSame": "(identique au prix catalogue)",
+  "weekParts": "C(T) sur la semaine : ",
+  "cacheOn": "<br><span style=\"color:var(--dim2)\">Remise de cache active (réussite {h} %) : le cache ne s'applique qu'aux tokens d'entrée, compressant à la fois les niveaux absolus et l'amplitude pleine/creuse.</span>"
+ },
+ "cache": {
+  "off": "Désactivé → tous les tokens d'entrée sont facturés aux <b>prix de cache manqué</b> — exactement la <b>base Cost/Task du classement Arena</b>.",
+  "hitHead": "Taux de réussite <b class=\"mono\">{h} %</b> : {h} % des tokens d'entrée sont facturés aux prix de lecture du cache, {m} % aux prix de manque (multiplicateur d'écriture inclus) ; <b>les tokens de sortie ne sont jamais remisés</b>, donc même 100 % de réussite ne peut pas atteindre zéro.",
+  "srcCounts": "{pub} modèles du jeu de candidats utilisent des prix de cache publiés, {est} estimés à 10 %{na}.",
+  "srcNa": ", {na} sans prix publiés (N/D)",
+  "wmNote": "Anthropic / OpenAI facturent séparément les écritures de cache (= 1,25× le prix d'entrée) et la part manquée est payée au prix d'écriture ; les autres fournisseurs ne facturent pas d'écriture.",
+  "missBasis": "<br><b>Note</b> : le Cost/Task d'Arena est calculé aux <b>prix de cache manqué</b> (les prix catalogues $4/$20 inférés du classement Agent en sont la preuve), donc activer la remise de cache est une hypothèse — « si votre charge de travail atteint vraiment cette fréquence » — et non la signification propre du classement.",
+  "pillPeak": "pointe (2×)",
+  "pillOff": "creuse (½ prix)",
+  "pillOff2": "désactivé",
+  "osHintHead": "La part de sortie décide comment une « variation de prix unitaire » se convertit en « variation de Cost/Task ». Défaut <b class=\"mono\">8 %</b> = entrée:sortie 11:1, d'après l'inférence mesurée sur 14 modèles du classement Agent (ratios 3,8–17,9×).",
+  "osHintOff": "Remise de cache désactivée, les heures pleines/creuses de DeepSeek déplacent entrée et sortie de façon <b>proportionnelle</b> et ce curseur n'a <b>aucun effet</b> sur elles ; il ne compte que pour des corrections comme l'entrée ×3 / sortie ×2,8 de GLM.",
+  "osHintOn": "<b>Remise de cache active, ce curseur devient critique</b> : le cache ne remise que l'entrée, donc plus la part de sortie est élevée, plus la remise est mince. Au même taux de réussite de 95 %, DeepSeek-20261017 économise 86 % à w=2 %, 68 % à w=8 % (défaut), 55 % à w=15 %, 40 % à w=25 %, et seulement 25 % à w=40 %.",
+  "adjAllOff": "<span style=\"color:var(--dim2)\">Toutes les corrections désactivées → le classement tel quel. Cochez une règle ci-dessus pour voir les effets temporels.</span>",
+  "adjNone": "Aucun modèle du jeu de candidats actuel n'est affecté par les corrections activées ({rules}).",
+  "adjHead": "<b>{peak} · {dow} {hr}:00 UTC</b> : <b>{n}</b> modèles du jeu de candidats sont réécrits → ",
+  "evModels": " modèles",
+  "evSource": "Source : ",
+  "verified": "vérifié",
+  "uncertain": "incertain",
+  "costCellTitle": "Catalogue {raw} → scénario actuel {cur}",
+  "costCellWhy": "Réussite cache {h} % : prix de lecture {pc}/M ({src}), multiplicateur d'écriture {wm}×",
+  "costCellSrcEst": "estimation à 10 % de l'entrée",
+  "costCellSrcPub": "prix publié",
+  "costCellTotal": "Total ×{scale}",
+  "listPrice": "Prix catalogue"
+ },
+ "ev": {
+  "ds_tod": {
+   "name": "Tarification heures pleines/creuses de DeepSeek",
+   "desc": "Pleine = jours ouvrés 01:00–04:00 et 06:00–10:00 UTC ; toutes les autres heures (week-ends inclus) sont à demi-prix. Le classement liste 20261017 en heures creuses et 20260910 / la famille V4-Pro en heures pleines — une même famille, deux conventions, un seul tableau.",
+   "src": "Page tarifaire officielle DeepSeek ; confirmée par quatre sources indépendantes : datacamp / justinmckelvey / felloai / okamomedia"
+  },
+  "gem_dec1": {
+   "name": "Hausse Gemini 4 Carbon/Argon le 01-12 (annoncée)",
+   "desc": "Le tarif de lancement 2/10 $ se termine le 2026-11-30 ; à partir du 01-12 ce sera 4/20 $ avec prix de lecture de cache 0,10 → 0,20 $. Le classement (instantané du 11-11) utilise le tarif de lancement. Faites glisser la date de tarification en décembre pour voir Carbon sortir de la frontière overall_all ce jour-là.",
+   "src": "Page tarifaire Google Gemini API (benchlm.ai / munderdiffl.in / datastudios.org concordent ; vérifié les 12-13/11/2026)"
+  },
+  "ds_v4flash": {
+   "name": "DeepSeek V4-Flash distingue-t-il aussi pleines/creuses ? (incertain)",
+   "desc": "V4-Flash est retiré ; les sources publiques ne confirment la tarification pleines/creuses que pour V4.1-Flash et V4-Pro. Désactivé par défaut — cochez uniquement pour l'analyse de sensibilité.",
+   "src": "preuves insuffisantes"
+  },
+  "suspect2x": {
+   "name": "Écart de 2× vs un index tiers, sans explication promo (incertain)",
+   "desc": "Mistral Medium 3.5 (0,75/3,75 $ vs index 1,50/7,50 $) et GPT-6 Sol (1/5 $ vs 2/10 $) sont listés à exactement la moitié d'un index tiers. Peut-être une promo, ou l'index est périmé. Désactivé par défaut.",
+   "src": "comparaison benchr.org/pricing"
+  },
+  "glm53flash_nov": {
+   "name": "GLM-5.3-Flash $0.02/$0.07 — très en dessous du tarif officiel $0.15/$0.50, sans annonce promo (incertain)",
+   "desc": "Le tableau du 11-20 affiche $0.02/$0.07 — 87 %/86 % en dessous de la page tarifaire Z.ai ($0.15/$0.50, vérifié 2026-11-22). Aucune annonce promo ni date de fin ; le billet de lancement ne mentionne que $0.045/task (discounted). $0.02/$0.07 correspond presque exactement au palier batch OpenRouter ($0.023/$0.068) — palier mal scrapé ou promo courte non annoncée. Désactivé par défaut.",
+   "src": "docs.z.ai/guides/overview/pricing + z.ai/blog/glm-5.3-flash (vérifié 2026-11-22) ; openrouter.ai/api/v1/models"
+  },
+  "glm47_nov": {
+   "name": "GLM-4.7 $0.40/$1.75 — ne correspond ni au tarif officiel ni à l’agrégateur (incertain)",
+   "desc": "Le tableau du 11-20 affiche $0.40/$1.75, mais la page tarifaire Z.ai indique toujours $0.60/$2.20 (vérifié 2026-11-22) et OpenRouter confirme $0.60/$2.20. Le prix du tableau est 33 %/20 % en dessous des deux, sans annonce promo ni date de fin. Désactivé par défaut.",
+   "src": "docs.z.ai/guides/overview/pricing (vérifié 2026-11-22) ; openrouter.ai/api/v1/models"
+  },
+  "qwen35_channel": {
+   "name": "Qwen3.5-397B-A17B affiché sous le tarif officiel Alibaba $0.60/$3.60 (incertain)",
+   "desc": "Le tableau est passé de $0.60/$3.60 à $0.45/$3.00, mais Alibaba Cloud Model Studio liste toujours qwen3.5-397b-a17b à $0.6/$3.6 (international, 0–256K, vérifié 2026-11-22) — aucune baisse annoncée. $0.45/$3.00 correspond exactement à OpenRouter : plutôt un changement de canal qu’une hausse/ baisse du vendeur. Désactivé par défaut.",
+   "src": "alibabacloud.com/help/en/model-studio/model-pricing (vérifié 2026-11-22) ; openrouter.ai/api/v1/models"
+  },
+  "kimi27_channel": {
+   "name": "Kimi K2.7 Code affiché sous le tarif officiel Moonshot $0.95/$4.00 (incertain)",
+   "desc": "Le tableau est passé de $0.60/$3.50 à $0.60/$3.00, mais Moonshot liste toujours kimi-k2.7-code à $0.95/$4.00 (vérifié 2026-11-22) et a annoncé le retrait de la série K2 d’ici fin décembre 2026. Le prix du tableau correspond exactement à OpenRouter ($0.60/$3.00) — un prix de canal 37 %/25 % sous le tarif officiel, sans annonce promo. Désactivé par défaut.",
+   "src": "platform.kimi.ai/docs/pricing/chat (vérifié 2026-11-22) ; openrouter.ai/api/v1/models"
+  },
+  "mimo25_retired": {
+   "name": "MiMo-V2.5-Pro retiré par Xiaomi ; le prix du tableau n’a plus d’ancrage officiel (incertain)",
+   "desc": "Xiaomi a officiellement retiré l’API MiMo-V2.5-Pro le 2026-10-21 (migration vers V2.6). Le prix du tableau a sauté de $0.43/$0.87 à $0.48/$1.80 ; l’ancien correspondait au tarif officiel international ($0.435/$0.87, repris par mimo-v2.6-pro puisque le billet de lancement promettait aucun changement de tarif), le nouveau n’existe que chez des hébergeurs tiers (OpenRouter $0.48/$1.80). Désactivé par défaut.",
+   "src": "mimo.mi.com/docs/price/pay-as-you-go + bannière de retrait platform.xiaomimimo.com (vérifié 2026-11-22) ; mimo.xiaomi.com/mimo-v2-5-pro"
+  },
+  "hy3p_channel": {
+   "name": "Hy3 preview affiché sous le tarif officiel Tencent $0.18/$0.60 (incertain)",
+   "desc": "Le tableau est passé de $0.18/$0.60 à $0.14/$0.58 pour Hy3 preview. Tencent Cloud facture Hy3 preview à partir de ¥1.2/¥4 par million de tokens (≈$0.17/$0.56), et les suivis tiers enregistrent le tarif officiel USD à $0.18/$0.60 — l’ancien prix du tableau. Le nouveau prix égale le tarif Hy3 GA et la cote OpenRouter : soit Tencent a aligné la preview sur le modèle GA sans annonce, soit le tableau a fusionné les deux entrées. Désactivé par défaut.",
+   "src": "cloud.tencent.com article Hy Token Plan 2676264 + suivi de tarifs Tencent activepieces.com (vérifié 2026-11-22) ; openrouter.ai/api/v1/models"
+  }
+ },
+ "peakTag": {
+  "peak": "pleine",
+  "off": "creuse",
+  "afterPromo": "après promo",
+  "promo": "période promo",
+  "inEffect": "en vigueur",
+  "notYet": "pas encore en vigueur"
+ },
+ "interact": {
+  "play": "▶ Play : balayer le seuil du plus haut au plus bas",
+  "pause": "⏸ Pause",
+  "stop": "Arrêt",
+  "sweeping": "balayage en cours",
+  "modeHintPareto": "<b>Votre idée initiale.</b> Fixez le seuil T, prenez le modèle le moins cher parmi ceux de score ≥ T. Balayez T vers le bas et la séquence des vainqueurs est la <b>courbe inférieure de Pareto</b>. La seule définition mathématiquement auto-cohérente (= maximisation de capacité sous contrainte de coût).",
+  "modeHintRatio": "<b>Score ÷ Coût.</b> Fortement biaisé vers les modèles bon marché car les scores Arena portent un décalage de base d'environ 1200 (le numérateur est artificiellement gonflé). Pour comparaison grossière uniquement.",
+  "modeHintBaseline": "<b>(Score − 1200) ÷ Coût.</b> Les scores BT d'Arena ont un plancher pratique d'environ 1200 (en dessous ≈ aléatoire) ; le soustraire donne « combien de gain de capacité réel chaque dollar achète ». Toujours biaisé vers les modèles bon marché — c'est précisément pourquoi le mode Seuil est la définition de niveau décision.",
+  "alertTiers": "Passez d'abord en mode ① Seuil",
+  "copied": "✓ Copié",
+  "copyLink": "Copier le lien d'état",
+  "promptCopy": "Copier manuellement : ",
+  "pasteFirst": "<span style=\"color:var(--bad)\">Collez d'abord le texte du tableau</span>",
+  "tooFewRows": "<span style=\"color:var(--bad)\">Seulement {n} lignes analysées — vérifiez qu'il s'agit bien d'un tableau de classement arena.ai (colonnes Score / Cost/Task requises)</span>",
+  "customBoard": "Classement personnalisé",
+  "userPaste": " modèles · collé par l'utilisateur",
+  "customNote": "à partir des données que vous avez collées dans cette session",
+  "noCostParsed": "<span style=\"color:var(--bad)\">⚠ {n} modèles analysés, mais la colonne Cost/Task est entièrement vide</span> — sans coûts, pas d'analyse de valeur (le classement WebDev · HTML d'arena.ai est exactement ainsi). Le jeu de données a été ajouté : vous pouvez voir le classement par score, mais la frontière sera vide.",
+  "addedOk": "<span style=\"color:var(--good)\">✓ {n} modèles ajoutés</span> ({wc} avec données de coût). Les jeux personnalisés sont perdus au rechargement — sauvegardez-les avec « Exporter en CSV »."
+ },
+ "method": {
+  "title": "Méthode et sources de données — Analyseur de valeur du classement Arena",
+  "desc": "Comment la frontière coût-qualité de Pareto est calculée à partir des classements WebDev d'arena.ai : sources de données, vérification des prix, règles pleines/creuses, modèle de cache et limites."
+ },
+ "boot": {
+  "methodBody": "PLACEHOLDER_BOOT",
+  "sourceBody": "PLACEHOLDER_BOOT"
+ },
+ "tabs": {
+  "rank": "Classement éco",
+  "rankT": "Réponse directe : à votre barre de qualité et profil de tâche quotidien — qui coûte le moins par tâche, de combien de points, pour combien de $",
+  "deep": "Paliers & graphiques",
+  "deepT": "Carte du gagnant, escalier, nuage de points, courbe hebdo, tableaux des paliers et des modèles"
+ },
+ "rank": {
+  "ctrlH2": "Critères du classement",
+  "capability": "Plateau de capacité",
+  "threshold": "Barre de qualité",
+  "ge": "≥ ",
+  "period": "Période tarifaire",
+  "pkNow": "Maintenant",
+  "pkPeak": "Heures pleines",
+  "pkOff": "Heures creuses",
+  "profile": "Profil de tâche quotidien",
+  "presetLight": "Q&R léger",
+  "presetLightT": "≈2k entrée / 0,5k sortie tokens par tâche",
+  "presetDev": "Dev quotidien",
+  "presetDevT": "≈20k entrée / 2k sortie tokens par tâche",
+  "presetHeavy": "Agent lourd",
+  "presetHeavyT": "≈120k entrée / 12k sortie tokens par tâche",
+  "presetBoard": "Mesuré (classement)",
+  "presetBoardT": "Utiliser le coût médian mesuré par Arena tel quel",
+  "inTok": "Entrée k",
+  "outTok": "Sortie k",
+  "perDay": "Tâches/jour",
+  "tblH2": "Classement meilleur rapport",
+  "c1": "#",
+  "c2": "Modèle",
+  "c3": "Score",
+  "c4": "vs #1",
+  "c5": "Par tâche",
+  "c6": "×#1",
+  "c7": "Par mois",
+  "tblNote": "Modèles au-dessus de la barre, du moins cher au plus cher. * = coût ajusté selon le scénario heures pleines/creuses & cache. Cliquer une ligne déplace la barre sur ce modèle.",
+  "count": "{n} au-dessus de la barre · {all} avec coût",
+  "more": "Afficher les {n} restants",
+  "fewer": "Top 20 uniquement",
+  "rowTitle": "{name} · score {s} · {c} par tâche · API {api} · {v} votes",
+  "still": "Barre : score ≥ ",
+  "empty": "Aucun modèle n'atteint un score ≥ {t} (max du plateau {smax}) — baissez la barre.",
+  "standards": "Barre : score ≥ {t} · {cap} · {prof} · {period}",
+  "profileTag": "profil {in}k ent. / {out}k sort.",
+  "measured": "Coût mesuré Arena",
+  "perImage": "par image (mesuré)",
+  "perTask": "/tâche",
+  "kpiPer": "Par tâche",
+  "kpiMonth": "Par mois",
+  "kpiMonthTail": "{n}/jour × 30",
+  "upSell": "Meilleur score dans la barre : {name} ({s} pts) — +{dc}/tâche ({mult}×) achète +{ds} pts. ",
+  "upExpensive": "Paiement raide — seulement si ces points comptent.",
+  "upOk": "Montée pas chère si vous voulez de la marge.",
+  "topIsChamp": "Le moins cher de la barre en est aussi le meilleur score — pas besoin de monter.",
+  "adjNote": "Coût catalogue {board} ; ajusté selon le scénario heures pleines/creuses & cache. ",
+  "swing": "Amplitude hebdo : {lo} – {hi} ({pct}% moins cher en heures creuses).",
+  "unitHint": "Les plateaux d'images sont facturés à l'image : le classement utilise la médiane mesurée par image d'Arena ; la tarification token pleines/creuses ne s'applique pas.",
+  "hint": "Coût profil = tokens d'entrée × prix d'entrée (remise cache de {ch}% incluse) + tokens de sortie × prix de sortie, ajusté heures pleines/creuses & promos. Réglez le taux de cache dans le panneau de prix à gauche."
+ },
+ "scene": {
+  "codingT": "Le moins cher pour coder",
+  "codingD": "20k entrées + 2k sorties · classé aux tarifs heures creuses",
+  "agentT": "Agents intensifs",
+  "agentD": "120k entrées + 12k sorties · classé aux prix de l'heure en cours",
+  "offT": "Aubaines heures creuses",
+  "offD": "Tâches légères (2k + 0,5k) · heures à demi-tarif façon DeepSeek"
+ },
+ "faq": [
+  {
+   "q": "Pourquoi le prix du classement ne correspond-il pas à mon coût réel ?",
+   "a": "Les prix affichés supposent 0 % de hits de cache et mélangent les conventions pointe/creux dans un même tableau. Cet outil recalcule votre coût réel par tâche au taux de cache que vous fixez (95 % par défaut) et à l'heure choisie, avec les ratios de lecture publiés et les multiplicateurs d'écriture de chaque modèle."
+  },
+  {
+   "q": "Comment sont gérés les demi-tarifs heures creuses à la DeepSeek ?",
+   "a": "Le coût de chaque modèle est tracé en courbe hebdomadaire de 168 heures d'après le calendrier pointe/creux publié (UTC). Le classement bascule entre heure courante, pointe et creux — un batch nocturne est tarifé au tarif nocturne."
+  },
+  {
+   "q": "Que signifie « fusion CI stricte » ?",
+   "a": "Les scores Arena comportent du bruit statistique : en mode strict, les paliers dont les intervalles de confiance à 95 % se chevauchent sont fusionnés, pour ne pas payer un écart de classement que les données ne soutiennent pas."
+  }
+ ]
 }

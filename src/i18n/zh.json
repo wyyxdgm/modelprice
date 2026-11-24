@@ -1,465 +1,487 @@
 {
-  "meta": {
-    "lang": "zh",
-    "locale_tag": "zh-CN",
-    "title": "Arena 榜单性价比分析器 · 分数区间 → 区间内最优性价比模型",
-    "desc": "在你的质量门槛下，哪个 AI 模型最便宜？Arena（LMArena）WebDev 分数 × 真实单任务成本的交互式 Pareto 阶梯 —— 含峰谷定价、缓存命中折扣与严格 CI 合并。免费、无需注册。",
-    "ogTitle": "每个质量档位的最便宜 AI 模型 — Arena 分数 vs 真实单任务成本",
-    "ogDesc": "设定你能接受的最低 Arena 分数，立刻看到跨过门槛的最便宜模型、升一档每分要花多少钱，以及峰谷价与缓存定价如何改变答案。"
+ "meta": {
+  "lang": "zh",
+  "locale_tag": "zh-CN",
+  "title": "大模型 API 价格对比计算器 · Arena 分数 × 最便宜模型",
+  "desc": "大模型 API 价格对比 + Token 计费计算器：按 LMArena 分数设定质量门槛，秒出最便宜的达标模型与 Claude/GPT 平替——含峰谷定价、缓存命中折扣、DeepSeek 错峰半价。免费、无需注册。",
+  "ogTitle": "每个质量档位的最便宜大模型 — Arena 分数 × 真实成本",
+  "ogDesc": "设定你能接受的最低 Arena 分数，立刻看到跨过门槛的最便宜模型、升一档每分要花多少钱，以及峰谷价与缓存定价如何改变答案。"
+ },
+ "dows": "周日,周一,周二,周三,周四,周五,周六",
+ "header": {
+  "h1": "大模型 API 价格对比计算器",
+  "sub": "Arena 分数 × 最便宜达标模型",
+  "tagline": "把能力门槛从最高拖到最低，每一档的赢家实时更新。这就是<b style=\"color:var(--good)\">下包络 / Pareto 前沿（lower envelope / Pareto frontier）</b>——你的直觉「每个能力档都有一个性价比最优模型」在数学上成立，但需要正确的定义（见下文）。数据：<a href=\"https://arena.ai/leaderboard/code/webdev\" target=\"_blank\" rel=\"noopener\">arena.ai/leaderboard</a>，抓取于 <span class=\"mono\" id=\"scraped\">%SCRAPED%</span>（榜单日期 <span class=\"mono\" id=\"captured\">%CAPTURED%</span>）。"
+ },
+ "intro": {
+  "h2": "每个质量档位的最便宜 AI 模型 — Arena 分数 vs 真实单任务成本",
+  "p1": "<b style=\"color:var(--text)\">设定你能接受的最低 Arena 分数，它就告诉你跨过这条线的最便宜模型</b>——外加升到下一档的每分边际成本，并已修正 DeepSeek 峰谷定价、过期促销与缓存未命中偏差。拖动金色阈值线（或点 ▶ Play），每个档位的赢家实时更新。",
+  "lnk": "「最优性价比」的三种定义 · 严格 95% CI 模式 · 价格按一周 168 小时建模 · <a href=\"%METHOD%\">方法与数据来源</a> · <a href=\"/data/v1/all.json\">JSON（AI 可读）</a> · <a href=\"/llms.txt\">llms.txt</a>"
+ },
+ "grp": {
+  "ds": {
+   "summary": "数据集与定义",
+   "h2": "榜单数据集",
+   "licHint": "<b>「仅开源」和「含闭源」是两张不同的榜，分数不可直接比较。</b>仅开源榜（<span class=\"mono\">?license=open-source</span>）封顶 <b class=\"mono\">1687</b>（Kimi K3.1 Pro）；含闭源榜封顶 <b class=\"mono\">1838</b>（Claude Fable 5.2 xHigh，$11.04/任务）—— Claude Opus 5.5 1815、Sonnet 5.5 1772、Gemini 4 Carbon 1768、GPT-6 Astra 1764 都在含闭源榜上。请把数据集切到 <b>含闭源（All-license）</b>条目。<br><span style=\"color:var(--dim2)\">注意：含闭源榜只抓到了前 41 名（分数 1590–1838），41 名之后的长尾缺失。高分区的前沿不受影响，但「全场最便宜」和「超额分/$」的基线会有偏差。</span>"
   },
-  "dows": "周日,周一,周二,周三,周四,周五,周六",
-  "header": {
-    "h1": "Arena 榜单性价比分析器",
-    "sub": "分数区间 → 区间内最优性价比模型",
-    "tagline": "把能力门槛从最高拖到最低，每一档的赢家实时更新。这就是<b style=\"color:var(--good)\">下包络 / Pareto 前沿（lower envelope / Pareto frontier）</b>——你的直觉「每个能力档都有一个性价比最优模型」在数学上成立，但需要正确的定义（见下文）。数据：<a href=\"https://arena.ai/leaderboard/code/webdev\" target=\"_blank\" rel=\"noopener\">arena.ai/leaderboard</a>，抓取于 <span class=\"mono\" id=\"scraped\"></span>（榜单日期 <span class=\"mono\" id=\"captured\"></span>）。"
+  "mode": {
+   "h2": "「最优性价比」的定义",
+   "b1": "① 门槛制",
+   "b1t": "分数 ≥ T 的模型里最便宜的那个（= 下包络，即你最初的想法）",
+   "b2": "② 分数/$",
+   "b2t": "最大 分数 ÷ 成本",
+   "b3": "③ 超额分/$",
+   "b3t": "最大 (分数 − 1200) ÷ 成本"
   },
-  "intro": {
-    "h2": "每个质量档位的最便宜 AI 模型 — Arena 分数 vs 真实单任务成本",
-    "p1": "<b style=\"color:var(--text)\">设定你能接受的最低 Arena 分数，它就告诉你跨过这条线的最便宜模型</b>——外加升到下一档的每分边际成本，并已修正 DeepSeek 峰谷定价、过期促销与缓存未命中偏差。拖动金色阈值线（或点 ▶ Play），每个档位的赢家实时更新。",
-    "lnk": "「最优性价比」的三种定义 · 严格 95% CI 模式 · 价格按一周 168 小时建模 · <a href=\"%METHOD%\">方法与数据来源</a> · <a href=\"/data/v1/all.json\">JSON（AI 可读）</a> · <a href=\"/llms.txt\">llms.txt</a>"
+  "ci": {
+   "h2": "显著性模式",
+   "point": "点估计",
+   "strict": "严格（95% CI 不重叠才算赢）",
+   "hint": "严格模式只接受「A 的 CI 下界 &gt; B 的 CI 上界」的差距，噪声永远不会变成结论。低票数 <span class=\"pill warn\" style=\"padding:0 5px\">Preliminary（预评）</span>模型的 CI 常达 ±20–55。"
   },
-  "grp": {
-    "ds": {
-      "summary": "数据集与定义",
-      "h2": "榜单数据集",
-      "licHint": "<b>「仅开源」和「含闭源」是两张不同的榜，分数不可直接比较。</b>仅开源榜（<span class=\"mono\">?license=open-source</span>）封顶 <b class=\"mono\">1687</b>（Kimi K3.1 Pro）；含闭源榜封顶 <b class=\"mono\">1838</b>（Claude Fable 5.2 xHigh，$11.04/任务）—— Claude Opus 5.5 1815、Sonnet 5.5 1772、Gemini 4 Carbon 1768、GPT-6 Astra 1764 都在含闭源榜上。请把数据集切到 <b>含闭源（All-license）</b>条目。<br><span style=\"color:var(--dim2)\">注意：含闭源榜只抓到了前 41 名（分数 1590–1838），41 名之后的长尾缺失。高分区的前沿不受影响，但「全场最便宜」和「超额分/$」的基线会有偏差。</span>"
-    },
-    "mode": {
-      "h2": "「最优性价比」的定义",
-      "b1": "① 门槛制",
-      "b1t": "分数 ≥ T 的模型里最便宜的那个（= 下包络，即你最初的想法）",
-      "b2": "② 分数/$",
-      "b2t": "最大 分数 ÷ 成本",
-      "b3": "③ 超额分/$",
-      "b3t": "最大 (分数 − 1200) ÷ 成本"
-    },
-    "ci": {
-      "h2": "显著性模式",
-      "point": "点估计",
-      "strict": "严格（95% CI 不重叠才算赢）",
-      "hint": "严格模式只接受「A 的 CI 下界 &gt; B 的 CI 上界」的差距，噪声永远不会变成结论。低票数 <span class=\"pill warn\" style=\"padding:0 5px\">Preliminary（预评）</span>模型的 CI 常达 ±20–55。"
-    },
-    "rng": {
-      "summary": "分数区间与扫掠",
-      "h2": "分数区间（能力验收线）",
-      "lo": "下界 lo",
-      "hi": "上界 hi",
-      "pFull": "全域 [min, max]",
-      "pSweep": "[T, max] 扫掠",
-      "pTop10": "Top10 档",
-      "pMid": "中段 1400–1550",
-      "play": "▶ Play：把门槛从最高扫到最低",
-      "speed": "速度",
-      "stop": "停止"
-    },
-    "price": {
-      "summary": "价格情景与缓存",
-      "h2": "价格情景：把标价变成<b>时间的函数</b>",
-      "tz": "显示时区",
-      "tz0": "UTC ±0",
-      "tz1": "CET +1",
-      "tz2": "EET +2",
-      "tz8": "北京 +8",
-      "tz9": "东京 +9",
-      "tzM5": "美东 −5",
-      "tzM8": "美西 −8",
-      "dow": "星期（UTC）",
-      "d1": "周一",
-      "d2": "周二",
-      "d3": "周三",
-      "d4": "周四",
-      "d5": "周五",
-      "d6": "周六",
-      "d0": "周日",
-      "utcHour": "UTC 小时",
-      "localTime": "· 你的本地时间是",
-      "now": "此刻",
-      "peak": "最贵小时",
-      "off": "最便宜小时",
-      "sat": "周六（全谷价）",
-      "board": "按榜面（全关）",
-      "all": "全部启用（含存疑）",
-      "date": "计价日期",
-      "outShare": "输出 token 占比",
-      "cacheH2": "缓存命中率（cache hit）",
-      "exact": "精确 %",
-      "c0": "0%（榜面价）",
-      "c50": "50%",
-      "c85": "85%",
-      "c95": "95%（默认）",
-      "c99": "99%",
-      "cacheSrc": "缓存读取价来源",
-      "srcPub": "已公布的缓存价（缺失按输入价 10% 估算）",
-      "srcFlat": "一律按输入价 10%（统一保守口径）",
-      "srcOff": "关闭缓存折扣（= Arena 榜面价）"
-    },
-    "filters": {
-      "summary": "过滤",
-      "h2": "过滤",
-      "minVotes": "最少票数 ≥",
-      "exPrelim": "排除 Preliminary（预评）",
-      "exAuto": "排除 AutoEval（自动评测）",
-      "onlyCost": "只看有 Cost/Task 的模型",
-      "costCap": "Cost/Task 上限 ≤ $<span class=\"mono\" id=\"cLab\">∞</span>（预算上限）",
-      "capHint": "预算上限 + 分数门槛 = 两条独立的现实约束。拉到最大即不限制。"
-    },
-    "export": {
-      "summary": "导出与扩展数据",
-      "h2": "导出 / 扩展数据",
-      "csv": "导出 CSV（当前表格）",
-      "tiers": "导出档位阶梯 CSV",
-      "copyLink": "复制状态链接",
-      "hint": "想加另一张榜（如 <span class=\"mono\">code/terminal</span>、<span class=\"mono\">text</span>、<span class=\"mono\">vision</span>）：打开 arena.ai 对应榜单页，选中表格、复制、粘贴到下面（列自动识别）。",
-      "pastePh": "粘贴 arena.ai 榜单的 markdown / 表格文本…",
-      "namePh": "新数据集名称（可选）",
-      "add": "添加"
-    }
+  "rng": {
+   "summary": "分数区间与扫掠",
+   "h2": "分数区间（能力验收线）",
+   "lo": "下界 lo",
+   "hi": "上界 hi",
+   "pFull": "全域 [min, max]",
+   "pSweep": "[T, max] 扫掠",
+   "pTop10": "Top10 档",
+   "pMid": "中段 1400–1550",
+   "play": "▶ Play：把门槛从最高扫到最低",
+   "speed": "速度",
+   "stop": "停止"
   },
-  "charts": {
-    "steps": {
-      "ttl": "① 阶梯图：门槛 T → 跨过 T 的最便宜模型（就是你要的「每一档的赢家」）",
-      "lg": "每段台阶 = 统治该分数区间的模型 · 点任意一段跳到它"
-    },
-    "scat": {
-      "ttl": "② 散点图：分数（x）× Cost/Task（y，对数）",
-      "lg": "◆ Pareto 前沿 · 灰点 = 被支配 · 竖线 = CI · 阴影 = 当前分数区间 · 金色虚线 = 门槛 T（可拖动）"
-    },
-    "tl": {
-      "ttl": "③ 一周 168 小时：门槛 T 下的最低成本 <span class=\"mono\">C(T)</span> 随时间变化",
-      "lg": "灰色 = 峰时窗口 · 折线跳变 = 冠军易主 · 金色虚线 = 你选中的小时 · 点任意处跳到那个小时"
-    }
+  "price": {
+   "summary": "价格情景与缓存",
+   "h2": "价格情景：把标价变成<b>时间的函数</b>",
+   "tz": "显示时区",
+   "tz0": "UTC ±0",
+   "tz1": "CET +1",
+   "tz2": "EET +2",
+   "tz8": "北京 +8",
+   "tz9": "东京 +9",
+   "tzM5": "美东 −5",
+   "tzM8": "美西 −8",
+   "dow": "星期（UTC）",
+   "d1": "周一",
+   "d2": "周二",
+   "d3": "周三",
+   "d4": "周四",
+   "d5": "周五",
+   "d6": "周六",
+   "d0": "周日",
+   "utcHour": "UTC 小时",
+   "localTime": "· 你的本地时间是",
+   "now": "此刻",
+   "peak": "最贵小时",
+   "off": "最便宜小时",
+   "sat": "周六（全谷价）",
+   "board": "按榜面（全关）",
+   "all": "全部启用（含存疑）",
+   "date": "计价日期",
+   "outShare": "输出 token 占比",
+   "cacheH2": "缓存命中率（cache hit）",
+   "exact": "精确 %",
+   "c0": "0%（榜面价）",
+   "c50": "50%",
+   "c85": "85%",
+   "c95": "95%（默认）",
+   "c99": "99%",
+   "cacheSrc": "缓存读取价来源",
+   "srcPub": "已公布的缓存价（缺失按输入价 10% 估算）",
+   "srcFlat": "一律按输入价 10%（统一保守口径）",
+   "srcOff": "关闭缓存折扣（= Arena 榜面价）"
   },
-  "tables": {
-    "tier": {
-      "h2": "档位阶梯",
-      "c1": "#",
-      "c2": "分数区间",
-      "c3": "区间赢家",
-      "c4": "分数",
-      "c5": "Cost/Task",
-      "c6": "↑ 升下一档的边际成本（$/分）",
-      "c7": "票数",
-      "c8": "备注"
-    },
-    "model": {
-      "h2": "模型总表",
-      "boardNo": "榜内 #",
-      "overallNo": "总榜 #",
-      "model": "模型",
-      "score": "分数",
-      "ci": "±CI",
-      "cost": "Cost/Task",
-      "pts": "分/$",
-      "excess": "超额分/$",
-      "votes": "票数",
-      "pin": "$/M 输入",
-      "pout": "$/M 输出",
-      "ctx": "上下文",
-      "lic": "许可"
-    }
+  "filters": {
+   "summary": "过滤",
+   "h2": "过滤",
+   "minVotes": "最少票数 ≥",
+   "exPrelim": "排除 Preliminary（预评）",
+   "exAuto": "排除 AutoEval（自动评测）",
+   "onlyCost": "只看有 Cost/Task 的模型",
+   "costCap": "Cost/Task 上限 ≤ $<span class=\"mono\" id=\"cLab\">∞</span>（预算上限）",
+   "capHint": "预算上限 + 分数门槛 = 两条独立的现实约束。拉到最大即不限制。"
   },
-  "bottom": {
-    "method": "方法论：这个思路站得住吗？（结论：站得住 — 但要做 5 处修正）",
-    "sources": "数据来源、方法与免责声明"
-  },
-  "footer": {
-    "html": "纯静态构建 · 零运行时依赖 · 数据在构建时从 arena.ai 快照内嵌（<span class=\"mono\">/api/*</span> 端点返回 403，无法实时查询 —— 这是<b>时点快照</b>）。Arena 官方 Pareto 视图：<a href=\"https://arena.ai/leaderboard/code/webdev/pareto\" target=\"_blank\" rel=\"noopener\">arena.ai/leaderboard/code/webdev/pareto</a>。<br>榜单数据 © LMArena (arena.ai)，快照 %CAPTURED% · 价格来自各厂商定价页，核对于 2026-11-14 · <a href=\"%METHOD%\">方法</a> · <a href=\"/data/v1/all.json\">JSON</a> · <a href=\"/llms.txt\">llms.txt</a> · <a href=\"/sitemap.xml\">站点地图</a>"
-  },
-  "data": {
-    "licAll": "含闭源 · ",
-    "licOS": "仅开源 · ",
-    "optTail": " 个模型 · 分数 ",
-    "dsNote": "{meta} · <b style=\"color:var(--dim)\">{note}</b><br>分数区间 <span class=\"mono\">{min}–{max}</span> · Cost/Task <span class=\"mono\">{cmin}–{cmax}</span> · 有成本数据 <span class=\"mono\">{wc}/{n}</span>",
-    "emptyNoCost": "这张榜没有 Cost/Task 数据 —— 整列成本全空无法做性价比分析（arena.ai 的 WebDev · HTML 子榜正是如此）。请选一张有成本列的榜。",
-    "emptyFiltered": "没有模型通过当前过滤 —— 放宽「最少票数」「Cost/Task 上限」或「排除 Preliminary」。"
-  },
-  "badges": {
-    "models": " 个模型",
-    "withCost": " 有 Cost/Task",
-    "inRange": " 在区间内",
-    "frontier": "Pareto 前沿：",
-    "frontierTiers": " 档",
-    "peak": "峰时",
-    "offpeak": "谷时",
-    "timeAdj": "价格已按时间修正：",
-    "timeAdjTail": " 个模型",
-    "listPrice": "标价（未按时间修正）",
-    "cacheOff": "缓存折扣：关",
-    "cacheHit": "缓存命中 ",
-    "strict": "严格 CI 模式"
-  },
-  "winner": {
-    "modeName": {
-      "pareto": "门槛制：分数 ≥ T 的最便宜模型",
-      "ratio": "最大 分数/$",
-      "baseline": "最大 超额分/$"
-    },
-    "currentMode": "当前口径 · ",
-    "strictCI": "严格 CI",
-    "pointEst": "点估计",
-    "licUnknown": "许可未知",
-    "preliminary": "Preliminary（预评）",
-    "autoEval": "AutoEval（自动评测）",
-    "pareto": "Pareto 前沿",
-    "dominated": "被支配",
-    "kpiScore": "Arena 分数",
-    "kpiCost": "Cost / Task（P50）",
-    "kpiRatio": "分数 / $",
-    "kpiExcess": "超额分 / $",
-    "kpiBaseline": "基线 ",
-    "kpiVotes": "票数",
-    "kpiApi": "API 单价 $/M",
-    "kpiEffPin": "有效输入价（命中 ",
-    "kpiEffPinMid": "%",
-    "kpiEst": "·估算",
-    "kpiList": "）· 标价 ",
-    "kpiInOut": "输入 / 输出",
-    "kpiCtx": "上下文",
-    "kpiRank": "总榜排名",
-    "listNoAdj": "标价（未做时间/缓存修正）",
-    "ptsPerDollar": "分/$",
-    "verdict": "<b>结论：</b>在门槛 <span class=\"mono\">T = {hi}</span>（区间 <span class=\"mono\">[{lo}, {hi}]</span>）以下，<span class=\"em\">{name}</span> 是<b>跨过能力线的最便宜模型</b>。<br>它统治分数区间 <span class=\"mono\">[{cov0}, {cov1}]</span> —— 在此区间内，每个更高分的模型都更贵、每个更便宜的模型都更低分（互不支配）。<br>",
-    "degraded": "<span class=\"warn\">⚠ 你的门槛 {hi} 超过了本数据集最高分 {smax}；没有模型达标 —— 下面给出的是最强的那个（相对最便宜）。</span><br>",
-    "bandNotOk": "<span class=\"warn\">⚠ 它的分数 {s} 低于你的下界 {lo}：[{lo}, {hi}] 内不存在 Pareto 最优模型，因为更强的一档更贵、更便宜的一档更低分。这是区间式问题的盲区 —— 门槛制只需要一个 T。</span><br>",
-    "swing": "<b>一周价格波动：</b>这位冠军自己的成本最低在 {loDow} {loHr}:00 UTC 的 <span class=\"mono\">{lo}</span>，最高在 {hiDow} {hiHr}:00 UTC 的 <span class=\"mono\">{hi}</span>（相差 {spread}×）。把任务排进谷时窗口，在这个门槛下等于免费打 <b>{pct}%</b> 折。<br>",
-    "nextUp": "<b>↑ 升一档：</b>{name}（{pts} 分，{cost}）→ 多付 <b class=\"mono\">{dc}</b> 换 <b class=\"mono\">+{ds}</b> 分；边际单价 <span class=\"mono\">{per}/分</span>。",
-    "nextUpExpensive": " <span class=\"warn\">这一档很贵 —— 只有真需要这个能力才值得。</span>",
-    "nextUpBargain": " <span class=\"em\">这个升级非常划算。</span>",
-    "nextUpNormal": " —— 正常范围。",
-    "nextUpNone": "<b>↑ 升一档：</b>没有了 —— 已经是这个数据集的能力天花板。<br>",
-    "downOne": "<b>↓ 降一档：</b>{name}（{pts} 分，{cost}）→ 省 <span class=\"mono\">{dc}</span> 但少 <span class=\"mono\">{ds}</span> 分；即每省 1 美元放弃 <span class=\"mono\">{per}</span> 分。",
-    "downTooMuch": " <span class=\"warn\">放弃的能力太多 —— 不值得为这点节省降档。</span>",
-    "downAcceptable": " 预算紧张的话这一档可以接受。",
-    "verdictRatio": "<b>结论：</b>在分数区间 <span class=\"mono\">[{lo}, {hi}]</span> 内（{n} 个模型在区间），按{basis}排名，榜首是 <span class=\"em\">{name}</span> = <b class=\"mono\">{val}</b>。",
-    "basisRatio": "分数÷成本",
-    "basisBaseline": "(分数−{base})÷成本",
-    "noInBand": " <span class=\"warn\">注意：区间内无达标模型；此结果来自全域。</span>",
-    "butNote": "<b>但注意：</b>{name} 分数更高（{s}），边际价只有 <span class=\"mono\">{per}/分</span>。「每美元分数」最高的模型往往不是你该用的 —— 它只是每分最便宜，可能缺乏绝对能力。<br>",
-    "biasedWarn": "<span class=\"warn\">⚠ 口径②③存在系统性偏差：</span>Arena 分数是 Bradley-Terry 型评分，带 ~1000+ 基线偏移，所以②「每美元分数」几乎总选便宜模型；③减去 1200 实用地板抵消偏移，更接近真实边际价值。",
-    "reliability": "<br><b>可靠性：</b><span class=\"{cl}\">{rel}</span>（{votes} 票，CI ±{ci}）。",
-    "rel_low": "低",
-    "rel_mid": "中",
-    "rel_high": "高",
-    "lowSampleWarn": " <span class=\"warn\">样本太小 —— 这个「性价比冠军」可能纯属噪声，别据此做采购决策。</span>",
-    "costMissing": "<br><span class=\"warn\">缺 Cost/Task</span> —— Arena 未公布该模型的单任务中位成本，无法参与性价比比较。"
-  },
-  "scatter": {
-    "needTwo": "至少需要 2 个有成本数据的模型",
-    "yAxis": "Cost / Task（P50）· 对数轴",
-    "xAxis": "Arena 分数（越强越靠右）",
-    "dotTitle": "{name}\n分数 {s} (+{u}/-{d})\nCost/Task {c}\n票数 {v}\nAPI {api}\n{pareto}\n点击 = 把分数区间上界设为该模型",
-    "dotPareto": "◆ Pareto 前沿（不被支配）",
-    "dotDominated": "被支配：存在更高分且更便宜的模型",
-    "dotApiNA": "N/A"
-  },
+  "export": {
+   "summary": "导出与扩展数据",
+   "h2": "导出 / 扩展数据",
+   "csv": "导出 CSV（当前表格）",
+   "tiers": "导出档位阶梯 CSV",
+   "copyLink": "复制状态链接",
+   "hint": "想加另一张榜（如 <span class=\"mono\">code/terminal</span>、<span class=\"mono\">text</span>、<span class=\"mono\">vision</span>）：打开 arena.ai 对应榜单页，选中表格、复制、粘贴到下面（列自动识别）。",
+   "pastePh": "粘贴 arena.ai 榜单的 markdown / 表格文本…",
+   "namePh": "新数据集名称（可选）",
+   "add": "添加"
+  }
+ },
+ "charts": {
   "steps": {
-    "modeOnly": "阶梯图只在①门槛制下存在 —— 它正是「门槛 T → 该档最便宜模型」的曲线",
-    "noCost": "前沿上没有带成本数据的模型",
-    "xAxisNarrow": "门槛 T → 最便宜 Cost/Task",
-    "xAxis": "门槛 T（「至少这么强」）→ 跨过 T 的最便宜模型的 Cost/Task",
-    "yAxis": "Cost / Task · 对数",
-    "segTitle": "分数区间 [{lo}, {up}]\n赢家：{name}\n分数 {s} (+{u}/-{d})\nCost/Task {c} · {v} 票\n点击 = 把分数区间设为该档"
+   "ttl": "① 阶梯图：门槛 T → 跨过 T 的最便宜模型（就是你要的「每一档的赢家」）",
+   "lg": "每段台阶 = 统治该分数区间的模型 · 点任意一段跳到它"
   },
-  "tiers": {
-    "count": "{n} 档 · 门槛前沿{strict}",
-    "countStrict": " · 严格 CI",
-    "modeOnly": "（仅在①门槛制下构建）",
-    "modeOnlyCell": "切到①门槛制查看完整阶梯：把门槛从高拖到低，赢家就是这些模型",
-    "notesPre": "Preliminary（预评） ",
-    "notesLow": "低样本 ",
-    "notesFrontier": "◆前沿",
-    "rowTitle": "点击 = 把分数区间设为该档"
-  },
-  "table": {
-    "count": "{n} / {total} 个模型 · 点表头排序 · 灰行 = 区间外"
+  "scat": {
+   "ttl": "② 散点图：分数（x）× Cost/Task（y，对数）",
+   "lg": "◆ Pareto 前沿 · 灰点 = 被支配 · 竖线 = CI · 阴影 = 当前分数区间 · 金色虚线 = 门槛 T（可拖动）"
   },
   "tl": {
-    "noQualifies": "门槛 T={t} 下没有模型达标（被过滤，或该分数以上没有成本数据）。请降低门槛或放宽过滤。",
-    "noQualifiesChart": "当前门槛下没有模型达标",
-    "perTask": "/任务",
-    "peakLegend": "峰时窗口 = 工作日 01:00–04:00 与 06:00–10:00 UTC（灰色）；周末全为谷价",
-    "listPrice": "标价 ",
-    "now": "此刻",
-    "noteHead": "门槛 <b class=\"mono\">T={t}</b> · 一周 168 小时中 <b>{peakH}</b> 个峰时 · 现在是 {dow} {hr}:00 UTC → <b style=\"color:var(--accent)\">{c}</b>，冠军 <b>{champ}</b>{diff}<br>",
-    "hourSuffix": " 小时",
-    "diffPricier": "（标价 {base}，贵 {pct}%）",
-    "diffCheaper": "（标价 {base}，便宜 {pct}%）",
-    "diffSame": "（与标价相同）",
-    "weekParts": "一周的 C(T)：",
-    "cacheOn": "<br><span style=\"color:var(--dim2)\">缓存折扣已开启（命中 {h}%）：缓存只作用于输入 token，绝对水平与峰谷振幅都会被压缩。</span>"
-  },
-  "cache": {
-    "off": "关闭 → 全部输入 token 按<b>缓存未命中价（cache-miss）</b>计费 —— 正是 <b>Arena 榜面 Cost/Task 的口径</b>。",
-    "hitHead": "命中率 <b class=\"mono\">{h}%</b>：输入 token 的 {h}% 按缓存读取价计费，{m}% 按（含写入倍率的）未命中价计费；<b>输出 token 永不打折</b>，所以哪怕 100% 命中率也压不到零。",
-    "srcCounts": "候选集中 {pub} 个模型用已公布的缓存价，{est} 个按 10% 估算{na}。",
-    "srcNa": "，{na} 个无公布价（N/A）",
-    "wmNote": "Anthropic / OpenAI 的缓存写入单独计费（= 输入价 1.25×），未命中的部分按写入价付；其他厂商不收写入费。",
-    "missBasis": "<br><b>注意</b>：Arena 的 Cost/Task 按<b>缓存未命中价</b>计算（Agent 榜反推出的 $4/$20 标价就是证据），所以开启缓存折扣是一个假设 ——「如果你的负载真的命中这么频繁」—— 而不是榜面本身的含义。",
-    "pillPeak": "峰时（2×）",
-    "pillOff": "谷时（½ 价）",
-    "pillOff2": "关",
-    "osHintHead": "输出占比决定「单价变化」如何换算成「Cost/Task 变化」。默认 <b class=\"mono\">8%</b> = 输入:输出 11:1，来自 14 个 Agent 榜模型的实测推理（比值 3.8–17.9×）。",
-    "osHintOff": "缓存折扣关闭时，DeepSeek 的峰谷价对输入输出<b>同比例</b>作用，这个滑块对它<b>无效</b>；只对 GLM 输入 ×3 / 输出 ×2.8 这类修正有意义。",
-    "osHintOn": "<b>缓存折扣开启后，这个滑块变成关键参数</b>：缓存只折扣输入，输出占比越高折扣越薄。同样 95% 命中率下，DeepSeek-20261017 在 w=2% 省 86%、w=8%（默认）省 68%、w=15% 省 55%、w=25% 省 40%、w=40% 只省 25%。",
-    "adjAllOff": "<span style=\"color:var(--dim2)\">全部修正关闭 → 即榜面原样。勾选上方任意规则可看时间效应。</span>",
-    "adjNone": "当前候选集中没有模型受已启用修正影响（{rules}）。",
-    "adjHead": "<b>{peak} · {dow} {hr}:00 UTC</b>：候选集中 <b>{n}</b> 个模型被改写 → ",
-    "evModels": " 个模型",
-    "evSource": "来源：",
-    "verified": "已核实",
-    "uncertain": "存疑",
-    "costCellTitle": "标价 {raw} → 当前情景 {cur}",
-    "costCellWhy": "缓存命中 {h}%：读取价 {pc}/M（{src}），写入倍率 {wm}×",
-    "costCellSrcEst": "按输入价 10% 估算",
-    "costCellSrcPub": "公布价",
-    "costCellTotal": "合计 ×{scale}",
-    "listPrice": "标价"
-  },
-  "ev": {
-    "ds_tod": {
-      "name": "DeepSeek 峰谷定价",
-      "desc": "峰时 = 工作日 01:00–04:00 与 06:00–10:00 UTC；其余时段（含周末）半价。榜面把 20261017 标为谷价、20260910 与 V4-Pro 系列标为峰价 —— 同一个家族、两种口径、一张表。",
-      "src": "DeepSeek 官方定价页；四个独立来源交叉确认：datacamp / justinmckelvey / felloai / okamomedia"
-    },
-    "gem_dec1": {
-      "name": "Gemini 4 Carbon/Argon 12-01 涨价（已公告）",
-      "desc": "首发优惠价 $2/$10 于 2026-11-30 结束；12-01 起 $4/$20，缓存读取价 $0.10 → $0.20。榜面（11-11 快照）仍按首发优惠价。把计价日期拖到 12 月，可以看到 Carbon 当天跌出 overall_all 前沿。",
-      "src": "Google Gemini API 定价页（benchlm.ai / munderdiffl.in / datastudios.org 三源一致；核对于 2026-11-12/13）"
-    },
-    "ds_v4flash": {
-      "name": "DeepSeek V4-Flash 是否也分峰谷价？（存疑）",
-      "desc": "V4-Flash 已下架；公开来源只确认了 V4.1-Flash 与 V4-Pro 的峰谷价。默认关闭 —— 仅用于敏感性分析。",
-      "src": "证据不足"
-    },
-    "suspect2x": {
-      "name": "与第三方指数差 2×，无促销解释（存疑）",
-      "desc": "Mistral Medium 3.5（$0.75/$3.75 vs 指数 $1.50/$7.50）与 GPT-6 Sol（$1/$5 vs $2/$10）恰好是某第三方指数的一半。可能是促销，也可能指数过时。默认关闭。",
-      "src": "benchr.org/pricing 对比"
-    },
-    "glm53flash_nov": {
-      "name": "GLM-5.3-Flash 榜面 $0.02/$0.07 远低于官方 $0.15/$0.50，无促销公告（存疑）",
-      "desc": "11-20 榜面价 $0.02/$0.07，比 Z.ai 定价页现价（$0.15/$0.50，2026-11-22 核对）低 87%/86%。全网无促销公告、无到期日；发布博客只写了 $0.045/task (discounted)。$0.02/$0.07 与 OpenRouter batch 档（$0.023/$0.068）几乎一致，可能是误抓档位或短促未公告促销。默认关闭。",
-      "src": "docs.z.ai/guides/overview/pricing + z.ai/blog/glm-5.3-flash（2026-11-22 核对）；openrouter.ai/api/v1/models"
-    },
-    "glm47_nov": {
-      "name": "GLM-4.7 榜面 $0.40/$1.75 与官方价、聚合渠道价都不符（存疑）",
-      "desc": "11-20 榜面价 $0.40/$1.75，但 Z.ai 定价页仍是 $0.60/$2.20（2026-11-22 核对），OpenRouter 也是 $0.60/$2.20。榜面价比两边都低 33%/20%，无促销公告、无到期日。默认关闭。",
-      "src": "docs.z.ai/guides/overview/pricing（2026-11-22 核对）；openrouter.ai/api/v1/models"
-    },
-    "qwen35_channel": {
-      "name": "Qwen3.5-397B-A17B 榜面价低于阿里官方 $0.60/$3.60（存疑）",
-      "desc": "榜面从 $0.60/$3.60 降到 $0.45/$3.00，但阿里云 Model Studio 国际站 qwen3.5-397b-a17b 仍是 $0.6/$3.6（0–256K 档，2026-11-22 核对），官方未宣布降价。$0.45/$3.00 与 OpenRouter 完全一致，更像聚合渠道切换而非厂商调价。默认关闭。",
-      "src": "alibabacloud.com/help/en/model-studio/model-pricing（2026-11-22 核对）；openrouter.ai/api/v1/models"
-    },
-    "kimi27_channel": {
-      "name": "Kimi K2.7 Code 榜面价低于 Moonshot 官方 $0.95/$4.00（存疑）",
-      "desc": "榜面从 $0.60/$3.50 变为 $0.60/$3.00，但 Moonshot 官方 kimi-k2.7-code 仍是 $0.95/$4.00（2026-11-22 核对），且已公告 K2 系列将于 2026 年 12 月底退役。榜面价与 OpenRouter 完全一致（$0.60/$3.00），比官方低 37%/25%，无促销公告。默认关闭。",
-      "src": "platform.kimi.ai/docs/pricing/chat（2026-11-22 核对）；openrouter.ai/api/v1/models"
-    },
-    "mimo25_retired": {
-      "name": "MiMo-V2.5-Pro 已被小米下线，榜面价无官方锚点（存疑）",
-      "desc": "小米已于 2026-10-21 正式下线 MiMo-V2.5-Pro API（要求切换 V2.6）。榜面价从 $0.43/$0.87 跳到 $0.48/$1.80：旧价恰为官方海外价（$0.435/$0.87，发布博客承诺价格不变，现由 mimo-v2.6-pro 承接），新价只存在于第三方托管（OpenRouter $0.48/$1.80）。默认关闭。",
-      "src": "mimo.mi.com/docs/price/pay-as-you-go + platform.xiaomimimo.com 下线横幅（2026-11-22 核对）；mimo.xiaomi.com/mimo-v2-5-pro"
-    },
-    "hy3p_channel": {
-      "name": "Hy3 preview 榜面价低于腾讯官方 $0.18/$0.60（存疑）",
-      "desc": "榜面 Hy3 preview 从 $0.18/$0.60 降到 $0.14/$0.58。腾讯云 Hy3 preview 按量计费为 ¥1.2/¥4 每百万 tokens 起（≈$0.17/$0.56），第三方追踪记录的官方美元价为 $0.18/$0.60（即旧榜面价）。新价与 Hy3 正式版价、OpenRouter 挂牌一致——要么腾讯未公告地把 preview 与正式版对齐，要么榜单把两个条目并了价。默认关闭。",
-      "src": "cloud.tencent.com Hy Token Plan 文章 2676264 + activepieces.com 腾讯定价追踪（2026-11-22 核对）；openrouter.ai/api/v1/models"
-    }
-  },
-  "peakTag": {
-    "peak": "峰时",
-    "off": "谷时",
-    "afterPromo": "促销后",
-    "promo": "促销期",
-    "inEffect": "已生效",
-    "notYet": "尚未生效"
-  },
-  "interact": {
-    "play": "▶ Play：把门槛从最高扫到最低",
-    "pause": "⏸ 暂停",
-    "stop": "停止",
-    "sweeping": "扫掠中",
-    "modeHintPareto": "<b>你最初的想法。</b>固定门槛 T，取分数 ≥ T 中最便宜的模型。把 T 从高往下扫，赢家序列就是 <b>Pareto 下包络</b>。这是唯一在数学上自洽的定义（= 成本约束下的能力最大化）。",
-    "modeHintRatio": "<b>分数 ÷ 成本。</b>强烈偏向便宜模型，因为 Arena 分数带 ~1200 基线偏移（分子被人为抬高）。只适合粗略比较。",
-    "modeHintBaseline": "<b>(分数 − 1200) ÷ 成本。</b>Arena BT 分数有 ~1200 的实用地板（低于它 ≈ 随机）；减去它得到「每美元买到多少真实能力提升」。仍偏向便宜模型 —— 这正是门槛制才是决策级定义的原因。",
-    "alertTiers": "请先切到①门槛制",
-    "copied": "✓ 已复制",
-    "copyLink": "复制状态链接",
-    "promptCopy": "请手动复制：",
-    "pasteFirst": "<span style=\"color:var(--bad)\">请先粘贴表格文本</span>",
-    "tooFewRows": "<span style=\"color:var(--bad)\">只解析出 {n} 行 —— 请确认这是 arena.ai 榜单表格（需要 分数 / Cost/Task 列）</span>",
-    "customBoard": "自建榜",
-    "userPaste": " 个模型 · 用户粘贴",
-    "customNote": "来自你本次会话粘贴的数据",
-    "noCostParsed": "<span style=\"color:var(--bad)\">⚠ 解析出 {n} 个模型，但 Cost/Task 整列为空</span> —— 没有成本就无法做性价比分析（arena.ai 的 WebDev · HTML 子榜正是如此）。数据集已添加：可以看分数排名，但前沿为空。",
-    "addedOk": "<span style=\"color:var(--good)\">✓ 已添加 {n} 个模型</span>（{wc} 个有成本数据）。自建数据集刷新后丢失 —— 请用「导出 CSV」保存。"
-  },
-  "method": {
-    "title": "方法与数据来源 — Arena 榜单性价比分析器",
-    "desc": "成本-质量 Pareto 前沿如何从 arena.ai WebDev 榜单算出：数据来源、价格核对、峰谷规则、缓存模型与局限。"
-  },
-  "boot": {
-    "methodBody": "PLACEHOLDER_BOOT",
-    "sourceBody": "PLACEHOLDER_BOOT"
-  },
-  "tabs": {
-    "rank": "实惠排行榜",
-    "rankT": "直接给答案：你的质量门槛 + 日常任务画像下，谁单次最便宜、强多少分、花多少 $",
-    "deep": "阶梯·图析",
-    "deepT": "赢家卡、阶梯图、散点图、一周成本曲线、档位表和全模型表"
-  },
-  "rank": {
-    "ctrlH2": "排行标准",
-    "capability": "能力榜单",
-    "threshold": "质量门槛",
-    "ge": "≥ ",
-    "period": "价格时段",
-    "pkNow": "此刻",
-    "pkPeak": "峰时",
-    "pkOff": "谷时",
-    "profile": "日常任务画像",
-    "presetLight": "轻量问答",
-    "presetLightT": "每次 ≈2k 输入 / 0.5k 输出 token",
-    "presetDev": "日常开发",
-    "presetDevT": "每次 ≈20k 输入 / 2k 输出 token",
-    "presetHeavy": "重度 agent",
-    "presetHeavyT": "每次 ≈120k 输入 / 12k 输出 token",
-    "presetBoard": "榜单实测",
-    "presetBoardT": "直接用 Arena 实测的单次任务成本中位数",
-    "inTok": "输入 k",
-    "outTok": "输出 k",
-    "perDay": "次/天",
-    "tblH2": "实惠排行榜",
-    "c1": "#",
-    "c2": "模型",
-    "c3": "分数",
-    "c4": "比 #1",
-    "c5": "单次$",
-    "c6": "贵×",
-    "c7": "每月$",
-    "tblNote": "达标模型按单次成本升序。* = 成本已按当前峰谷/缓存情景修正。点行把质量门槛移到该模型。",
-    "count": "{n} 个达标 · 共 {all} 个有成本",
-    "more": "展开其余 {n} 个",
-    "fewer": "只看前 20",
-    "rowTitle": "{name} · 分数 {s} · 单次 {c} · API {api} · {v} 票",
-    "still": "门槛：分数 ≥ ",
-    "empty": "该榜没有模型达到分数 ≥ {t}（榜最高 {smax}）——把门槛调低。",
-    "standards": "标准：分数 ≥ {t} · {cap} · {prof} · {period}",
-    "profileTag": "画像 {in}k入/{out}k出",
-    "measured": "Arena 实测成本",
-    "perImage": "每张图（实测）",
-    "perTask": "/次",
-    "kpiPer": "单次",
-    "kpiMonth": "每月",
-    "kpiMonthTail": "每天 {n} 次 × 30",
-    "upSell": "达标里分数最高：{name}（{s} 分）——每次多花 {dc}（{mult}×）买 +{ds} 分。",
-    "upExpensive": "升级代价大——真需要这些分再买。",
-    "upOk": "升级便宜，想要余量可以上。",
-    "topIsChamp": "达标里最便宜的也是分数最高的——不用升级。",
-    "adjNote": "榜面标价成本 {board}，已按当前峰谷/缓存情景修正。",
-    "swing": "一周波动：{lo} – {hi}（谷时便宜 {pct}%）。",
-    "unitHint": "文生图按张计费：排行榜用 Arena 实测的每张图成本中位数，token 峰谷价不适用。",
-    "hint": "画像成本 = 输入 token × 输入价（含 {ch}% 缓存折扣）+ 输出 token × 输出价，按当前峰谷/促销修正；缓存率与缓存价来源在左侧「价格情景」区调整。"
+   "ttl": "③ 一周 168 小时：门槛 T 下的最低成本 <span class=\"mono\">C(T)</span> 随时间变化",
+   "lg": "灰色 = 峰时窗口 · 折线跳变 = 冠军易主 · 金色虚线 = 你选中的小时 · 点任意处跳到那个小时"
   }
+ },
+ "tables": {
+  "tier": {
+   "h2": "档位阶梯",
+   "c1": "#",
+   "c2": "分数区间",
+   "c3": "区间赢家",
+   "c4": "分数",
+   "c5": "Cost/Task",
+   "c6": "↑ 升下一档的边际成本（$/分）",
+   "c7": "票数",
+   "c8": "备注"
+  },
+  "model": {
+   "h2": "模型总表",
+   "boardNo": "榜内 #",
+   "overallNo": "总榜 #",
+   "model": "模型",
+   "score": "分数",
+   "ci": "±CI",
+   "cost": "Cost/Task",
+   "pts": "分/$",
+   "excess": "超额分/$",
+   "votes": "票数",
+   "pin": "$/M 输入",
+   "pout": "$/M 输出",
+   "ctx": "上下文",
+   "lic": "许可"
+  }
+ },
+ "bottom": {
+  "method": "方法论：这个思路站得住吗？（结论：站得住 — 但要做 5 处修正）",
+  "sources": "数据来源、方法与免责声明"
+ },
+ "footer": {
+  "html": "纯静态构建 · 零运行时依赖 · 数据在构建时从 arena.ai 快照内嵌（<span class=\"mono\">/api/*</span> 端点返回 403，无法实时查询 —— 这是<b>时点快照</b>）。Arena 官方 Pareto 视图：<a href=\"https://arena.ai/leaderboard/code/webdev/pareto\" target=\"_blank\" rel=\"noopener\">arena.ai/leaderboard/code/webdev/pareto</a>。<br>榜单数据 © LMArena (arena.ai)，快照 %CAPTURED% · 价格来自各厂商定价页，核对于 2026-11-14 · <a href=\"%METHOD%\">方法</a> · <a href=\"/data/v1/all.json\">JSON</a> · <a href=\"/llms.txt\">llms.txt</a> · <a href=\"/sitemap.xml\">站点地图</a>"
+ },
+ "data": {
+  "licAll": "含闭源 · ",
+  "licOS": "仅开源 · ",
+  "optTail": " 个模型 · 分数 ",
+  "dsNote": "{meta} · <b style=\"color:var(--dim)\">{note}</b><br>分数区间 <span class=\"mono\">{min}–{max}</span> · Cost/Task <span class=\"mono\">{cmin}–{cmax}</span> · 有成本数据 <span class=\"mono\">{wc}/{n}</span>",
+  "emptyNoCost": "这张榜没有 Cost/Task 数据 —— 整列成本全空无法做性价比分析（arena.ai 的 WebDev · HTML 子榜正是如此）。请选一张有成本列的榜。",
+  "emptyFiltered": "没有模型通过当前过滤 —— 放宽「最少票数」「Cost/Task 上限」或「排除 Preliminary」。"
+ },
+ "badges": {
+  "models": " 个模型",
+  "withCost": " 有 Cost/Task",
+  "inRange": " 在区间内",
+  "frontier": "Pareto 前沿：",
+  "frontierTiers": " 档",
+  "peak": "峰时",
+  "offpeak": "谷时",
+  "timeAdj": "价格已按时间修正：",
+  "timeAdjTail": " 个模型",
+  "listPrice": "标价（未按时间修正）",
+  "cacheOff": "缓存折扣：关",
+  "cacheHit": "缓存命中 ",
+  "strict": "严格 CI 模式"
+ },
+ "winner": {
+  "modeName": {
+   "pareto": "门槛制：分数 ≥ T 的最便宜模型",
+   "ratio": "最大 分数/$",
+   "baseline": "最大 超额分/$"
+  },
+  "currentMode": "当前口径 · ",
+  "strictCI": "严格 CI",
+  "pointEst": "点估计",
+  "licUnknown": "许可未知",
+  "preliminary": "Preliminary（预评）",
+  "autoEval": "AutoEval（自动评测）",
+  "pareto": "Pareto 前沿",
+  "dominated": "被支配",
+  "kpiScore": "Arena 分数",
+  "kpiCost": "Cost / Task（P50）",
+  "kpiRatio": "分数 / $",
+  "kpiExcess": "超额分 / $",
+  "kpiBaseline": "基线 ",
+  "kpiVotes": "票数",
+  "kpiApi": "API 单价 $/M",
+  "kpiEffPin": "有效输入价（命中 ",
+  "kpiEffPinMid": "%",
+  "kpiEst": "·估算",
+  "kpiList": "）· 标价 ",
+  "kpiInOut": "输入 / 输出",
+  "kpiCtx": "上下文",
+  "kpiRank": "总榜排名",
+  "listNoAdj": "标价（未做时间/缓存修正）",
+  "ptsPerDollar": "分/$",
+  "verdict": "<b>结论：</b>在门槛 <span class=\"mono\">T = {hi}</span>（区间 <span class=\"mono\">[{lo}, {hi}]</span>）以下，<span class=\"em\">{name}</span> 是<b>跨过能力线的最便宜模型</b>。<br>它统治分数区间 <span class=\"mono\">[{cov0}, {cov1}]</span> —— 在此区间内，每个更高分的模型都更贵、每个更便宜的模型都更低分（互不支配）。<br>",
+  "degraded": "<span class=\"warn\">⚠ 你的门槛 {hi} 超过了本数据集最高分 {smax}；没有模型达标 —— 下面给出的是最强的那个（相对最便宜）。</span><br>",
+  "bandNotOk": "<span class=\"warn\">⚠ 它的分数 {s} 低于你的下界 {lo}：[{lo}, {hi}] 内不存在 Pareto 最优模型，因为更强的一档更贵、更便宜的一档更低分。这是区间式问题的盲区 —— 门槛制只需要一个 T。</span><br>",
+  "swing": "<b>一周价格波动：</b>这位冠军自己的成本最低在 {loDow} {loHr}:00 UTC 的 <span class=\"mono\">{lo}</span>，最高在 {hiDow} {hiHr}:00 UTC 的 <span class=\"mono\">{hi}</span>（相差 {spread}×）。把任务排进谷时窗口，在这个门槛下等于免费打 <b>{pct}%</b> 折。<br>",
+  "nextUp": "<b>↑ 升一档：</b>{name}（{pts} 分，{cost}）→ 多付 <b class=\"mono\">{dc}</b> 换 <b class=\"mono\">+{ds}</b> 分；边际单价 <span class=\"mono\">{per}/分</span>。",
+  "nextUpExpensive": " <span class=\"warn\">这一档很贵 —— 只有真需要这个能力才值得。</span>",
+  "nextUpBargain": " <span class=\"em\">这个升级非常划算。</span>",
+  "nextUpNormal": " —— 正常范围。",
+  "nextUpNone": "<b>↑ 升一档：</b>没有了 —— 已经是这个数据集的能力天花板。<br>",
+  "downOne": "<b>↓ 降一档：</b>{name}（{pts} 分，{cost}）→ 省 <span class=\"mono\">{dc}</span> 但少 <span class=\"mono\">{ds}</span> 分；即每省 1 美元放弃 <span class=\"mono\">{per}</span> 分。",
+  "downTooMuch": " <span class=\"warn\">放弃的能力太多 —— 不值得为这点节省降档。</span>",
+  "downAcceptable": " 预算紧张的话这一档可以接受。",
+  "verdictRatio": "<b>结论：</b>在分数区间 <span class=\"mono\">[{lo}, {hi}]</span> 内（{n} 个模型在区间），按{basis}排名，榜首是 <span class=\"em\">{name}</span> = <b class=\"mono\">{val}</b>。",
+  "basisRatio": "分数÷成本",
+  "basisBaseline": "(分数−{base})÷成本",
+  "noInBand": " <span class=\"warn\">注意：区间内无达标模型；此结果来自全域。</span>",
+  "butNote": "<b>但注意：</b>{name} 分数更高（{s}），边际价只有 <span class=\"mono\">{per}/分</span>。「每美元分数」最高的模型往往不是你该用的 —— 它只是每分最便宜，可能缺乏绝对能力。<br>",
+  "biasedWarn": "<span class=\"warn\">⚠ 口径②③存在系统性偏差：</span>Arena 分数是 Bradley-Terry 型评分，带 ~1000+ 基线偏移，所以②「每美元分数」几乎总选便宜模型；③减去 1200 实用地板抵消偏移，更接近真实边际价值。",
+  "reliability": "<br><b>可靠性：</b><span class=\"{cl}\">{rel}</span>（{votes} 票，CI ±{ci}）。",
+  "rel_low": "低",
+  "rel_mid": "中",
+  "rel_high": "高",
+  "lowSampleWarn": " <span class=\"warn\">样本太小 —— 这个「性价比冠军」可能纯属噪声，别据此做采购决策。</span>",
+  "costMissing": "<br><span class=\"warn\">缺 Cost/Task</span> —— Arena 未公布该模型的单任务中位成本，无法参与性价比比较。"
+ },
+ "scatter": {
+  "needTwo": "至少需要 2 个有成本数据的模型",
+  "yAxis": "Cost / Task（P50）· 对数轴",
+  "xAxis": "Arena 分数（越强越靠右）",
+  "dotTitle": "{name}\n分数 {s} (+{u}/-{d})\nCost/Task {c}\n票数 {v}\nAPI {api}\n{pareto}\n点击 = 把分数区间上界设为该模型",
+  "dotPareto": "◆ Pareto 前沿（不被支配）",
+  "dotDominated": "被支配：存在更高分且更便宜的模型",
+  "dotApiNA": "N/A"
+ },
+ "steps": {
+  "modeOnly": "阶梯图只在①门槛制下存在 —— 它正是「门槛 T → 该档最便宜模型」的曲线",
+  "noCost": "前沿上没有带成本数据的模型",
+  "xAxisNarrow": "门槛 T → 最便宜 Cost/Task",
+  "xAxis": "门槛 T（「至少这么强」）→ 跨过 T 的最便宜模型的 Cost/Task",
+  "yAxis": "Cost / Task · 对数",
+  "segTitle": "分数区间 [{lo}, {up}]\n赢家：{name}\n分数 {s} (+{u}/-{d})\nCost/Task {c} · {v} 票\n点击 = 把分数区间设为该档"
+ },
+ "tiers": {
+  "count": "{n} 档 · 门槛前沿{strict}",
+  "countStrict": " · 严格 CI",
+  "modeOnly": "（仅在①门槛制下构建）",
+  "modeOnlyCell": "切到①门槛制查看完整阶梯：把门槛从高拖到低，赢家就是这些模型",
+  "notesPre": "Preliminary（预评） ",
+  "notesLow": "低样本 ",
+  "notesFrontier": "◆前沿",
+  "rowTitle": "点击 = 把分数区间设为该档"
+ },
+ "table": {
+  "count": "{n} / {total} 个模型 · 点表头排序 · 灰行 = 区间外"
+ },
+ "tl": {
+  "noQualifies": "门槛 T={t} 下没有模型达标（被过滤，或该分数以上没有成本数据）。请降低门槛或放宽过滤。",
+  "noQualifiesChart": "当前门槛下没有模型达标",
+  "perTask": "/任务",
+  "peakLegend": "峰时窗口 = 工作日 01:00–04:00 与 06:00–10:00 UTC（灰色）；周末全为谷价",
+  "listPrice": "标价 ",
+  "now": "此刻",
+  "noteHead": "门槛 <b class=\"mono\">T={t}</b> · 一周 168 小时中 <b>{peakH}</b> 个峰时 · 现在是 {dow} {hr}:00 UTC → <b style=\"color:var(--accent)\">{c}</b>，冠军 <b>{champ}</b>{diff}<br>",
+  "hourSuffix": " 小时",
+  "diffPricier": "（标价 {base}，贵 {pct}%）",
+  "diffCheaper": "（标价 {base}，便宜 {pct}%）",
+  "diffSame": "（与标价相同）",
+  "weekParts": "一周的 C(T)：",
+  "cacheOn": "<br><span style=\"color:var(--dim2)\">缓存折扣已开启（命中 {h}%）：缓存只作用于输入 token，绝对水平与峰谷振幅都会被压缩。</span>"
+ },
+ "cache": {
+  "off": "关闭 → 全部输入 token 按<b>缓存未命中价（cache-miss）</b>计费 —— 正是 <b>Arena 榜面 Cost/Task 的口径</b>。",
+  "hitHead": "命中率 <b class=\"mono\">{h}%</b>：输入 token 的 {h}% 按缓存读取价计费，{m}% 按（含写入倍率的）未命中价计费；<b>输出 token 永不打折</b>，所以哪怕 100% 命中率也压不到零。",
+  "srcCounts": "候选集中 {pub} 个模型用已公布的缓存价，{est} 个按 10% 估算{na}。",
+  "srcNa": "，{na} 个无公布价（N/A）",
+  "wmNote": "Anthropic / OpenAI 的缓存写入单独计费（= 输入价 1.25×），未命中的部分按写入价付；其他厂商不收写入费。",
+  "missBasis": "<br><b>注意</b>：Arena 的 Cost/Task 按<b>缓存未命中价</b>计算（Agent 榜反推出的 $4/$20 标价就是证据），所以开启缓存折扣是一个假设 ——「如果你的负载真的命中这么频繁」—— 而不是榜面本身的含义。",
+  "pillPeak": "峰时（2×）",
+  "pillOff": "谷时（½ 价）",
+  "pillOff2": "关",
+  "osHintHead": "输出占比决定「单价变化」如何换算成「Cost/Task 变化」。默认 <b class=\"mono\">8%</b> = 输入:输出 11:1，来自 14 个 Agent 榜模型的实测推理（比值 3.8–17.9×）。",
+  "osHintOff": "缓存折扣关闭时，DeepSeek 的峰谷价对输入输出<b>同比例</b>作用，这个滑块对它<b>无效</b>；只对 GLM 输入 ×3 / 输出 ×2.8 这类修正有意义。",
+  "osHintOn": "<b>缓存折扣开启后，这个滑块变成关键参数</b>：缓存只折扣输入，输出占比越高折扣越薄。同样 95% 命中率下，DeepSeek-20261017 在 w=2% 省 86%、w=8%（默认）省 68%、w=15% 省 55%、w=25% 省 40%、w=40% 只省 25%。",
+  "adjAllOff": "<span style=\"color:var(--dim2)\">全部修正关闭 → 即榜面原样。勾选上方任意规则可看时间效应。</span>",
+  "adjNone": "当前候选集中没有模型受已启用修正影响（{rules}）。",
+  "adjHead": "<b>{peak} · {dow} {hr}:00 UTC</b>：候选集中 <b>{n}</b> 个模型被改写 → ",
+  "evModels": " 个模型",
+  "evSource": "来源：",
+  "verified": "已核实",
+  "uncertain": "存疑",
+  "costCellTitle": "标价 {raw} → 当前情景 {cur}",
+  "costCellWhy": "缓存命中 {h}%：读取价 {pc}/M（{src}），写入倍率 {wm}×",
+  "costCellSrcEst": "按输入价 10% 估算",
+  "costCellSrcPub": "公布价",
+  "costCellTotal": "合计 ×{scale}",
+  "listPrice": "标价"
+ },
+ "ev": {
+  "ds_tod": {
+   "name": "DeepSeek 峰谷定价",
+   "desc": "峰时 = 工作日 01:00–04:00 与 06:00–10:00 UTC；其余时段（含周末）半价。榜面把 20261017 标为谷价、20260910 与 V4-Pro 系列标为峰价 —— 同一个家族、两种口径、一张表。",
+   "src": "DeepSeek 官方定价页；四个独立来源交叉确认：datacamp / justinmckelvey / felloai / okamomedia"
+  },
+  "gem_dec1": {
+   "name": "Gemini 4 Carbon/Argon 12-01 涨价（已公告）",
+   "desc": "首发优惠价 $2/$10 于 2026-11-30 结束；12-01 起 $4/$20，缓存读取价 $0.10 → $0.20。榜面（11-11 快照）仍按首发优惠价。把计价日期拖到 12 月，可以看到 Carbon 当天跌出 overall_all 前沿。",
+   "src": "Google Gemini API 定价页（benchlm.ai / munderdiffl.in / datastudios.org 三源一致；核对于 2026-11-12/13）"
+  },
+  "ds_v4flash": {
+   "name": "DeepSeek V4-Flash 是否也分峰谷价？（存疑）",
+   "desc": "V4-Flash 已下架；公开来源只确认了 V4.1-Flash 与 V4-Pro 的峰谷价。默认关闭 —— 仅用于敏感性分析。",
+   "src": "证据不足"
+  },
+  "suspect2x": {
+   "name": "与第三方指数差 2×，无促销解释（存疑）",
+   "desc": "Mistral Medium 3.5（$0.75/$3.75 vs 指数 $1.50/$7.50）与 GPT-6 Sol（$1/$5 vs $2/$10）恰好是某第三方指数的一半。可能是促销，也可能指数过时。默认关闭。",
+   "src": "benchr.org/pricing 对比"
+  },
+  "glm53flash_nov": {
+   "name": "GLM-5.3-Flash 榜面 $0.02/$0.07 远低于官方 $0.15/$0.50，无促销公告（存疑）",
+   "desc": "11-20 榜面价 $0.02/$0.07，比 Z.ai 定价页现价（$0.15/$0.50，2026-11-22 核对）低 87%/86%。全网无促销公告、无到期日；发布博客只写了 $0.045/task (discounted)。$0.02/$0.07 与 OpenRouter batch 档（$0.023/$0.068）几乎一致，可能是误抓档位或短促未公告促销。默认关闭。",
+   "src": "docs.z.ai/guides/overview/pricing + z.ai/blog/glm-5.3-flash（2026-11-22 核对）；openrouter.ai/api/v1/models"
+  },
+  "glm47_nov": {
+   "name": "GLM-4.7 榜面 $0.40/$1.75 与官方价、聚合渠道价都不符（存疑）",
+   "desc": "11-20 榜面价 $0.40/$1.75，但 Z.ai 定价页仍是 $0.60/$2.20（2026-11-22 核对），OpenRouter 也是 $0.60/$2.20。榜面价比两边都低 33%/20%，无促销公告、无到期日。默认关闭。",
+   "src": "docs.z.ai/guides/overview/pricing（2026-11-22 核对）；openrouter.ai/api/v1/models"
+  },
+  "qwen35_channel": {
+   "name": "Qwen3.5-397B-A17B 榜面价低于阿里官方 $0.60/$3.60（存疑）",
+   "desc": "榜面从 $0.60/$3.60 降到 $0.45/$3.00，但阿里云 Model Studio 国际站 qwen3.5-397b-a17b 仍是 $0.6/$3.6（0–256K 档，2026-11-22 核对），官方未宣布降价。$0.45/$3.00 与 OpenRouter 完全一致，更像聚合渠道切换而非厂商调价。默认关闭。",
+   "src": "alibabacloud.com/help/en/model-studio/model-pricing（2026-11-22 核对）；openrouter.ai/api/v1/models"
+  },
+  "kimi27_channel": {
+   "name": "Kimi K2.7 Code 榜面价低于 Moonshot 官方 $0.95/$4.00（存疑）",
+   "desc": "榜面从 $0.60/$3.50 变为 $0.60/$3.00，但 Moonshot 官方 kimi-k2.7-code 仍是 $0.95/$4.00（2026-11-22 核对），且已公告 K2 系列将于 2026 年 12 月底退役。榜面价与 OpenRouter 完全一致（$0.60/$3.00），比官方低 37%/25%，无促销公告。默认关闭。",
+   "src": "platform.kimi.ai/docs/pricing/chat（2026-11-22 核对）；openrouter.ai/api/v1/models"
+  },
+  "mimo25_retired": {
+   "name": "MiMo-V2.5-Pro 已被小米下线，榜面价无官方锚点（存疑）",
+   "desc": "小米已于 2026-10-21 正式下线 MiMo-V2.5-Pro API（要求切换 V2.6）。榜面价从 $0.43/$0.87 跳到 $0.48/$1.80：旧价恰为官方海外价（$0.435/$0.87，发布博客承诺价格不变，现由 mimo-v2.6-pro 承接），新价只存在于第三方托管（OpenRouter $0.48/$1.80）。默认关闭。",
+   "src": "mimo.mi.com/docs/price/pay-as-you-go + platform.xiaomimimo.com 下线横幅（2026-11-22 核对）；mimo.xiaomi.com/mimo-v2-5-pro"
+  },
+  "hy3p_channel": {
+   "name": "Hy3 preview 榜面价低于腾讯官方 $0.18/$0.60（存疑）",
+   "desc": "榜面 Hy3 preview 从 $0.18/$0.60 降到 $0.14/$0.58。腾讯云 Hy3 preview 按量计费为 ¥1.2/¥4 每百万 tokens 起（≈$0.17/$0.56），第三方追踪记录的官方美元价为 $0.18/$0.60（即旧榜面价）。新价与 Hy3 正式版价、OpenRouter 挂牌一致——要么腾讯未公告地把 preview 与正式版对齐，要么榜单把两个条目并了价。默认关闭。",
+   "src": "cloud.tencent.com Hy Token Plan 文章 2676264 + activepieces.com 腾讯定价追踪（2026-11-22 核对）；openrouter.ai/api/v1/models"
+  }
+ },
+ "peakTag": {
+  "peak": "峰时",
+  "off": "谷时",
+  "afterPromo": "促销后",
+  "promo": "促销期",
+  "inEffect": "已生效",
+  "notYet": "尚未生效"
+ },
+ "interact": {
+  "play": "▶ Play：把门槛从最高扫到最低",
+  "pause": "⏸ 暂停",
+  "stop": "停止",
+  "sweeping": "扫掠中",
+  "modeHintPareto": "<b>你最初的想法。</b>固定门槛 T，取分数 ≥ T 中最便宜的模型。把 T 从高往下扫，赢家序列就是 <b>Pareto 下包络</b>。这是唯一在数学上自洽的定义（= 成本约束下的能力最大化）。",
+  "modeHintRatio": "<b>分数 ÷ 成本。</b>强烈偏向便宜模型，因为 Arena 分数带 ~1200 基线偏移（分子被人为抬高）。只适合粗略比较。",
+  "modeHintBaseline": "<b>(分数 − 1200) ÷ 成本。</b>Arena BT 分数有 ~1200 的实用地板（低于它 ≈ 随机）；减去它得到「每美元买到多少真实能力提升」。仍偏向便宜模型 —— 这正是门槛制才是决策级定义的原因。",
+  "alertTiers": "请先切到①门槛制",
+  "copied": "✓ 已复制",
+  "copyLink": "复制状态链接",
+  "promptCopy": "请手动复制：",
+  "pasteFirst": "<span style=\"color:var(--bad)\">请先粘贴表格文本</span>",
+  "tooFewRows": "<span style=\"color:var(--bad)\">只解析出 {n} 行 —— 请确认这是 arena.ai 榜单表格（需要 分数 / Cost/Task 列）</span>",
+  "customBoard": "自建榜",
+  "userPaste": " 个模型 · 用户粘贴",
+  "customNote": "来自你本次会话粘贴的数据",
+  "noCostParsed": "<span style=\"color:var(--bad)\">⚠ 解析出 {n} 个模型，但 Cost/Task 整列为空</span> —— 没有成本就无法做性价比分析（arena.ai 的 WebDev · HTML 子榜正是如此）。数据集已添加：可以看分数排名，但前沿为空。",
+  "addedOk": "<span style=\"color:var(--good)\">✓ 已添加 {n} 个模型</span>（{wc} 个有成本数据）。自建数据集刷新后丢失 —— 请用「导出 CSV」保存。"
+ },
+ "method": {
+  "title": "方法与数据来源 — Arena 榜单性价比分析器",
+  "desc": "成本-质量 Pareto 前沿如何从 arena.ai WebDev 榜单算出：数据来源、价格核对、峰谷规则、缓存模型与局限。"
+ },
+ "boot": {
+  "methodBody": "PLACEHOLDER_BOOT",
+  "sourceBody": "PLACEHOLDER_BOOT"
+ },
+ "tabs": {
+  "rank": "实惠排行榜",
+  "rankT": "直接给答案：你的质量门槛 + 日常任务画像下，谁单次最便宜、强多少分、花多少 $",
+  "deep": "阶梯·图析",
+  "deepT": "赢家卡、阶梯图、散点图、一周成本曲线、档位表和全模型表"
+ },
+ "rank": {
+  "ctrlH2": "排行标准",
+  "capability": "能力榜单",
+  "threshold": "质量门槛",
+  "ge": "≥ ",
+  "period": "价格时段",
+  "pkNow": "此刻",
+  "pkPeak": "峰时",
+  "pkOff": "谷时",
+  "profile": "日常任务画像",
+  "presetLight": "轻量问答",
+  "presetLightT": "每次 ≈2k 输入 / 0.5k 输出 token",
+  "presetDev": "日常开发",
+  "presetDevT": "每次 ≈20k 输入 / 2k 输出 token",
+  "presetHeavy": "重度 agent",
+  "presetHeavyT": "每次 ≈120k 输入 / 12k 输出 token",
+  "presetBoard": "榜单实测",
+  "presetBoardT": "直接用 Arena 实测的单次任务成本中位数",
+  "inTok": "输入 k",
+  "outTok": "输出 k",
+  "perDay": "次/天",
+  "tblH2": "实惠排行榜",
+  "c1": "#",
+  "c2": "模型",
+  "c3": "分数",
+  "c4": "比 #1",
+  "c5": "单次$",
+  "c6": "贵×",
+  "c7": "每月$",
+  "tblNote": "达标模型按单次成本升序。* = 成本已按当前峰谷/缓存情景修正。点行把质量门槛移到该模型。",
+  "count": "{n} 个达标 · 共 {all} 个有成本",
+  "more": "展开其余 {n} 个",
+  "fewer": "只看前 20",
+  "rowTitle": "{name} · 分数 {s} · 单次 {c} · API {api} · {v} 票",
+  "still": "门槛：分数 ≥ ",
+  "empty": "该榜没有模型达到分数 ≥ {t}（榜最高 {smax}）——把门槛调低。",
+  "standards": "标准：分数 ≥ {t} · {cap} · {prof} · {period}",
+  "profileTag": "画像 {in}k入/{out}k出",
+  "measured": "Arena 实测成本",
+  "perImage": "每张图（实测）",
+  "perTask": "/次",
+  "kpiPer": "单次",
+  "kpiMonth": "每月",
+  "kpiMonthTail": "每天 {n} 次 × 30",
+  "upSell": "达标里分数最高：{name}（{s} 分）——每次多花 {dc}（{mult}×）买 +{ds} 分。",
+  "upExpensive": "升级代价大——真需要这些分再买。",
+  "upOk": "升级便宜，想要余量可以上。",
+  "topIsChamp": "达标里最便宜的也是分数最高的——不用升级。",
+  "adjNote": "榜面标价成本 {board}，已按当前峰谷/缓存情景修正。",
+  "swing": "一周波动：{lo} – {hi}（谷时便宜 {pct}%）。",
+  "unitHint": "文生图按张计费：排行榜用 Arena 实测的每张图成本中位数，token 峰谷价不适用。",
+  "hint": "画像成本 = 输入 token × 输入价（含 {ch}% 缓存折扣）+ 输出 token × 输出价，按当前峰谷/促销修正；缓存率与缓存价来源在左侧「价格情景」区调整。"
+ },
+ "scene": {
+  "codingT": "写代码最省钱",
+  "codingD": "2 万输入 + 2 千输出 · 按错峰半价口径排行",
+  "agentT": "Agent 重度调用",
+  "agentD": "12 万输入 + 1.2 万输出 · 按当前时段实价排行",
+  "offT": "深夜低谷白嫖",
+  "offD": "轻量任务（2k + 0.5k）· DeepSeek 式错峰半价时段"
+ },
+ "faq": [
+  {
+   "q": "为什么榜单价格不等于我的实际成本？",
+   "a": "榜面价假设 0% 缓存命中，且峰谷计价口径混在一张表里。本工具按你设置的缓存命中率（默认 95%）与所选时段、结合各模型公布的读缓存比率与写入倍率，重算真实单任务成本。"
+  },
+  {
+   "q": "DeepSeek 式的错峰半价是怎么算的？",
+   "a": "每个模型的成本按供应商公布的峰谷时段（UTC）展开成 168 小时周成本曲线。实惠排行榜可在「此刻 / 峰时 / 谷时」三种口径间切换——夜里跑批就按夜里的价算。"
+  },
+  {
+   "q": "「严格 CI 合并」是什么意思？",
+   "a": "Arena 分数带统计噪声：严格模式下 95% 置信区间重叠的档位会被合并，不为数据支撑不了的排名差付溢价。"
+  }
+ ]
 }

@@ -822,6 +822,28 @@ TC('排行榜：页签状态机 + deep 重渲（fake DOM 烟雾）', ()=>{
   return '页签状态机 + deep 重渲 OK';
 });
 
+TC('首屏场景卡：applyScene 三场景参数展开（与 URL ?scene= 同映射）', ()=>{
+  reset();
+  if(applyScene('nope')!==false) throw new Error('非法 scene 应返回 false');
+  // coding = 写代码：dev 画像（20k/2k）+ 谷时（hour=12 dow=6）
+  applyScene('coding');
+  if(S.tab!=='rank'||S.rankPreset!=='dev'||S.rankIn!==20||S.rankOut!==2) throw new Error('coding 展开错: '+JSON.stringify([S.tab,S.rankPreset,S.rankIn,S.rankOut]));
+  if(S.rankPk!=='off'||S.hour!==12||S.dow!==6) throw new Error('coding 谷时错: '+S.rankPk+'/'+S.hour+'/'+S.dow);
+  // agent = Agent 重度：heavy 画像（120k/12k）+ 此刻（hour/dow = UTC 当前）
+  applyScene('agent');
+  if(S.rankPreset!=='heavy'||S.rankIn!==120||S.rankOut!==12||S.rankPk!=='now') throw new Error('agent 展开错');
+  // offpeak = 深夜低谷：light 画像（2k/0.5k）+ 谷时
+  applyScene('offpeak');
+  if(S.rankPreset!=='light'||S.rankIn!==2||S.rankOut!==0.5||S.rankPk!=='off') throw new Error('offpeak 展开错');
+  // 场景后排行榜冠军必须与同口径暴力最小一致（agent=heavy+此刻，dailyCost 口径）
+  applyScene('agent'); S.rankT=1400; S.rankTSet=true; recompute();
+  const rows=rankRows();
+  const bruteMin=Math.min(...cur.filter(m=>m.s>=S.rankT&&m.c!=null&&m.c>0).map(m=>dailyCost(m)));
+  if(!rows.length||Math.abs(rows[0].c-bruteMin)>1e-12) throw new Error('agent 场景冠军 ≠ 暴力最小成本');
+  reset();
+  return 'coding→dev+谷时 / agent→heavy+此刻 / offpeak→light+谷时；冠军=暴力解';
+});
+
 let fail=0;
 for(const [n,st,r,ms] of out){ if(st!=='OK')fail++; W((st==='OK'?'✓ ':'✗ ')+n+`  [${ms}ms]\n     `+String(r).slice(0,1500)); }
 W('\n'+(out.length-fail)+'/'+out.length+' passed');

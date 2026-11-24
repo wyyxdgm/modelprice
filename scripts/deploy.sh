@@ -61,8 +61,8 @@ done
 
 # ② 首页 title + 新工程结构确认（外链 assets；DATA JSON 内嵌）
 home=$(smoke_curl -s --max-time 20 "$B/")
-echo "$home" | grep -o '<title>[^<]*</title>' | head -1 | grep -q 'Arena Leaderboard Value Analyzer' \
-  || { echo "❌ 首页 title 不含工具名"; fail=1; }
+echo "$home" | grep -o '<title>[^<]*</title>' | head -1 | grep -q 'Price-Performance Calculator' \
+  || { echo "❌ 首页 title 不含搜索词品牌（LLM Price-Performance Calculator）"; fail=1; }
 n=$(echo "$home" | grep -c 'src="/assets/js/' || true)
 [[ "$n" -ge 10 ]] || { echo "❌ 首页外链 js 引用数异常: $n (期望 ≥10，含 10-rank.js)"; fail=1; }
 # ⚠️ 不用 echo|grep -q：pipefail 下 grep -q 早退会让左侧写进程收 SIGPIPE（exit 141）→ 误报 MISS
@@ -107,5 +107,15 @@ n_hf=$(echo "$zhhome" | grep -o 'rel="alternate" hreflang=' | wc -l | tr -d ' ')
 [[ "$n_hf" -ge 6 ]] || { echo "❌ /zh/ hreflang 条数异常: $n_hf (期望 ≥6，5 语言 + x-default)"; fail=1; }
 [[ "$zhhome" == *'id="langNav"'* ]] || { echo "❌ /zh/ 缺语言切换器"; fail=1; }
 [[ "$zhhome" == *'<html lang="zh">'* ]] || { echo "❌ /zh/ html lang 非 zh"; fail=1; }
+
+# ⑧ SEO 静态化抽检（构建期落地，搜索引擎可直接抓）：日期 + JSON-LD + 场景卡
+echo "$zhhome" | grep -q 'id="scraped">20[0-9][0-9]-[0-9][0-9]' \
+  || { echo "❌ /zh/ 抓取日期未静态落地（应为构建期注入的日期）"; fail=1; }
+echo "$zhhome" | grep -q 'application/ld+json' \
+  || { echo "❌ /zh/ 缺 JSON-LD 结构化数据"; fail=1; }
+echo "$zhhome" | grep -q 'FAQPage' \
+  || { echo "❌ /zh/ JSON-LD 缺 FAQPage"; fail=1; }
+echo "$home" | grep -q 'data-scene="coding"' \
+  || { echo "❌ 首页缺首屏场景卡（data-scene）"; fail=1; }
 
 [[ $fail -eq 0 ]] && echo "🎉 冒烟全过" || { echo "💥 冒烟有失败项"; exit 1; }

@@ -1,465 +1,487 @@
 {
-  "meta": {
-    "lang": "en",
-    "locale_tag": "en-US",
-    "title": "Arena Leaderboard Value Analyzer · Score Range → Best-Value Model",
-    "desc": "Which AI model is cheapest for your quality bar? An interactive Pareto ladder of Arena (LMArena) WebDev scores vs. real cost per task — with peak/off-peak pricing, cache-hit discounts, and strict CI merging. Free, no signup.",
-    "ogTitle": "Cheapest AI models at every quality level — Arena Score vs. real cost per task",
-    "ogDesc": "Set your minimum acceptable Arena Score and see the cheapest model that clears it, how much the next tier costs per point, and how peak/off-peak and cache pricing change the answer."
+ "meta": {
+  "lang": "en",
+  "locale_tag": "en-US",
+  "title": "LLM Price-Performance Calculator 2026 — Cheapest AI by Arena Score",
+  "desc": "Find the cheapest LLM that clears your quality bar. Interactive calculator: LMArena Arena scores × real API cost per task, with peak/off-peak pricing, cache-hit discounts and strict CI merging. Free, no signup.",
+  "ogTitle": "Cheapest LLM at every quality level — Arena Score × real cost",
+  "ogDesc": "Set your minimum acceptable Arena Score and see the cheapest model that clears it, how much the next tier costs per point, and how peak/off-peak and cache pricing change the answer."
+ },
+ "dows": "Sun,Mon,Tue,Wed,Thu,Fri,Sat",
+ "header": {
+  "h1": "LLM Price-Performance Calculator",
+  "sub": "cheapest AI model by Arena Score",
+  "tagline": "Drag the capability threshold from highest to lowest and watch each tier's winner update live. This is the <b style=\"color:var(--good)\">lower envelope / Pareto frontier</b> — Your intuition \"every capability tier has a best-value model\" is mathematically sound, but it needs the right definition (see below). Data: <a href=\"https://arena.ai/leaderboard/code/webdev\" target=\"_blank\" rel=\"noopener\">arena.ai/leaderboard</a>, scraped <span class=\"mono\" id=\"scraped\">%SCRAPED%</span> (leaderboard dated <span class=\"mono\" id=\"captured\">%CAPTURED%</span>)."
+ },
+ "intro": {
+  "h2": "Cheapest AI models at every quality level — Arena Score vs. real cost per task",
+  "p1": "<b style=\"color:var(--text)\">Set the minimum Arena Score you can accept, and it names the cheapest model that clears the bar</b> — plus the marginal $/point to the next tier, corrected for DeepSeek peak/off-peak pricing, expired promos and cache-miss bias. Drag the gold threshold line (or hit ▶ Play) and watch every tier's winner update live.",
+  "lnk": "Three definitions of \"best value\" · strict 95% CI mode · prices modeled over a 168-hour week · <a href=\"%METHOD%\">Method &amp; data sources</a> · <a href=\"/data/v1/all.json\">JSON (AI-readable)</a> · <a href=\"/llms.txt\">llms.txt</a>"
+ },
+ "grp": {
+  "ds": {
+   "summary": "Dataset &amp; definition",
+   "h2": "Leaderboard dataset",
+   "licHint": "<b>Open-source-only and all-license are two different boards; their scores are not comparable.</b> Open-source board (<span class=\"mono\">?license=open-source</span>) maxes out at  <b class=\"mono\">1687</b> (Kimi K3.1 Pro); the all-license board tops out at  <b class=\"mono\">1838</b> (Claude Fable 5.2 xHigh, $11.04/task) — Claude Opus 5.5 1815, Sonnet 5.5 1772, Gemini 4 Carbon 1768, GPT-6 Astra 1764 are all there. Switch the dataset to the <b>All-license</b> entry.<br><span style=\"color:var(--dim2)\">Note: the all-license board only has the top 41 scraped (Score 1590–1838); the long tail beyond rank 41 is missing. The high-score frontier is unaffected, but \"cheapest overall\" and \"excess score/$\" baselines will skew.</span>"
   },
-  "dows": "Sun,Mon,Tue,Wed,Thu,Fri,Sat",
-  "header": {
-    "h1": "Arena Leaderboard Value Analyzer",
-    "sub": "score range → best-value model in range",
-    "tagline": "Drag the capability threshold from highest to lowest and watch each tier's winner update live. This is the <b style=\"color:var(--good)\">lower envelope / Pareto frontier</b> — Your intuition \"every capability tier has a best-value model\" is mathematically sound, but it needs the right definition (see below). Data: <a href=\"https://arena.ai/leaderboard/code/webdev\" target=\"_blank\" rel=\"noopener\">arena.ai/leaderboard</a>, scraped <span class=\"mono\" id=\"scraped\"></span> (leaderboard dated <span class=\"mono\" id=\"captured\"></span>)."
+  "mode": {
+   "h2": "Definition of \"best value\"",
+   "b1": "① Threshold",
+   "b1t": "cheapest among models with score ≥ T (= lower envelope, your original idea)",
+   "b2": "② Score / $",
+   "b2t": "max Score ÷ Cost",
+   "b3": "③ Excess score / $",
+   "b3t": "max (Score − 1200) ÷ Cost"
   },
-  "intro": {
-    "h2": "Cheapest AI models at every quality level — Arena Score vs. real cost per task",
-    "p1": "<b style=\"color:var(--text)\">Set the minimum Arena Score you can accept, and it names the cheapest model that clears the bar</b> — plus the marginal $/point to the next tier, corrected for DeepSeek peak/off-peak pricing, expired promos and cache-miss bias. Drag the gold threshold line (or hit ▶ Play) and watch every tier's winner update live.",
-    "lnk": "Three definitions of \"best value\" · strict 95% CI mode · prices modeled over a 168-hour week · <a href=\"%METHOD%\">Method &amp; data sources</a> · <a href=\"/data/v1/all.json\">JSON (AI-readable)</a> · <a href=\"/llms.txt\">llms.txt</a>"
+  "ci": {
+   "h2": "Significance mode",
+   "point": "Point estimate",
+   "strict": "Strict (win only if 95% CIs don't overlap)",
+   "hint": "Strict mode only accepts a gap where A's CI lower bound &gt; B's CI upper bound, so noise never becomes a conclusion. Low-vote  <span class=\"pill warn\" style=\"padding:0 5px\">Preliminary</span>  model CIs often reach ±20–55."
   },
-  "grp": {
-    "ds": {
-      "summary": "Dataset &amp; definition",
-      "h2": "Leaderboard dataset",
-      "licHint": "<b>Open-source-only and all-license are two different boards; their scores are not comparable.</b> Open-source board (<span class=\"mono\">?license=open-source</span>) maxes out at  <b class=\"mono\">1687</b> (Kimi K3.1 Pro); the all-license board tops out at  <b class=\"mono\">1838</b> (Claude Fable 5.2 xHigh, $11.04/task) — Claude Opus 5.5 1815, Sonnet 5.5 1772, Gemini 4 Carbon 1768, GPT-6 Astra 1764 are all there. Switch the dataset to the <b>All-license</b> entry.<br><span style=\"color:var(--dim2)\">Note: the all-license board only has the top 41 scraped (Score 1590–1838); the long tail beyond rank 41 is missing. The high-score frontier is unaffected, but \"cheapest overall\" and \"excess score/$\" baselines will skew.</span>"
-    },
-    "mode": {
-      "h2": "Definition of \"best value\"",
-      "b1": "① Threshold",
-      "b1t": "cheapest among models with score ≥ T (= lower envelope, your original idea)",
-      "b2": "② Score / $",
-      "b2t": "max Score ÷ Cost",
-      "b3": "③ Excess score / $",
-      "b3t": "max (Score − 1200) ÷ Cost"
-    },
-    "ci": {
-      "h2": "Significance mode",
-      "point": "Point estimate",
-      "strict": "Strict (win only if 95% CIs don't overlap)",
-      "hint": "Strict mode only accepts a gap where A's CI lower bound &gt; B's CI upper bound, so noise never becomes a conclusion. Low-vote  <span class=\"pill warn\" style=\"padding:0 5px\">Preliminary</span>  model CIs often reach ±20–55."
-    },
-    "rng": {
-      "summary": "Score range &amp; sweep",
-      "h2": "Score range (capability acceptance)",
-      "lo": "Lower lo",
-      "hi": "Upper hi",
-      "pFull": "Full domain [min, max]",
-      "pSweep": "[T, max] sweep",
-      "pTop10": "Top10 tiers",
-      "pMid": "Mid band 1400–1550",
-      "play": "▶ Play: sweep the threshold from highest to lowest",
-      "speed": "speed",
-      "stop": "Stop"
-    },
-    "price": {
-      "summary": "Price scenarios &amp; cache",
-      "h2": "Price scenarios: making list prices <b>a function of time</b>",
-      "tz": "Display timezone",
-      "tz0": "UTC ±0",
-      "tz1": "CET +1",
-      "tz2": "EET +2",
-      "tz8": "Beijing +8",
-      "tz9": "Tokyo +9",
-      "tzM5": "US East −5",
-      "tzM8": "US West −8",
-      "dow": "Day (UTC)",
-      "d1": "Mon",
-      "d2": "Tue",
-      "d3": "Wed",
-      "d4": "Thu",
-      "d5": "Fri",
-      "d6": "Sat",
-      "d0": "Sun",
-      "utcHour": "UTC hour",
-      "localTime": "· Your local time is",
-      "now": "now",
-      "peak": "Priciest hour",
-      "off": "Cheapest hour",
-      "sat": "Saturday (all off-peak)",
-      "board": "As listed (all off)",
-      "all": "Enable all (incl. uncertain)",
-      "date": "Pricing date",
-      "outShare": "Output token share",
-      "cacheH2": "Cache hit rate",
-      "exact": "Exact %",
-      "c0": "0% (board prices)",
-      "c50": "50%",
-      "c85": "85%",
-      "c95": "95% (default)",
-      "c99": "99%",
-      "cacheSrc": "Cache read-price source",
-      "srcPub": "Published cache prices (missing → estimated at 10% of input)",
-      "srcFlat": "Flat 10% of input price for all (uniform conservative)",
-      "srcOff": "Disable cache discount (= Arena board prices)"
-    },
-    "filters": {
-      "summary": "Filters",
-      "h2": "Filters",
-      "minVotes": "Min votes ≥",
-      "exPrelim": "Exclude Preliminary",
-      "exAuto": "Exclude AutoEval",
-      "onlyCost": "Only models with Cost/Task",
-      "costCap": "Cost/Task cap ≤ $<span class=\"mono\" id=\"cLab\">∞</span>(budget cap)",
-      "capHint": "Budget cap + score threshold = two independent real-world constraints. Set to max for no limit."
-    },
-    "export": {
-      "summary": "Export &amp; extend data",
-      "h2": "Export / extend data",
-      "csv": "Export CSV (current table)",
-      "tiers": "Export tier-ladder CSV",
-      "copyLink": "Copy state link",
-      "hint": "To add another board (e.g.  <span class=\"mono\">code/terminal</span>、<span class=\"mono\">text</span>、<span class=\"mono\">vision</span>): open the board's page on arena.ai, select the table, copy, and paste below (columns are auto-detected).",
-      "pastePh": "Paste an arena.ai leaderboard's markdown / table text…",
-      "namePh": "New dataset name (optional)",
-      "add": "Add"
-    }
+  "rng": {
+   "summary": "Score range &amp; sweep",
+   "h2": "Score range (capability acceptance)",
+   "lo": "Lower lo",
+   "hi": "Upper hi",
+   "pFull": "Full domain [min, max]",
+   "pSweep": "[T, max] sweep",
+   "pTop10": "Top10 tiers",
+   "pMid": "Mid band 1400–1550",
+   "play": "▶ Play: sweep the threshold from highest to lowest",
+   "speed": "speed",
+   "stop": "Stop"
   },
-  "charts": {
-    "steps": {
-      "ttl": "① Step chart: threshold T → cheapest model clearing T (the \"winner of every tier\" you asked for)",
-      "lg": "Each bar = one model ruling that score range · click any bar to jump to it"
-    },
-    "scat": {
-      "ttl": "② Scatter: Score (x) × Cost/Task (y, log)",
-      "lg": "◆ Pareto frontier · gray dots = dominated · vertical bars = CI · shade = current score band · gold dashed line = threshold T (drag it)"
-    },
-    "tl": {
-      "ttl": "③ 168 hours of the week: minimum cost at threshold T <span class=\"mono\">C(T)</span> change over time",
-      "lg": "Gray = peak windows · line jumps = champion changes · gold dashed = your selected hour · click anywhere to jump to that hour"
-    }
+  "price": {
+   "summary": "Price scenarios &amp; cache",
+   "h2": "Price scenarios: making list prices <b>a function of time</b>",
+   "tz": "Display timezone",
+   "tz0": "UTC ±0",
+   "tz1": "CET +1",
+   "tz2": "EET +2",
+   "tz8": "Beijing +8",
+   "tz9": "Tokyo +9",
+   "tzM5": "US East −5",
+   "tzM8": "US West −8",
+   "dow": "Day (UTC)",
+   "d1": "Mon",
+   "d2": "Tue",
+   "d3": "Wed",
+   "d4": "Thu",
+   "d5": "Fri",
+   "d6": "Sat",
+   "d0": "Sun",
+   "utcHour": "UTC hour",
+   "localTime": "· Your local time is",
+   "now": "now",
+   "peak": "Priciest hour",
+   "off": "Cheapest hour",
+   "sat": "Saturday (all off-peak)",
+   "board": "As listed (all off)",
+   "all": "Enable all (incl. uncertain)",
+   "date": "Pricing date",
+   "outShare": "Output token share",
+   "cacheH2": "Cache hit rate",
+   "exact": "Exact %",
+   "c0": "0% (board prices)",
+   "c50": "50%",
+   "c85": "85%",
+   "c95": "95% (default)",
+   "c99": "99%",
+   "cacheSrc": "Cache read-price source",
+   "srcPub": "Published cache prices (missing → estimated at 10% of input)",
+   "srcFlat": "Flat 10% of input price for all (uniform conservative)",
+   "srcOff": "Disable cache discount (= Arena board prices)"
   },
-  "tables": {
-    "tier": {
-      "h2": "Tier ladder",
-      "c1": "#",
-      "c2": "Score range",
-      "c3": "Winner in range",
-      "c4": "Score",
-      "c5": "Cost/Task",
-      "c6": "↑ Marginal cost of the next tier ($/pt)",
-      "c7": "Votes",
-      "c8": "Notes"
-    },
-    "model": {
-      "h2": "Model table",
-      "boardNo": "Board #",
-      "overallNo": "Overall #",
-      "model": "Model",
-      "score": "Score",
-      "ci": "±CI",
-      "cost": "Cost/Task",
-      "pts": "pts/$",
-      "excess": "Excess score/$",
-      "votes": "Votes",
-      "pin": "$/M in",
-      "pout": "$/M out",
-      "ctx": "Context",
-      "lic": "License"
-    }
+  "filters": {
+   "summary": "Filters",
+   "h2": "Filters",
+   "minVotes": "Min votes ≥",
+   "exPrelim": "Exclude Preliminary",
+   "exAuto": "Exclude AutoEval",
+   "onlyCost": "Only models with Cost/Task",
+   "costCap": "Cost/Task cap ≤ $<span class=\"mono\" id=\"cLab\">∞</span>(budget cap)",
+   "capHint": "Budget cap + score threshold = two independent real-world constraints. Set to max for no limit."
   },
-  "bottom": {
-    "method": "Methodology: does this approach hold? (Verdict: yes — with 5 corrections)",
-    "sources": "Data sources, methodology &amp; disclaimers"
-  },
-  "footer": {
-    "html": "Static build · zero runtime dependencies · data embedded at build time from arena.ai snapshots (the <span class=\"mono\">/api/*</span> endpoints return 403, so live queries are impossible — this is <b>a point-in-time snapshot</b>). Arena's built-in Pareto view: <a href=\"https://arena.ai/leaderboard/code/webdev/pareto\" target=\"_blank\" rel=\"noopener\">arena.ai/leaderboard/code/webdev/pareto</a>.<br>Leaderboard data © LMArena (arena.ai), snapshot %CAPTURED% · prices from vendor pricing pages, checked %SCRAPED% · <a href=\"%METHOD%\">Method</a> · <a href=\"/data/v1/all.json\">JSON</a> · <a href=\"/llms.txt\">llms.txt</a> · <a href=\"/sitemap.xml\">Sitemap</a>"
-  },
-  "data": {
-    "licAll": "All-license · ",
-    "licOS": "Open-source · ",
-    "optTail": " models · Score ",
-    "dsNote": "{meta} · <b style=\"color:var(--dim)\">{note}</b><br>Score range <span class=\"mono\">{min}–{max}</span> · Cost/Task <span class=\"mono\">{cmin}–{cmax}</span> · with cost data <span class=\"mono\">{wc}/{n}</span>",
-    "emptyNoCost": "This board has no Cost/Task data — an entirely empty cost column cannot support value analysis (the WebDev · HTML board on arena.ai is exactly like this). Pick a board with a cost column.",
-    "emptyFiltered": "No model passes the current filters — relax \"Min votes\", \"Cost/Task cap\", or \"Exclude Preliminary\"."
-  },
-  "badges": {
-    "models": " models",
-    "withCost": " with Cost/Task",
-    "inRange": " in range",
-    "frontier": "Pareto frontier: ",
-    "frontierTiers": " tiers",
-    "peak": "Peak",
-    "offpeak": "Off-peak",
-    "timeAdj": "Prices time-adjusted: ",
-    "timeAdjTail": " models",
-    "listPrice": "List price (no time adjustment)",
-    "cacheOff": "Cache discount: off",
-    "cacheHit": "Cache hit ",
-    "strict": "Strict CI mode"
-  },
-  "winner": {
-    "modeName": {
-      "pareto": "Threshold: cheapest model with score ≥ T",
-      "ratio": "max Score/$",
-      "baseline": "max excess score/$"
-    },
-    "currentMode": "Current mode · ",
-    "strictCI": "strict CI",
-    "pointEst": "point estimate",
-    "licUnknown": "license unknown",
-    "preliminary": "Preliminary",
-    "autoEval": "AutoEval",
-    "pareto": "Pareto frontier",
-    "dominated": "dominated",
-    "kpiScore": "Arena Score",
-    "kpiCost": "Cost / Task (P50)",
-    "kpiRatio": "Score / $",
-    "kpiExcess": "Excess score / $",
-    "kpiBaseline": "Baseline ",
-    "kpiVotes": "Votes",
-    "kpiApi": "API price $/M",
-    "kpiEffPin": "Effective input price (hit ",
-    "kpiEffPinMid": "%",
-    "kpiEst": "·est.",
-    "kpiList": ") · list ",
-    "kpiInOut": "in / out",
-    "kpiCtx": "Context",
-    "kpiRank": "Overall rank",
-    "listNoAdj": "List price (no time/cache adjustment)",
-    "ptsPerDollar": "pts/$",
-    "verdict": "<b>Verdict:</b> below the threshold <span class=\"mono\">T = {hi}</span> (range <span class=\"mono\">[{lo}, {hi}]</span>),<span class=\"em\">{name}</span> is <b>the cheapest model that clears the capability bar</b>.<br>It rules the score range <span class=\"mono\">[{cov0}, {cov1}]</span> — within it, every higher-scoring model costs more and every cheaper model scores lower (mutually undominated).<br>",
-    "degraded": "<span class=\"warn\">⚠ Your threshold {hi} exceeds this dataset's top score {smax}; no model qualifies — what follows is the strongest, relatively cheapest one.</span><br>",
-    "bandNotOk": "<span class=\"warn\">⚠ Its score {s} is below your lower bound {lo}: no Pareto-optimal model exists in [{lo}, {hi}] because the stronger tier costs more and the cheaper tier scores lower. This is a blind spot of range-style questions — threshold mode only needs one T.</span><br>",
-    "swing": "<b>Weekly price swing:</b> this champion's own cost bottoms at <span class=\"mono\">{lo}</span> on {loDow} {loHr}:00 UTC and peaks at <span class=\"mono\">{hi}</span> on {hiDow} {hiHr}:00 UTC ({spread}× apart). Scheduling tasks into off-peak windows is a free <b>{pct}%</b> discount at this threshold.<br>",
-    "nextUp": "<b>↑ Next tier up:</b> {name} ({pts} pts, {cost}) → pay <b class=\"mono\">{dc}</b> more for <b class=\"mono\">+{ds}</b> pts; marginal price <span class=\"mono\">{per}/pt</span>.",
-    "nextUpExpensive": " <span class=\"warn\">This tier is expensive — only worth it if you truly need the capability.</span>",
-    "nextUpBargain": " <span class=\"em\">The upgrade is a bargain.</span>",
-    "nextUpNormal": " — a normal range.",
-    "nextUpNone": "<b>↑ Next tier up:</b> none — it's already this dataset's capability ceiling.<br>",
-    "downOne": "<b>↓ One tier down:</b> {name} ({pts} pts, {cost}) → save <span class=\"mono\">{dc}</span> but lose <span class=\"mono\">{ds}</span> pts; i.e. giving up <span class=\"mono\">{per}</span> pts per dollar saved.",
-    "downTooMuch": " <span class=\"warn\">Too much capability given up — the saving isn't worth it.</span>",
-    "downAcceptable": " If budget is tight, this tier is acceptable.",
-    "verdictRatio": "<b>Verdict:</b> within the score range <span class=\"mono\">[{lo}, {hi}]</span> ({n} models in range), ranked by {basis}, the top model is <span class=\"em\">{name}</span> = <b class=\"mono\">{val}</b>.",
-    "basisRatio": "Score÷Cost",
-    "basisBaseline": "(Score−{base})÷Cost",
-    "noInBand": " <span class=\"warn\">Note: no qualifying model in range; this result is from the full domain.</span>",
-    "butNote": "<b>But note:</b> {name} scores higher ({s}) at a marginal price of <span class=\"mono\">{per}/pt</span>. The top \"score per $\" model is often not the one you should use — it's just the cheapest per point, and may lack absolute capability.<br>",
-    "biasedWarn": "<span class=\"warn\">⚠ Modes ② and ③ are systematically biased:</span> Arena Score is a Bradley-Terry-style rating with a ~1000+ baseline offset, so ② \"score per $\" almost always picks cheap models; ③ subtracts the practical 1200 floor to cancel the offset, getting closer to true marginal value.",
-    "reliability": "<br><b>Reliability:</b> <span class=\"{cl}\">{rel}</span> ({votes} votes, CI ±{ci}).",
-    "lowSampleWarn": " <span class=\"warn\">Sample too small — this \"value champion\" may be pure noise. Don't make purchasing decisions on it.</span>",
-    "costMissing": "<br><span class=\"warn\">Cost/Task missing</span> — Arena doesn't publish this model's median task cost, so it can't take part in value comparisons.",
-    "rel_low": "low",
-    "rel_mid": "mid",
-    "rel_high": "high"
-  },
-  "scatter": {
-    "needTwo": "Need at least 2 models with cost data",
-    "yAxis": "Cost / Task (P50) · log axis",
-    "xAxis": "Arena Score (stronger → right)",
-    "dotTitle": "{name}\nScore {s} (+{u}/-{d})\nCost/Task {c}\nVotes {v}\nAPI {api}\n{pareto}\nclick = set the score range's upper bound to this model",
-    "dotPareto": "◆ Pareto frontier (undominated)",
-    "dotDominated": "Dominated: a higher-scoring, cheaper model exists",
-    "dotApiNA": "N/A"
-  },
+  "export": {
+   "summary": "Export &amp; extend data",
+   "h2": "Export / extend data",
+   "csv": "Export CSV (current table)",
+   "tiers": "Export tier-ladder CSV",
+   "copyLink": "Copy state link",
+   "hint": "To add another board (e.g.  <span class=\"mono\">code/terminal</span>、<span class=\"mono\">text</span>、<span class=\"mono\">vision</span>): open the board's page on arena.ai, select the table, copy, and paste below (columns are auto-detected).",
+   "pastePh": "Paste an arena.ai leaderboard's markdown / table text…",
+   "namePh": "New dataset name (optional)",
+   "add": "Add"
+  }
+ },
+ "charts": {
   "steps": {
-    "modeOnly": "The step chart only exists in ① Threshold mode — it is exactly the curve \"threshold T → cheapest model of that tier\"",
-    "noCost": "No model with cost data on the frontier",
-    "xAxisNarrow": "Threshold T → cheapest Cost/Task",
-    "xAxis": "Threshold T (\"at least this strong\") → Cost/Task of the cheapest model clearing T",
-    "yAxis": "Cost / Task · log",
-    "segTitle": "Score range [{lo}, {up}]\nwinner: {name}\nScore {s} (+{u}/-{d})\nCost/Task {c} · {v} votes\nclick = set the score range to this tier"
+   "ttl": "① Step chart: threshold T → cheapest model clearing T (the \"winner of every tier\" you asked for)",
+   "lg": "Each bar = one model ruling that score range · click any bar to jump to it"
   },
-  "tiers": {
-    "count": "{n} tiers · threshold frontier{strict}",
-    "countStrict": " · strict CI",
-    "modeOnly": "(only built in ① Threshold mode)",
-    "modeOnlyCell": "Switch to ① Threshold mode to see the full ladder: drag the threshold from high to low and the winners are these models",
-    "notesPre": "Preliminary ",
-    "notesLow": "low-sample ",
-    "notesFrontier": "◆frontier",
-    "rowTitle": "click = set the score range to this tier"
-  },
-  "table": {
-    "count": "{n} / {total} models · click headers to sort · dim rows = out of range"
+  "scat": {
+   "ttl": "② Scatter: Score (x) × Cost/Task (y, log)",
+   "lg": "◆ Pareto frontier · gray dots = dominated · vertical bars = CI · shade = current score band · gold dashed line = threshold T (drag it)"
   },
   "tl": {
-    "noQualifies": "No model qualifies at threshold T={t} (filtered out, or no cost data above this score). Lower the threshold or relax the filters.",
-    "noQualifiesChart": "No model qualifies at the current threshold",
-    "perTask": "/task",
-    "peakLegend": "Peak windows = weekdays 01:00–04:00 & 06:00–10:00 UTC (gray); weekends are all off-peak",
-    "listPrice": "List price ",
-    "now": "now",
-    "noteHead": "Threshold <b class=\"mono\">T={t}</b> · <b>{peakH}</b> peak hours per 168-hour week · Now {dow} {hr}:00 UTC → <b style=\"color:var(--accent)\">{c}</b>, champion <b>{champ}</b>{diff}<br>",
-    "weekParts": "C(T) over the week: ",
-    "hourSuffix": " h",
-    "diffPricier": "(list price {base}, pricier by {pct}%)",
-    "diffCheaper": "(list price {base}, cheaper by {pct}%)",
-    "diffSame": "(same as list price)",
-    "cacheOn": "<br><span style=\"color:var(--dim2)\">Cache discount on (hit {h}%): cache applies to input tokens only, compressing both absolute levels and peak/off-peak amplitude.</span>"
-  },
-  "cache": {
-    "off": "Off → all input tokens bill at <b>cache-miss prices</b> — exactly <b>Arena's leaderboard Cost/Task basis</b>.",
-    "hitHead": "Hit rate <b class=\"mono\">{h}%</b>: {h}% of input tokens bill at cache-read prices, {m}% at (write-multiplier-inclusive) miss prices; <b>output tokens are never discounted</b>, so even a 100% hit rate can't reach zero.",
-    "srcCounts": "{pub} models in the candidate set use published cache prices, {est} estimated at 10%{na}.",
-    "srcNa": ", {na} without published prices (N/A)",
-    "wmNote": "Anthropic / OpenAI bill cache writes separately (= 1.25× input price) and the missed share is paid at the write price; other providers charge no write fee.",
-    "missBasis": "<br><b>Note</b>: Arena's Cost/Task is computed at <b>cache-miss prices</b> (the Agent board's inferred $4/$20 list prices are the proof), so enabling the cache discount is a hypothetical — \"if your workload really hits this often\" — not the board's own meaning.",
-    "pillPeak": "peak (2×)",
-    "pillOff": "off-peak (½ price)",
-    "pillOff2": "off",
-    "osHintHead": "Output share decides how a \"unit-price change\" converts into a \"Cost/Task change\". Default <b class=\"mono\">8%</b> = input:output 11:1, from measured inference on 14 Agent-board models (ratios 3.8–17.9×).",
-    "osHintOff": "With cache discount off, DeepSeek's peak/off-peak moves input and output <b>proportionally</b> and this slider has <b>no effect</b> on it; it only matters for corrections like GLM's input ×3 / output ×2.8.",
-    "osHintOn": "<b>With cache discount on, this slider becomes critical</b>: cache discounts input only, so the higher the output share, the thinner the discount. At the same 95% hit rate, DeepSeek-20261017 saves 86% at w=2%, 68% at w=8% (default), 55% at w=15%, 40% at w=25%, and only 25% at w=40%.",
-    "adjAllOff": "<span style=\"color:var(--dim2)\">All corrections off → the board as listed. Tick any rule above to see time effects.</span>",
-    "adjNone": "No model in the current candidate set is affected by the enabled corrections ({rules}).",
-    "adjHead": "<b>{peak} · {dow} {hr}:00 UTC</b>: <b>{n}</b> models in the candidate set get rewritten → ",
-    "evModels": " models",
-    "evSource": "Source: ",
-    "verified": "verified",
-    "uncertain": "uncertain",
-    "costCellTitle": "List {raw} → current scenario {cur}",
-    "costCellWhy": "Cache hit {h}%: read price {pc}/M ({src}), write multiplier {wm}×",
-    "costCellSrcEst": "10%-of-input estimate",
-    "costCellSrcPub": "published",
-    "costCellTotal": "Total ×{scale}",
-    "listPrice": "List price"
-  },
-  "ev": {
-    "ds_tod": {
-      "name": "DeepSeek peak/off-peak pricing",
-      "desc": "Peak = weekdays 01:00–04:00 and 06:00–10:00 UTC; all other hours (incl. weekends) are half price. The board lists 20261017 at off-peak and 20260910 / the V4-Pro family at peak — one family, two conventions, one table.",
-      "src": "DeepSeek official pricing page; confirmed by four independent sources: datacamp / justinmckelvey / felloai / okamomedia"
-    },
-    "gem_dec1": {
-      "name": "Gemini 4 Carbon/Argon hike on 12-01 (announced)",
-      "desc": "Intro pricing $2/$10 ends 2026-11-30; from 12-01 it is $4/$20 with cache read price $0.10 → $0.20. The board (11-11 snapshot) uses intro pricing. Drag the pricing date into December to watch Carbon collapse out of the overall_all frontier.",
-      "src": "Google Gemini API pricing page (benchlm.ai / munderdiffl.in / datastudios.org all agree; checked 2026-11-12/13)"
-    },
-    "ds_v4flash": {
-      "name": "Does DeepSeek V4-Flash also split peak/off-peak? (uncertain)",
-      "desc": "V4-Flash is retired; public sources only confirm peak/off-peak pricing for V4.1-Flash and V4-Pro. Off by default — tick only for sensitivity analysis.",
-      "src": "insufficient evidence"
-    },
-    "suspect2x": {
-      "name": "2× off vs a third-party index, no promo explanation (uncertain)",
-      "desc": "Mistral Medium 3.5 ($0.75/$3.75 vs index $1.50/$7.50) and GPT-6 Sol ($1/$5 vs $2/$10) are listed at exactly half of a third-party index. Could be a promo, or the index is stale. Off by default.",
-      "src": "benchr.org/pricing comparison"
-    },
-    "glm53flash_nov": {
-      "name": "GLM-5.3-Flash $0.02/$0.07 vs official $0.15/$0.50, no promo notice (uncertain)",
-      "desc": "The 11-20 board lists $0.02/$0.07 — 87%/86% below the Z.ai pricing page ($0.15/$0.50, checked 2026-11-22). No promo announcement or end date anywhere; the launch blog only says (discounted) for $0.045/task. $0.02/$0.07 closely matches the OpenRouter batch tier ($0.023/$0.068), so this may be a mis-scraped tier or a short unannounced promo. Off by default.",
-      "src": "docs.z.ai/guides/overview/pricing + z.ai/blog/glm-5.3-flash (checked 2026-11-22); openrouter.ai/api/v1/models"
-    },
-    "glm47_nov": {
-      "name": "GLM-4.7 $0.40/$1.75 matches neither official nor aggregator (uncertain)",
-      "desc": "The 11-20 board lists $0.40/$1.75, but the Z.ai pricing page still shows $0.60/$2.20 (checked 2026-11-22) and OpenRouter agrees at $0.60/$2.20. The board price is 33%/20% below both, with no promo announcement or end date. Off by default.",
-      "src": "docs.z.ai/guides/overview/pricing (checked 2026-11-22); openrouter.ai/api/v1/models"
-    },
-    "qwen35_channel": {
-      "name": "Qwen3.5-397B-A17B listed below Alibaba official $0.60/$3.60 (uncertain)",
-      "desc": "The board moved $0.60/$3.60 → $0.45/$3.00, but Alibaba Cloud Model Studio still lists qwen3.5-397b-a17b at $0.6/$3.6 (international, 0–256K, checked 2026-11-22) — no price cut announced. $0.45/$3.00 is the OpenRouter aggregator price, so this looks like a channel switch, not a vendor hike. Off by default.",
-      "src": "alibabacloud.com/help/en/model-studio/model-pricing (checked 2026-11-22); openrouter.ai/api/v1/models"
-    },
-    "kimi27_channel": {
-      "name": "Kimi K2.7 Code listed below Moonshot official $0.95/$4.00 (uncertain)",
-      "desc": "The board moved $0.60/$3.50 → $0.60/$3.00, but Moonshot still lists kimi-k2.7-code at $0.95/$4.00 (checked 2026-11-22) and has announced K2-series retirement by end of December 2026. The board price matches OpenRouter exactly ($0.60/$3.00) — an aggregator channel price, 37%/25% below official, no promo notice. Off by default.",
-      "src": "platform.kimi.ai/docs/pricing/chat (checked 2026-11-22); openrouter.ai/api/v1/models"
-    },
-    "mimo25_retired": {
-      "name": "MiMo-V2.5-Pro retired by Xiaomi; board price has no official anchor (uncertain)",
-      "desc": "Xiaomi officially delisted MiMo-V2.5-Pro API on 2026-10-21 (switch to V2.6 required). The board price jumped $0.43/$0.87 → $0.48/$1.80; the old price matched the official overseas rate ($0.435/$0.87, carried over to mimo-v2.6-pro since the launch blog promised no pricing change), the new one only exists on third-party hosting (OpenRouter $0.48/$1.80). Off by default.",
-      "src": "mimo.mi.com/docs/price/pay-as-you-go + platform.xiaomimimo.com delisting banner (checked 2026-11-22); mimo.xiaomi.com/mimo-v2-5-pro"
-    },
-    "hy3p_channel": {
-      "name": "Hy3 preview listed below Tencent official $0.18/$0.60 (uncertain)",
-      "desc": "The board moved Hy3 preview $0.18/$0.60 → $0.14/$0.58. Tencent Cloud bills Hy3 preview from ¥1.2/¥4 per 1M tokens (≈$0.17/$0.56), and third-party trackers record the official USD rate as $0.18/$0.60 — the old board price. The new price equals the Hy3 non-preview rate and the OpenRouter listing, so either Tencent aligned preview pricing with the GA model (unannounced) or the board merged the two entries. Off by default.",
-      "src": "cloud.tencent.com Hy Token Plan article 2676264 + activepieces.com Tencent pricing tracker (checked 2026-11-22); openrouter.ai/api/v1/models"
-    }
-  },
-  "peakTag": {
-    "peak": "peak",
-    "off": "off-peak",
-    "afterPromo": "after promo",
-    "promo": "promo period",
-    "inEffect": "in effect",
-    "notYet": "not yet in effect"
-  },
-  "interact": {
-    "play": "▶ Play: sweep the threshold from highest to lowest",
-    "pause": "⏸ Pause",
-    "stop": "Stop",
-    "sweeping": "sweeping",
-    "modeHintPareto": "<b>Your original idea.</b> Fix threshold T, take the cheapest model among those with score ≥ T. Sweep T downward and the winner sequence is the <b>Pareto lower envelope</b>. The only mathematically self-consistent definition (= capability maximization under a cost constraint).",
-    "modeHintRatio": "<b>Score ÷ Cost.</b> Strongly biased toward cheap models because Arena scores carry a ~1200 baseline offset (the numerator is artificially inflated). For rough comparison only.",
-    "modeHintBaseline": "<b>(Score − 1200) ÷ Cost.</b> Arena BT scores have a ~1200 practical floor (below it ≈ random); subtracting it yields \"how much real capability gain each dollar buys\". Still biased toward cheap models — which is exactly why Threshold mode is the decision-grade definition.",
-    "alertTiers": "Switch to ① Threshold mode first",
-    "copied": "✓ Copied",
-    "copyLink": "Copy state link",
-    "promptCopy": "Copy manually: ",
-    "pasteFirst": "<span style=\"color:var(--bad)\">Paste table text first</span>",
-    "tooFewRows": "<span style=\"color:var(--bad)\">Only parsed {n} rows — check this is an arena.ai leaderboard table (needs Score / Cost/Task columns)</span>",
-    "customBoard": "Custom board",
-    "userPaste": " models · user paste",
-    "customNote": "from data you pasted in this session",
-    "noCostParsed": "<span style=\"color:var(--bad)\">⚠ Parsed {n} models, but the Cost/Task column is entirely empty</span> — without costs there's no value analysis (the WebDev · HTML board on arena.ai is exactly like this). The dataset was added: you can view score rankings, but the frontier will be empty.",
-    "addedOk": "<span style=\"color:var(--good)\">✓ Added {n} models</span> ({wc} with cost data). Custom datasets are lost on reload — save them with \"Export CSV\"."
-  },
-  "boot": {
-    "methodBody": "PLACEHOLDER_METHOD_BODY",
-    "sourceBody": "PLACEHOLDER_SOURCE_BODY"
-  },
-  "method": {
-    "title": "Method & Data Sources — Arena Leaderboard Value Analyzer",
-    "desc": "How the cost-quality Pareto frontier is computed from arena.ai WebDev leaderboards: data sources, price verification, peak/off-peak rules, cache model, and limitations."
-  },
-  "tabs": {
-    "rank": "Best value",
-    "rankT": "Direct answer: at your quality bar and daily-task profile — who is cheapest per task, by how many points, for how many $",
-    "deep": "Tiers & charts",
-    "deepT": "Winner card, step chart, scatter, weekly cost curve, tier & model tables"
-  },
-  "rank": {
-    "ctrlH2": "Ranking standard",
-    "capability": "Capability board",
-    "threshold": "Quality bar",
-    "ge": "≥ ",
-    "period": "Price period",
-    "pkNow": "Now",
-    "pkPeak": "Peak",
-    "pkOff": "Off-peak",
-    "profile": "Daily task profile",
-    "presetLight": "Light Q&A",
-    "presetLightT": "≈2k input / 0.5k output tokens per task",
-    "presetDev": "Daily dev",
-    "presetDevT": "≈20k input / 2k output tokens per task",
-    "presetHeavy": "Heavy agent",
-    "presetHeavyT": "≈120k input / 12k output tokens per task",
-    "presetBoard": "Board measured",
-    "presetBoardT": "Use Arena's measured median Cost/Task as-is",
-    "inTok": "Input k",
-    "outTok": "Output k",
-    "perDay": "Tasks/day",
-    "tblH2": "Best value ranking",
-    "c1": "#",
-    "c2": "Model",
-    "c3": "Score",
-    "c4": "vs #1",
-    "c5": "Per task",
-    "c6": "×#1",
-    "c7": "Per month",
-    "tblNote": "Models clearing the bar, cheapest first. * = cost adjusted by the current peak/off-peak & cache scenario. Click a row to move the bar to that model.",
-    "count": "{n} clear the bar · {all} with cost",
-    "more": "Show remaining {n}",
-    "fewer": "Show top 20 only",
-    "rowTitle": "{name} · score {s} · {c} per task · API {api} · {v} votes",
-    "still": "Bar: score ≥ ",
-    "empty": "No model on this board reaches score ≥ {t} (board max {smax}) — lower the bar.",
-    "standards": "Bar: score ≥ {t} · {cap} · {prof} · {period}",
-    "profileTag": "{in}k in / {out}k out profile",
-    "measured": "Arena measured cost",
-    "perImage": "per image (measured)",
-    "perTask": "/task",
-    "kpiPer": "Per task",
-    "kpiMonth": "Per month",
-    "kpiMonthTail": "{n}/day × 30",
-    "upSell": "Top scorer in bar: {name} ({s} pts) — +{dc}/task ({mult}×) buys +{ds} pts. ",
-    "upExpensive": "Steep — pay only if you need those points.",
-    "upOk": "Cheap upgrade if you want more headroom.",
-    "topIsChamp": "Cheapest in the bar is also its top scorer — no upgrade needed.",
-    "adjNote": "Board list cost {board}; adjusted by the current peak/off-peak & cache scenario. ",
-    "swing": "Weekly swing: {lo} – {hi} ({pct}% cheaper off-peak).",
-    "unitHint": "Image boards bill per generated image: the ranking uses Arena's measured median $/image, and token peak/off-peak pricing does not apply.",
-    "hint": "Profile cost = input tokens × input price (incl. {ch}% cache discount) + output tokens × output price, adjusted for peak/off-peak & promos. Tune cache rate & source in the pricing panel on the left."
+   "ttl": "③ 168 hours of the week: minimum cost at threshold T <span class=\"mono\">C(T)</span> change over time",
+   "lg": "Gray = peak windows · line jumps = champion changes · gold dashed = your selected hour · click anywhere to jump to that hour"
   }
+ },
+ "tables": {
+  "tier": {
+   "h2": "Tier ladder",
+   "c1": "#",
+   "c2": "Score range",
+   "c3": "Winner in range",
+   "c4": "Score",
+   "c5": "Cost/Task",
+   "c6": "↑ Marginal cost of the next tier ($/pt)",
+   "c7": "Votes",
+   "c8": "Notes"
+  },
+  "model": {
+   "h2": "Model table",
+   "boardNo": "Board #",
+   "overallNo": "Overall #",
+   "model": "Model",
+   "score": "Score",
+   "ci": "±CI",
+   "cost": "Cost/Task",
+   "pts": "pts/$",
+   "excess": "Excess score/$",
+   "votes": "Votes",
+   "pin": "$/M in",
+   "pout": "$/M out",
+   "ctx": "Context",
+   "lic": "License"
+  }
+ },
+ "bottom": {
+  "method": "Methodology: does this approach hold? (Verdict: yes — with 5 corrections)",
+  "sources": "Data sources, methodology &amp; disclaimers"
+ },
+ "footer": {
+  "html": "Static build · zero runtime dependencies · data embedded at build time from arena.ai snapshots (the <span class=\"mono\">/api/*</span> endpoints return 403, so live queries are impossible — this is <b>a point-in-time snapshot</b>). Arena's built-in Pareto view: <a href=\"https://arena.ai/leaderboard/code/webdev/pareto\" target=\"_blank\" rel=\"noopener\">arena.ai/leaderboard/code/webdev/pareto</a>.<br>Leaderboard data © LMArena (arena.ai), snapshot %CAPTURED% · prices from vendor pricing pages, checked %SCRAPED% · <a href=\"%METHOD%\">Method</a> · <a href=\"/data/v1/all.json\">JSON</a> · <a href=\"/llms.txt\">llms.txt</a> · <a href=\"/sitemap.xml\">Sitemap</a>"
+ },
+ "data": {
+  "licAll": "All-license · ",
+  "licOS": "Open-source · ",
+  "optTail": " models · Score ",
+  "dsNote": "{meta} · <b style=\"color:var(--dim)\">{note}</b><br>Score range <span class=\"mono\">{min}–{max}</span> · Cost/Task <span class=\"mono\">{cmin}–{cmax}</span> · with cost data <span class=\"mono\">{wc}/{n}</span>",
+  "emptyNoCost": "This board has no Cost/Task data — an entirely empty cost column cannot support value analysis (the WebDev · HTML board on arena.ai is exactly like this). Pick a board with a cost column.",
+  "emptyFiltered": "No model passes the current filters — relax \"Min votes\", \"Cost/Task cap\", or \"Exclude Preliminary\"."
+ },
+ "badges": {
+  "models": " models",
+  "withCost": " with Cost/Task",
+  "inRange": " in range",
+  "frontier": "Pareto frontier: ",
+  "frontierTiers": " tiers",
+  "peak": "Peak",
+  "offpeak": "Off-peak",
+  "timeAdj": "Prices time-adjusted: ",
+  "timeAdjTail": " models",
+  "listPrice": "List price (no time adjustment)",
+  "cacheOff": "Cache discount: off",
+  "cacheHit": "Cache hit ",
+  "strict": "Strict CI mode"
+ },
+ "winner": {
+  "modeName": {
+   "pareto": "Threshold: cheapest model with score ≥ T",
+   "ratio": "max Score/$",
+   "baseline": "max excess score/$"
+  },
+  "currentMode": "Current mode · ",
+  "strictCI": "strict CI",
+  "pointEst": "point estimate",
+  "licUnknown": "license unknown",
+  "preliminary": "Preliminary",
+  "autoEval": "AutoEval",
+  "pareto": "Pareto frontier",
+  "dominated": "dominated",
+  "kpiScore": "Arena Score",
+  "kpiCost": "Cost / Task (P50)",
+  "kpiRatio": "Score / $",
+  "kpiExcess": "Excess score / $",
+  "kpiBaseline": "Baseline ",
+  "kpiVotes": "Votes",
+  "kpiApi": "API price $/M",
+  "kpiEffPin": "Effective input price (hit ",
+  "kpiEffPinMid": "%",
+  "kpiEst": "·est.",
+  "kpiList": ") · list ",
+  "kpiInOut": "in / out",
+  "kpiCtx": "Context",
+  "kpiRank": "Overall rank",
+  "listNoAdj": "List price (no time/cache adjustment)",
+  "ptsPerDollar": "pts/$",
+  "verdict": "<b>Verdict:</b> below the threshold <span class=\"mono\">T = {hi}</span> (range <span class=\"mono\">[{lo}, {hi}]</span>),<span class=\"em\">{name}</span> is <b>the cheapest model that clears the capability bar</b>.<br>It rules the score range <span class=\"mono\">[{cov0}, {cov1}]</span> — within it, every higher-scoring model costs more and every cheaper model scores lower (mutually undominated).<br>",
+  "degraded": "<span class=\"warn\">⚠ Your threshold {hi} exceeds this dataset's top score {smax}; no model qualifies — what follows is the strongest, relatively cheapest one.</span><br>",
+  "bandNotOk": "<span class=\"warn\">⚠ Its score {s} is below your lower bound {lo}: no Pareto-optimal model exists in [{lo}, {hi}] because the stronger tier costs more and the cheaper tier scores lower. This is a blind spot of range-style questions — threshold mode only needs one T.</span><br>",
+  "swing": "<b>Weekly price swing:</b> this champion's own cost bottoms at <span class=\"mono\">{lo}</span> on {loDow} {loHr}:00 UTC and peaks at <span class=\"mono\">{hi}</span> on {hiDow} {hiHr}:00 UTC ({spread}× apart). Scheduling tasks into off-peak windows is a free <b>{pct}%</b> discount at this threshold.<br>",
+  "nextUp": "<b>↑ Next tier up:</b> {name} ({pts} pts, {cost}) → pay <b class=\"mono\">{dc}</b> more for <b class=\"mono\">+{ds}</b> pts; marginal price <span class=\"mono\">{per}/pt</span>.",
+  "nextUpExpensive": " <span class=\"warn\">This tier is expensive — only worth it if you truly need the capability.</span>",
+  "nextUpBargain": " <span class=\"em\">The upgrade is a bargain.</span>",
+  "nextUpNormal": " — a normal range.",
+  "nextUpNone": "<b>↑ Next tier up:</b> none — it's already this dataset's capability ceiling.<br>",
+  "downOne": "<b>↓ One tier down:</b> {name} ({pts} pts, {cost}) → save <span class=\"mono\">{dc}</span> but lose <span class=\"mono\">{ds}</span> pts; i.e. giving up <span class=\"mono\">{per}</span> pts per dollar saved.",
+  "downTooMuch": " <span class=\"warn\">Too much capability given up — the saving isn't worth it.</span>",
+  "downAcceptable": " If budget is tight, this tier is acceptable.",
+  "verdictRatio": "<b>Verdict:</b> within the score range <span class=\"mono\">[{lo}, {hi}]</span> ({n} models in range), ranked by {basis}, the top model is <span class=\"em\">{name}</span> = <b class=\"mono\">{val}</b>.",
+  "basisRatio": "Score÷Cost",
+  "basisBaseline": "(Score−{base})÷Cost",
+  "noInBand": " <span class=\"warn\">Note: no qualifying model in range; this result is from the full domain.</span>",
+  "butNote": "<b>But note:</b> {name} scores higher ({s}) at a marginal price of <span class=\"mono\">{per}/pt</span>. The top \"score per $\" model is often not the one you should use — it's just the cheapest per point, and may lack absolute capability.<br>",
+  "biasedWarn": "<span class=\"warn\">⚠ Modes ② and ③ are systematically biased:</span> Arena Score is a Bradley-Terry-style rating with a ~1000+ baseline offset, so ② \"score per $\" almost always picks cheap models; ③ subtracts the practical 1200 floor to cancel the offset, getting closer to true marginal value.",
+  "reliability": "<br><b>Reliability:</b> <span class=\"{cl}\">{rel}</span> ({votes} votes, CI ±{ci}).",
+  "lowSampleWarn": " <span class=\"warn\">Sample too small — this \"value champion\" may be pure noise. Don't make purchasing decisions on it.</span>",
+  "costMissing": "<br><span class=\"warn\">Cost/Task missing</span> — Arena doesn't publish this model's median task cost, so it can't take part in value comparisons.",
+  "rel_low": "low",
+  "rel_mid": "mid",
+  "rel_high": "high"
+ },
+ "scatter": {
+  "needTwo": "Need at least 2 models with cost data",
+  "yAxis": "Cost / Task (P50) · log axis",
+  "xAxis": "Arena Score (stronger → right)",
+  "dotTitle": "{name}\nScore {s} (+{u}/-{d})\nCost/Task {c}\nVotes {v}\nAPI {api}\n{pareto}\nclick = set the score range's upper bound to this model",
+  "dotPareto": "◆ Pareto frontier (undominated)",
+  "dotDominated": "Dominated: a higher-scoring, cheaper model exists",
+  "dotApiNA": "N/A"
+ },
+ "steps": {
+  "modeOnly": "The step chart only exists in ① Threshold mode — it is exactly the curve \"threshold T → cheapest model of that tier\"",
+  "noCost": "No model with cost data on the frontier",
+  "xAxisNarrow": "Threshold T → cheapest Cost/Task",
+  "xAxis": "Threshold T (\"at least this strong\") → Cost/Task of the cheapest model clearing T",
+  "yAxis": "Cost / Task · log",
+  "segTitle": "Score range [{lo}, {up}]\nwinner: {name}\nScore {s} (+{u}/-{d})\nCost/Task {c} · {v} votes\nclick = set the score range to this tier"
+ },
+ "tiers": {
+  "count": "{n} tiers · threshold frontier{strict}",
+  "countStrict": " · strict CI",
+  "modeOnly": "(only built in ① Threshold mode)",
+  "modeOnlyCell": "Switch to ① Threshold mode to see the full ladder: drag the threshold from high to low and the winners are these models",
+  "notesPre": "Preliminary ",
+  "notesLow": "low-sample ",
+  "notesFrontier": "◆frontier",
+  "rowTitle": "click = set the score range to this tier"
+ },
+ "table": {
+  "count": "{n} / {total} models · click headers to sort · dim rows = out of range"
+ },
+ "tl": {
+  "noQualifies": "No model qualifies at threshold T={t} (filtered out, or no cost data above this score). Lower the threshold or relax the filters.",
+  "noQualifiesChart": "No model qualifies at the current threshold",
+  "perTask": "/task",
+  "peakLegend": "Peak windows = weekdays 01:00–04:00 & 06:00–10:00 UTC (gray); weekends are all off-peak",
+  "listPrice": "List price ",
+  "now": "now",
+  "noteHead": "Threshold <b class=\"mono\">T={t}</b> · <b>{peakH}</b> peak hours per 168-hour week · Now {dow} {hr}:00 UTC → <b style=\"color:var(--accent)\">{c}</b>, champion <b>{champ}</b>{diff}<br>",
+  "weekParts": "C(T) over the week: ",
+  "hourSuffix": " h",
+  "diffPricier": "(list price {base}, pricier by {pct}%)",
+  "diffCheaper": "(list price {base}, cheaper by {pct}%)",
+  "diffSame": "(same as list price)",
+  "cacheOn": "<br><span style=\"color:var(--dim2)\">Cache discount on (hit {h}%): cache applies to input tokens only, compressing both absolute levels and peak/off-peak amplitude.</span>"
+ },
+ "cache": {
+  "off": "Off → all input tokens bill at <b>cache-miss prices</b> — exactly <b>Arena's leaderboard Cost/Task basis</b>.",
+  "hitHead": "Hit rate <b class=\"mono\">{h}%</b>: {h}% of input tokens bill at cache-read prices, {m}% at (write-multiplier-inclusive) miss prices; <b>output tokens are never discounted</b>, so even a 100% hit rate can't reach zero.",
+  "srcCounts": "{pub} models in the candidate set use published cache prices, {est} estimated at 10%{na}.",
+  "srcNa": ", {na} without published prices (N/A)",
+  "wmNote": "Anthropic / OpenAI bill cache writes separately (= 1.25× input price) and the missed share is paid at the write price; other providers charge no write fee.",
+  "missBasis": "<br><b>Note</b>: Arena's Cost/Task is computed at <b>cache-miss prices</b> (the Agent board's inferred $4/$20 list prices are the proof), so enabling the cache discount is a hypothetical — \"if your workload really hits this often\" — not the board's own meaning.",
+  "pillPeak": "peak (2×)",
+  "pillOff": "off-peak (½ price)",
+  "pillOff2": "off",
+  "osHintHead": "Output share decides how a \"unit-price change\" converts into a \"Cost/Task change\". Default <b class=\"mono\">8%</b> = input:output 11:1, from measured inference on 14 Agent-board models (ratios 3.8–17.9×).",
+  "osHintOff": "With cache discount off, DeepSeek's peak/off-peak moves input and output <b>proportionally</b> and this slider has <b>no effect</b> on it; it only matters for corrections like GLM's input ×3 / output ×2.8.",
+  "osHintOn": "<b>With cache discount on, this slider becomes critical</b>: cache discounts input only, so the higher the output share, the thinner the discount. At the same 95% hit rate, DeepSeek-20261017 saves 86% at w=2%, 68% at w=8% (default), 55% at w=15%, 40% at w=25%, and only 25% at w=40%.",
+  "adjAllOff": "<span style=\"color:var(--dim2)\">All corrections off → the board as listed. Tick any rule above to see time effects.</span>",
+  "adjNone": "No model in the current candidate set is affected by the enabled corrections ({rules}).",
+  "adjHead": "<b>{peak} · {dow} {hr}:00 UTC</b>: <b>{n}</b> models in the candidate set get rewritten → ",
+  "evModels": " models",
+  "evSource": "Source: ",
+  "verified": "verified",
+  "uncertain": "uncertain",
+  "costCellTitle": "List {raw} → current scenario {cur}",
+  "costCellWhy": "Cache hit {h}%: read price {pc}/M ({src}), write multiplier {wm}×",
+  "costCellSrcEst": "10%-of-input estimate",
+  "costCellSrcPub": "published",
+  "costCellTotal": "Total ×{scale}",
+  "listPrice": "List price"
+ },
+ "ev": {
+  "ds_tod": {
+   "name": "DeepSeek peak/off-peak pricing",
+   "desc": "Peak = weekdays 01:00–04:00 and 06:00–10:00 UTC; all other hours (incl. weekends) are half price. The board lists 20261017 at off-peak and 20260910 / the V4-Pro family at peak — one family, two conventions, one table.",
+   "src": "DeepSeek official pricing page; confirmed by four independent sources: datacamp / justinmckelvey / felloai / okamomedia"
+  },
+  "gem_dec1": {
+   "name": "Gemini 4 Carbon/Argon hike on 12-01 (announced)",
+   "desc": "Intro pricing $2/$10 ends 2026-11-30; from 12-01 it is $4/$20 with cache read price $0.10 → $0.20. The board (11-11 snapshot) uses intro pricing. Drag the pricing date into December to watch Carbon collapse out of the overall_all frontier.",
+   "src": "Google Gemini API pricing page (benchlm.ai / munderdiffl.in / datastudios.org all agree; checked 2026-11-12/13)"
+  },
+  "ds_v4flash": {
+   "name": "Does DeepSeek V4-Flash also split peak/off-peak? (uncertain)",
+   "desc": "V4-Flash is retired; public sources only confirm peak/off-peak pricing for V4.1-Flash and V4-Pro. Off by default — tick only for sensitivity analysis.",
+   "src": "insufficient evidence"
+  },
+  "suspect2x": {
+   "name": "2× off vs a third-party index, no promo explanation (uncertain)",
+   "desc": "Mistral Medium 3.5 ($0.75/$3.75 vs index $1.50/$7.50) and GPT-6 Sol ($1/$5 vs $2/$10) are listed at exactly half of a third-party index. Could be a promo, or the index is stale. Off by default.",
+   "src": "benchr.org/pricing comparison"
+  },
+  "glm53flash_nov": {
+   "name": "GLM-5.3-Flash $0.02/$0.07 vs official $0.15/$0.50, no promo notice (uncertain)",
+   "desc": "The 11-20 board lists $0.02/$0.07 — 87%/86% below the Z.ai pricing page ($0.15/$0.50, checked 2026-11-22). No promo announcement or end date anywhere; the launch blog only says (discounted) for $0.045/task. $0.02/$0.07 closely matches the OpenRouter batch tier ($0.023/$0.068), so this may be a mis-scraped tier or a short unannounced promo. Off by default.",
+   "src": "docs.z.ai/guides/overview/pricing + z.ai/blog/glm-5.3-flash (checked 2026-11-22); openrouter.ai/api/v1/models"
+  },
+  "glm47_nov": {
+   "name": "GLM-4.7 $0.40/$1.75 matches neither official nor aggregator (uncertain)",
+   "desc": "The 11-20 board lists $0.40/$1.75, but the Z.ai pricing page still shows $0.60/$2.20 (checked 2026-11-22) and OpenRouter agrees at $0.60/$2.20. The board price is 33%/20% below both, with no promo announcement or end date. Off by default.",
+   "src": "docs.z.ai/guides/overview/pricing (checked 2026-11-22); openrouter.ai/api/v1/models"
+  },
+  "qwen35_channel": {
+   "name": "Qwen3.5-397B-A17B listed below Alibaba official $0.60/$3.60 (uncertain)",
+   "desc": "The board moved $0.60/$3.60 → $0.45/$3.00, but Alibaba Cloud Model Studio still lists qwen3.5-397b-a17b at $0.6/$3.6 (international, 0–256K, checked 2026-11-22) — no price cut announced. $0.45/$3.00 is the OpenRouter aggregator price, so this looks like a channel switch, not a vendor hike. Off by default.",
+   "src": "alibabacloud.com/help/en/model-studio/model-pricing (checked 2026-11-22); openrouter.ai/api/v1/models"
+  },
+  "kimi27_channel": {
+   "name": "Kimi K2.7 Code listed below Moonshot official $0.95/$4.00 (uncertain)",
+   "desc": "The board moved $0.60/$3.50 → $0.60/$3.00, but Moonshot still lists kimi-k2.7-code at $0.95/$4.00 (checked 2026-11-22) and has announced K2-series retirement by end of December 2026. The board price matches OpenRouter exactly ($0.60/$3.00) — an aggregator channel price, 37%/25% below official, no promo notice. Off by default.",
+   "src": "platform.kimi.ai/docs/pricing/chat (checked 2026-11-22); openrouter.ai/api/v1/models"
+  },
+  "mimo25_retired": {
+   "name": "MiMo-V2.5-Pro retired by Xiaomi; board price has no official anchor (uncertain)",
+   "desc": "Xiaomi officially delisted MiMo-V2.5-Pro API on 2026-10-21 (switch to V2.6 required). The board price jumped $0.43/$0.87 → $0.48/$1.80; the old price matched the official overseas rate ($0.435/$0.87, carried over to mimo-v2.6-pro since the launch blog promised no pricing change), the new one only exists on third-party hosting (OpenRouter $0.48/$1.80). Off by default.",
+   "src": "mimo.mi.com/docs/price/pay-as-you-go + platform.xiaomimimo.com delisting banner (checked 2026-11-22); mimo.xiaomi.com/mimo-v2-5-pro"
+  },
+  "hy3p_channel": {
+   "name": "Hy3 preview listed below Tencent official $0.18/$0.60 (uncertain)",
+   "desc": "The board moved Hy3 preview $0.18/$0.60 → $0.14/$0.58. Tencent Cloud bills Hy3 preview from ¥1.2/¥4 per 1M tokens (≈$0.17/$0.56), and third-party trackers record the official USD rate as $0.18/$0.60 — the old board price. The new price equals the Hy3 non-preview rate and the OpenRouter listing, so either Tencent aligned preview pricing with the GA model (unannounced) or the board merged the two entries. Off by default.",
+   "src": "cloud.tencent.com Hy Token Plan article 2676264 + activepieces.com Tencent pricing tracker (checked 2026-11-22); openrouter.ai/api/v1/models"
+  }
+ },
+ "peakTag": {
+  "peak": "peak",
+  "off": "off-peak",
+  "afterPromo": "after promo",
+  "promo": "promo period",
+  "inEffect": "in effect",
+  "notYet": "not yet in effect"
+ },
+ "interact": {
+  "play": "▶ Play: sweep the threshold from highest to lowest",
+  "pause": "⏸ Pause",
+  "stop": "Stop",
+  "sweeping": "sweeping",
+  "modeHintPareto": "<b>Your original idea.</b> Fix threshold T, take the cheapest model among those with score ≥ T. Sweep T downward and the winner sequence is the <b>Pareto lower envelope</b>. The only mathematically self-consistent definition (= capability maximization under a cost constraint).",
+  "modeHintRatio": "<b>Score ÷ Cost.</b> Strongly biased toward cheap models because Arena scores carry a ~1200 baseline offset (the numerator is artificially inflated). For rough comparison only.",
+  "modeHintBaseline": "<b>(Score − 1200) ÷ Cost.</b> Arena BT scores have a ~1200 practical floor (below it ≈ random); subtracting it yields \"how much real capability gain each dollar buys\". Still biased toward cheap models — which is exactly why Threshold mode is the decision-grade definition.",
+  "alertTiers": "Switch to ① Threshold mode first",
+  "copied": "✓ Copied",
+  "copyLink": "Copy state link",
+  "promptCopy": "Copy manually: ",
+  "pasteFirst": "<span style=\"color:var(--bad)\">Paste table text first</span>",
+  "tooFewRows": "<span style=\"color:var(--bad)\">Only parsed {n} rows — check this is an arena.ai leaderboard table (needs Score / Cost/Task columns)</span>",
+  "customBoard": "Custom board",
+  "userPaste": " models · user paste",
+  "customNote": "from data you pasted in this session",
+  "noCostParsed": "<span style=\"color:var(--bad)\">⚠ Parsed {n} models, but the Cost/Task column is entirely empty</span> — without costs there's no value analysis (the WebDev · HTML board on arena.ai is exactly like this). The dataset was added: you can view score rankings, but the frontier will be empty.",
+  "addedOk": "<span style=\"color:var(--good)\">✓ Added {n} models</span> ({wc} with cost data). Custom datasets are lost on reload — save them with \"Export CSV\"."
+ },
+ "boot": {
+  "methodBody": "PLACEHOLDER_METHOD_BODY",
+  "sourceBody": "PLACEHOLDER_SOURCE_BODY"
+ },
+ "method": {
+  "title": "Method & Data Sources — Arena Leaderboard Value Analyzer",
+  "desc": "How the cost-quality Pareto frontier is computed from arena.ai WebDev leaderboards: data sources, price verification, peak/off-peak rules, cache model, and limitations."
+ },
+ "tabs": {
+  "rank": "Best value",
+  "rankT": "Direct answer: at your quality bar and daily-task profile — who is cheapest per task, by how many points, for how many $",
+  "deep": "Tiers & charts",
+  "deepT": "Winner card, step chart, scatter, weekly cost curve, tier & model tables"
+ },
+ "rank": {
+  "ctrlH2": "Ranking standard",
+  "capability": "Capability board",
+  "threshold": "Quality bar",
+  "ge": "≥ ",
+  "period": "Price period",
+  "pkNow": "Now",
+  "pkPeak": "Peak",
+  "pkOff": "Off-peak",
+  "profile": "Daily task profile",
+  "presetLight": "Light Q&A",
+  "presetLightT": "≈2k input / 0.5k output tokens per task",
+  "presetDev": "Daily dev",
+  "presetDevT": "≈20k input / 2k output tokens per task",
+  "presetHeavy": "Heavy agent",
+  "presetHeavyT": "≈120k input / 12k output tokens per task",
+  "presetBoard": "Board measured",
+  "presetBoardT": "Use Arena's measured median Cost/Task as-is",
+  "inTok": "Input k",
+  "outTok": "Output k",
+  "perDay": "Tasks/day",
+  "tblH2": "Best value ranking",
+  "c1": "#",
+  "c2": "Model",
+  "c3": "Score",
+  "c4": "vs #1",
+  "c5": "Per task",
+  "c6": "×#1",
+  "c7": "Per month",
+  "tblNote": "Models clearing the bar, cheapest first. * = cost adjusted by the current peak/off-peak & cache scenario. Click a row to move the bar to that model.",
+  "count": "{n} clear the bar · {all} with cost",
+  "more": "Show remaining {n}",
+  "fewer": "Show top 20 only",
+  "rowTitle": "{name} · score {s} · {c} per task · API {api} · {v} votes",
+  "still": "Bar: score ≥ ",
+  "empty": "No model on this board reaches score ≥ {t} (board max {smax}) — lower the bar.",
+  "standards": "Bar: score ≥ {t} · {cap} · {prof} · {period}",
+  "profileTag": "{in}k in / {out}k out profile",
+  "measured": "Arena measured cost",
+  "perImage": "per image (measured)",
+  "perTask": "/task",
+  "kpiPer": "Per task",
+  "kpiMonth": "Per month",
+  "kpiMonthTail": "{n}/day × 30",
+  "upSell": "Top scorer in bar: {name} ({s} pts) — +{dc}/task ({mult}×) buys +{ds} pts. ",
+  "upExpensive": "Steep — pay only if you need those points.",
+  "upOk": "Cheap upgrade if you want more headroom.",
+  "topIsChamp": "Cheapest in the bar is also its top scorer — no upgrade needed.",
+  "adjNote": "Board list cost {board}; adjusted by the current peak/off-peak & cache scenario. ",
+  "swing": "Weekly swing: {lo} – {hi} ({pct}% cheaper off-peak).",
+  "unitHint": "Image boards bill per generated image: the ranking uses Arena's measured median $/image, and token peak/off-peak pricing does not apply.",
+  "hint": "Profile cost = input tokens × input price (incl. {ch}% cache discount) + output tokens × output price, adjusted for peak/off-peak & promos. Tune cache rate & source in the pricing panel on the left."
+ },
+ "scene": {
+  "codingT": "Cheapest for coding",
+  "codingD": "20k in + 2k out tokens · ranked at off-peak rates",
+  "agentT": "Heavy agent workloads",
+  "agentD": "120k in + 12k out tokens · ranked at current-hour prices",
+  "offT": "Off-peak steals",
+  "offD": "Light tasks (2k + 0.5k) · DeepSeek-style half-price hours"
+ },
+ "faq": [
+  {
+   "q": "Why doesn't the leaderboard price match my real cost?",
+   "a": "Board prices assume 0% cache hits and mix peak/off-peak conventions in one table. This tool recomputes your real per-task cost at the cache-hit rate you set (95% by default) and the hour you pick, with published read-ratios and write multipliers applied per model."
+  },
+  {
+   "q": "How are DeepSeek-style off-peak half prices handled?",
+   "a": "Every model's cost is rendered as a 168-hour weekly curve from each vendor's published peak/off-peak schedule (UTC). The best-value ranking can switch between current-hour, peak and off-peak conventions, so a nightly batch job is priced at nightly rates."
+  },
+  {
+   "q": "What does \"strict CI merging\" mean?",
+   "a": "Arena scores carry statistical noise: tiers whose 95% confidence intervals overlap are merged in strict mode, so you don't pay a premium for a ranking difference the data can't support."
+  }
+ ]
 }

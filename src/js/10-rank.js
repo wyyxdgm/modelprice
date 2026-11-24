@@ -12,6 +12,23 @@ S.rankPreset='dev'; S.rankIn=20; S.rankOut=2; S.rankPerDay=30; S.rankPk='now';
 S.rankShowAll=false;
 const RANK_PRESETS={light:[2,0.5], dev:[20,2], heavy:[120,12]};
 const RANK_TOP_N=20;
+/* 首屏一键场景卡 → 等价 rank 参数（卡片点击与 URL ?scene= 共用同一映射，09-boot 调 applyScene） */
+const SCENARIOS={coding:{rk:'dev',rp:'off'}, agent:{rk:'heavy',rp:'now'}, offpeak:{rk:'light',rp:'off'}};
+function applyScene(k){
+  const sc=SCENARIOS[k]; if(!sc) return false;
+  S.tab='rank'; S.rankPreset=sc.rk; S.rankPk=sc.rp;
+  if(RANK_PRESETS[sc.rk]){ const [i,o]=RANK_PRESETS[sc.rk]; S.rankIn=i; S.rankOut=o; }
+  if(sc.rp==='now'){ S.hour=new Date().getUTCHours(); S.dow=new Date().getUTCDay(); }
+  else if(sc.rp==='peak'){ S.hour=2; S.dow=3; }
+  else { S.hour=12; S.dow=6; }
+  [...$('#tabs').children].forEach(x=>x.classList.toggle('on',x.dataset.tab==='rank'));
+  $('#rankView').style.display=''; $('#deepView').style.display='none';
+  [...$('#rankPk').children].forEach(x=>x.classList.toggle('on',x.dataset.v===S.rankPk));
+  [...$('#rankPreset').children].forEach(x=>x.classList.toggle('on',x.dataset.v===S.rankPreset));
+  $('#rankIn').value=String(S.rankIn); $('#rankOut').value=String(S.rankOut);
+  syncPriceUI(); recompute();
+  return true;
+}
 
 function rankIsImage(){ return DATASETS[S.ds] && DATASETS[S.ds].unit==='image'; }
 /* 一次「日常标准任务」的成本。榜单实测口径 / 文生图（按张）/ 无标价 → 直接用情景修正后的 m.c。 */
@@ -163,6 +180,13 @@ function renderRank(){
   $('#rankView').style.display=S.tab==='rank'?'':'none';
   $('#deepView').style.display=S.tab==='deep'?'':'none';
   [...$('#tabs').children].forEach(x=>x.classList.toggle('on',x.dataset.tab===S.tab));
+  /* 首屏场景卡：一键设参 → 滚到答案区（?scene= 的 boot 解析走 applyScene，不滚动） */
+  const scWrap=$('#sceneCards');
+  if(scWrap) scWrap.onclick=e=>{
+    const b=e.target.closest('[data-scene]'); if(!b) return;
+    if(applyScene(b.dataset.scene))
+      document.querySelector('.res').scrollIntoView({behavior:'smooth',block:'start'});
+  };
 })();
 /* 左栏能力下拉 → 排行榜下拉同步 */
 (function(){ const old=dsSel.onchange;

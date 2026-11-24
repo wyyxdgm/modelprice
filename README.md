@@ -1,4 +1,4 @@
-# ModelPrice — Arena Leaderboard Value Analyzer
+# ModelPrice — LLM Price-Performance Calculator (Arena Score × real cost)
 
 Public, static, single-page tool answering one question with arena.ai (LMArena) leaderboard data (WebDev code boards + Text-to-Image):
 

@@ -1,465 +1,487 @@
 {
-  "meta": {
-    "lang": "ja",
-    "locale_tag": "ja-JP",
-    "title": "Arena リーダーボード コスパ分析ツール · スコア範囲 → 最有力モデル",
-    "desc": "あなたの品質基準で最も安い AI モデルはどれ？ Arena（LMArena）WebDev スコア × 実コスト/タスクのインタラクティブなパレート階段 —— ピーク/オフピーク価格・キャッシュヒット割引・厳密 CI 統合に対応。無料・登録不要。",
-    "ogTitle": "あらゆる品質レベルで最も安い AI モデル — Arena スコア vs 実コスト/タスク",
-    "ogDesc": "許容できる最低 Arena スコアを設定すると、それをクリアする最安モデル・次Tierの1ポイントあたりコスト・ピーク/オフピークとキャッシュ価格が答えをどう変えるかが分かります。"
+ "meta": {
+  "lang": "ja",
+  "locale_tag": "ja-JP",
+  "title": "LLM API 料金比較ツール 2026 — Arenaスコア別・最安モデル",
+  "desc": "品質のハードルを設定すれば、それを満たす最安のLLMがすぐわかる。LMArenaのスコア×実際のタスク単位コストを対話式で計算。ピーク/オフピーク料金、キャッシュ割引、厳密なCIマージに対応。無料・登録不要。",
+  "ogTitle": "すべての品質帯で最安のLLM — Arenaスコア × 実コスト",
+  "ogDesc": "許容できる最低Arenaスコアを設定すると、ハードルを超える最安モデル、次のティアの1ポイントあたりのコスト、ピーク/オフピークとキャッシュ料金の影響がすぐ見えます。"
+ },
+ "dows": "日,月,火,水,木,金,土",
+ "header": {
+  "h1": "LLM API 料金比較ツール",
+  "sub": "Arenaスコア別・最安モデル",
+  "tagline": "能力しきい値を最高から最低までドラッグすると、各Tierの勝者がリアルタイムで更新されます。これが<b style=\"color:var(--good)\">下包絡 / パレートフロンティア（lower envelope / Pareto frontier）</b>です ——「すべての能力Tierに最コスパ模型が存在する」という直感は数学的に正しいですが、正しい定義が必要です（下記参照）。データ：<a href=\"https://arena.ai/leaderboard/code/webdev\" target=\"_blank\" rel=\"noopener\">arena.ai/leaderboard</a>、取得日 <span class=\"mono\" id=\"scraped\">%SCRAPED%</span>（リーダーボード日付 <span class=\"mono\" id=\"captured\">%CAPTURED%</span>）。"
+ },
+ "intro": {
+  "h2": "あらゆる品質レベルで最も安い AI モデル — Arena スコア vs 実コスト/タスク",
+  "p1": "<b style=\"color:var(--text)\">許容できる最低 Arena スコアを設定すれば、そのハードルをクリアする最安モデルが分かります</b>—— 次Tierへの限界 $/ポイントに加え、DeepSeek のピーク/オフピーク価格・期限切れプロモ・キャッシュミス偏向を補正済み。金色のしきい値ラインをドラッグ（または ▶ Play）すると、全Tierの勝者がリアルタイム更新されます。",
+  "lnk": "「最コスパ」の3つの定義 · 厳密 95% CI モード · 1週間168時間の価格モデル · <a href=\"%METHOD%\">手法とデータソース</a> · <a href=\"/data/v1/all.json\">JSON（AI 可読）</a> · <a href=\"/llms.txt\">llms.txt</a>"
+ },
+ "grp": {
+  "ds": {
+   "summary": "データセットと定義",
+   "h2": "リーダーボードデータセット",
+   "licHint": "<b>「オープンソース限定」と「全ライセンス」は別のリーダーボードであり、スコアは比較できません。</b>オープンソース板（<span class=\"mono\">?license=open-source</span>）は上限 <b class=\"mono\">1687</b>（Kimi K3.1 Pro）；全ライセンス板は上限 <b class=\"mono\">1838</b>（Claude Fable 5.2 xHigh、$11.04/タスク）—— Claude Opus 5.5 1815、Sonnet 5.5 1772、Gemini 4 Carbon 1768、GPT-6 Astra 1764 は全ライセンス板にいます。データセットを <b>全ライセンス（All-license）</b>に切り替えてください。<br><span style=\"color:var(--dim2)\">注：全ライセンス板は上位41位（スコア 1590–1838）のみ取得しており、41位以降のロングテールが欠落しています。高スコア側のフロンティアは影響を受けませんが、「全体最安」と「超過スコア/$」の基準に偏りが出ます。</span>"
   },
-  "dows": "日,月,火,水,木,金,土",
-  "header": {
-    "h1": "Arena リーダーボード コスパ分析ツール",
-    "sub": "スコア範囲 → 範囲内の最有力モデル",
-    "tagline": "能力しきい値を最高から最低までドラッグすると、各Tierの勝者がリアルタイムで更新されます。これが<b style=\"color:var(--good)\">下包絡 / パレートフロンティア（lower envelope / Pareto frontier）</b>です ——「すべての能力Tierに最コスパ模型が存在する」という直感は数学的に正しいですが、正しい定義が必要です（下記参照）。データ：<a href=\"https://arena.ai/leaderboard/code/webdev\" target=\"_blank\" rel=\"noopener\">arena.ai/leaderboard</a>、取得日 <span class=\"mono\" id=\"scraped\"></span>（リーダーボード日付 <span class=\"mono\" id=\"captured\"></span>）。"
+  "mode": {
+   "h2": "「最コスパ」の定義",
+   "b1": "① しきい値",
+   "b1t": "スコア ≥ T のモデルのうち最安（= 下包絡、あなたの元のアイデア）",
+   "b2": "② スコア/$",
+   "b2t": "最大 スコア ÷ コスト",
+   "b3": "③ 超過スコア/$",
+   "b3t": "最大 (スコア − 1200) ÷ コスト"
   },
-  "intro": {
-    "h2": "あらゆる品質レベルで最も安い AI モデル — Arena スコア vs 実コスト/タスク",
-    "p1": "<b style=\"color:var(--text)\">許容できる最低 Arena スコアを設定すれば、そのハードルをクリアする最安モデルが分かります</b>—— 次Tierへの限界 $/ポイントに加え、DeepSeek のピーク/オフピーク価格・期限切れプロモ・キャッシュミス偏向を補正済み。金色のしきい値ラインをドラッグ（または ▶ Play）すると、全Tierの勝者がリアルタイム更新されます。",
-    "lnk": "「最コスパ」の3つの定義 · 厳密 95% CI モード · 1週間168時間の価格モデル · <a href=\"%METHOD%\">手法とデータソース</a> · <a href=\"/data/v1/all.json\">JSON（AI 可読）</a> · <a href=\"/llms.txt\">llms.txt</a>"
+  "ci": {
+   "h2": "有意性モード",
+   "point": "点推定",
+   "strict": "厳密（95% CI が重ならない場合のみ勝ち）",
+   "hint": "厳密モードは「A の CI 下限 &gt; B の CI 上限」という差のみを受け入れ、ノイズが結論になることはありません。低票数の <span class=\"pill warn\" style=\"padding:0 5px\">Preliminary（暫定）</span>モデルの CI は ±20–55 に達することがよくあります。"
   },
-  "grp": {
-    "ds": {
-      "summary": "データセットと定義",
-      "h2": "リーダーボードデータセット",
-      "licHint": "<b>「オープンソース限定」と「全ライセンス」は別のリーダーボードであり、スコアは比較できません。</b>オープンソース板（<span class=\"mono\">?license=open-source</span>）は上限 <b class=\"mono\">1687</b>（Kimi K3.1 Pro）；全ライセンス板は上限 <b class=\"mono\">1838</b>（Claude Fable 5.2 xHigh、$11.04/タスク）—— Claude Opus 5.5 1815、Sonnet 5.5 1772、Gemini 4 Carbon 1768、GPT-6 Astra 1764 は全ライセンス板にいます。データセットを <b>全ライセンス（All-license）</b>に切り替えてください。<br><span style=\"color:var(--dim2)\">注：全ライセンス板は上位41位（スコア 1590–1838）のみ取得しており、41位以降のロングテールが欠落しています。高スコア側のフロンティアは影響を受けませんが、「全体最安」と「超過スコア/$」の基準に偏りが出ます。</span>"
-    },
-    "mode": {
-      "h2": "「最コスパ」の定義",
-      "b1": "① しきい値",
-      "b1t": "スコア ≥ T のモデルのうち最安（= 下包絡、あなたの元のアイデア）",
-      "b2": "② スコア/$",
-      "b2t": "最大 スコア ÷ コスト",
-      "b3": "③ 超過スコア/$",
-      "b3t": "最大 (スコア − 1200) ÷ コスト"
-    },
-    "ci": {
-      "h2": "有意性モード",
-      "point": "点推定",
-      "strict": "厳密（95% CI が重ならない場合のみ勝ち）",
-      "hint": "厳密モードは「A の CI 下限 &gt; B の CI 上限」という差のみを受け入れ、ノイズが結論になることはありません。低票数の <span class=\"pill warn\" style=\"padding:0 5px\">Preliminary（暫定）</span>モデルの CI は ±20–55 に達することがよくあります。"
-    },
-    "rng": {
-      "summary": "スコア範囲とスイープ",
-      "h2": "スコア範囲（能力の受け入れ基準）",
-      "lo": "下限 lo",
-      "hi": "上限 hi",
-      "pFull": "全範囲 [min, max]",
-      "pSweep": "[T, max] スイープ",
-      "pTop10": "Top10 Tier",
-      "pMid": "中間帯 1400–1550",
-      "play": "▶ Play：しきい値を最高から最低へスイープ",
-      "speed": "速度",
-      "stop": "停止"
-    },
-    "price": {
-      "summary": "価格シナリオとキャッシュ",
-      "h2": "価格シナリオ：定価を<b>時間の関数</b>にする",
-      "tz": "表示タイムゾーン",
-      "tz0": "UTC ±0",
-      "tz1": "CET +1",
-      "tz2": "EET +2",
-      "tz8": "北京 +8",
-      "tz9": "東京 +9",
-      "tzM5": "米東部 −5",
-      "tzM8": "米西部 −8",
-      "dow": "曜日（UTC）",
-      "d1": "月",
-      "d2": "火",
-      "d3": "水",
-      "d4": "木",
-      "d5": "金",
-      "d6": "土",
-      "d0": "日",
-      "utcHour": "UTC 時",
-      "localTime": "· あなたの現地時刻は",
-      "now": "現在",
-      "peak": "最も高い時間帯",
-      "off": "最も安い時間帯",
-      "sat": "土曜（全日オフピーク）",
-      "board": "掲載どおり（全オフ）",
-      "all": "すべて有効（不確実分を含む）",
-      "date": "価格設定日",
-      "outShare": "出力トークン比率",
-      "cacheH2": "キャッシュヒット率",
-      "exact": "正確な %",
-      "c0": "0%（掲載価格）",
-      "c50": "50%",
-      "c85": "85%",
-      "c95": "95%（デフォルト）",
-      "c99": "99%",
-      "cacheSrc": "キャッシュ読取価格の出所",
-      "srcPub": "公表済みキャッシュ価格（未公表は入力価格の10%で推定）",
-      "srcFlat": "全モデル一律 入力価格の10%（統一保守型）",
-      "srcOff": "キャッシュ割引を無効化（= Arena 掲載価格）"
-    },
-    "filters": {
-      "summary": "フィルター",
-      "h2": "フィルター",
-      "minVotes": "最小票数 ≥",
-      "exPrelim": "Preliminary（暫定）を除外",
-      "exAuto": "AutoEval（自動評価）を除外",
-      "onlyCost": "Cost/Task があるモデルのみ",
-      "costCap": "Cost/Task 上限 ≤ $<span class=\"mono\" id=\"cLab\">∞</span>（予算上限）",
-      "capHint": "予算上限 + スコアしきい値 = 2つの独立した現実の制約。最大にすると無制限。"
-    },
-    "export": {
-      "summary": "エクスポートとデータ拡張",
-      "h2": "エクスポート / データ拡張",
-      "csv": "CSV エクスポート（現在のテーブル）",
-      "tiers": "Tier ラダー CSV エクスポート",
-      "copyLink": "状態リンクをコピー",
-      "hint": "別のリーダーボードを追加する場合（例：<span class=\"mono\">code/terminal</span>、<span class=\"mono\">text</span>、<span class=\"mono\">vision</span>）：arena.ai の該当ボードページを開き、テーブルを選択・コピーして、下に貼り付けてください（列は自動検出）。",
-      "pastePh": "arena.ai リーダーボードの markdown / テーブルテキストを貼り付け…",
-      "namePh": "新しいデータセット名（任意）",
-      "add": "追加"
-    }
+  "rng": {
+   "summary": "スコア範囲とスイープ",
+   "h2": "スコア範囲（能力の受け入れ基準）",
+   "lo": "下限 lo",
+   "hi": "上限 hi",
+   "pFull": "全範囲 [min, max]",
+   "pSweep": "[T, max] スイープ",
+   "pTop10": "Top10 Tier",
+   "pMid": "中間帯 1400–1550",
+   "play": "▶ Play：しきい値を最高から最低へスイープ",
+   "speed": "速度",
+   "stop": "停止"
   },
-  "charts": {
-    "steps": {
-      "ttl": "① 階段チャート：しきい値 T → T をクリアする最安モデル（あなたが求めた「各Tierの勝者」）",
-      "lg": "各段 = そのスコア範囲を支配するモデル · どの段でもクリックでジャンプ"
-    },
-    "scat": {
-      "ttl": "② 散布図：スコア（x）× Cost/Task（y、対数）",
-      "lg": "◆ パレートフロンティア · 灰色ドット = 支配された · 縦線 = CI · 影 = 現在のスコア帯 · 金色破線 = しきい値 T（ドラッグ可）"
-    },
-    "tl": {
-      "ttl": "③ 1週間168時間：しきい値 T での最低コスト <span class=\"mono\">C(T)</span> の時間変化",
-      "lg": "灰色 = ピーク時間帯 · 折線のジャンプ = トップ交代 · 金色破線 = 選択中の時刻 · どこでもクリックでその時刻へジャンプ"
-    }
+  "price": {
+   "summary": "価格シナリオとキャッシュ",
+   "h2": "価格シナリオ：定価を<b>時間の関数</b>にする",
+   "tz": "表示タイムゾーン",
+   "tz0": "UTC ±0",
+   "tz1": "CET +1",
+   "tz2": "EET +2",
+   "tz8": "北京 +8",
+   "tz9": "東京 +9",
+   "tzM5": "米東部 −5",
+   "tzM8": "米西部 −8",
+   "dow": "曜日（UTC）",
+   "d1": "月",
+   "d2": "火",
+   "d3": "水",
+   "d4": "木",
+   "d5": "金",
+   "d6": "土",
+   "d0": "日",
+   "utcHour": "UTC 時",
+   "localTime": "· あなたの現地時刻は",
+   "now": "現在",
+   "peak": "最も高い時間帯",
+   "off": "最も安い時間帯",
+   "sat": "土曜（全日オフピーク）",
+   "board": "掲載どおり（全オフ）",
+   "all": "すべて有効（不確実分を含む）",
+   "date": "価格設定日",
+   "outShare": "出力トークン比率",
+   "cacheH2": "キャッシュヒット率",
+   "exact": "正確な %",
+   "c0": "0%（掲載価格）",
+   "c50": "50%",
+   "c85": "85%",
+   "c95": "95%（デフォルト）",
+   "c99": "99%",
+   "cacheSrc": "キャッシュ読取価格の出所",
+   "srcPub": "公表済みキャッシュ価格（未公表は入力価格の10%で推定）",
+   "srcFlat": "全モデル一律 入力価格の10%（統一保守型）",
+   "srcOff": "キャッシュ割引を無効化（= Arena 掲載価格）"
   },
-  "tables": {
-    "tier": {
-      "h2": "Tier ラダー",
-      "c1": "#",
-      "c2": "スコア範囲",
-      "c3": "範囲内の勝者",
-      "c4": "スコア",
-      "c5": "Cost/Task",
-      "c6": "↑ 次Tierへの限界コスト（$/pt）",
-      "c7": "票数",
-      "c8": "備考"
-    },
-    "model": {
-      "h2": "モデル一覧",
-      "boardNo": "板内 #",
-      "overallNo": "全体 #",
-      "model": "モデル",
-      "score": "スコア",
-      "ci": "±CI",
-      "cost": "Cost/Task",
-      "pts": "pt/$",
-      "excess": "超過スコア/$",
-      "votes": "票数",
-      "pin": "$/M 入力",
-      "pout": "$/M 出力",
-      "ctx": "コンテキスト",
-      "lic": "ライセンス"
-    }
+  "filters": {
+   "summary": "フィルター",
+   "h2": "フィルター",
+   "minVotes": "最小票数 ≥",
+   "exPrelim": "Preliminary（暫定）を除外",
+   "exAuto": "AutoEval（自動評価）を除外",
+   "onlyCost": "Cost/Task があるモデルのみ",
+   "costCap": "Cost/Task 上限 ≤ $<span class=\"mono\" id=\"cLab\">∞</span>（予算上限）",
+   "capHint": "予算上限 + スコアしきい値 = 2つの独立した現実の制約。最大にすると無制限。"
   },
-  "bottom": {
-    "method": "手法：このアプローチは成り立つのか？（結論：成り立つ —— ただし5つの補正が必要）",
-    "sources": "データソース・手法・免責事項"
-  },
-  "footer": {
-    "html": "静的ビルド · ランタイム依存ゼロ · データはビルド時に arena.ai スナップショットから埋め込み（<span class=\"mono\">/api/*</span> エンドポイントは 403 を返すためリアルタイム照会は不可能 —— これは<b>時点スナップショット</b>です）。Arena 公式パレート表示：<a href=\"https://arena.ai/leaderboard/code/webdev/pareto\" target=\"_blank\" rel=\"noopener\">arena.ai/leaderboard/code/webdev/pareto</a>。<br>リーダーボードデータ © LMArena (arena.ai)、スナップショット %CAPTURED% · 価格は各ベンダーの価格ページから、2026-11-14 時点で確認 · <a href=\"%METHOD%\">手法</a> · <a href=\"/data/v1/all.json\">JSON</a> · <a href=\"/llms.txt\">llms.txt</a> · <a href=\"/sitemap.xml\">サイトマップ</a>"
-  },
-  "data": {
-    "licAll": "全ライセンス · ",
-    "licOS": "オープンソースのみ · ",
-    "optTail": " モデル · スコア ",
-    "dsNote": "{meta} · <b style=\"color:var(--dim)\">{note}</b><br>スコア範囲 <span class=\"mono\">{min}–{max}</span> · Cost/Task <span class=\"mono\">{cmin}–{cmax}</span> · コストデータあり <span class=\"mono\">{wc}/{n}</span>",
-    "emptyNoCost": "このボードには Cost/Task データがありません —— コスト列が丸ごと空ではコスパ分析はできません（arena.ai の WebDev · HTML ボードがまさにこれです）。コスト列のあるボードを選んでください。",
-    "emptyFiltered": "現在のフィルターを通るモデルがありません ——「最小票数」「Cost/Task 上限」「Preliminary を除外」を緩めてください。"
-  },
-  "badges": {
-    "models": " モデル",
-    "withCost": " Cost/Task あり",
-    "inRange": " 範囲内",
-    "frontier": "パレートフロンティア：",
-    "frontierTiers": " Tier",
-    "peak": "ピーク",
-    "offpeak": "オフピーク",
-    "timeAdj": "時間補正済み価格：",
-    "timeAdjTail": " モデル",
-    "listPrice": "定価（時間補正なし）",
-    "cacheOff": "キャッシュ割引：オフ",
-    "cacheHit": "キャッシュヒット ",
-    "strict": "厳密 CI モード"
-  },
-  "winner": {
-    "modeName": {
-      "pareto": "しきい値：スコア ≥ T の最安モデル",
-      "ratio": "最大 スコア/$",
-      "baseline": "最大 超過スコア/$"
-    },
-    "currentMode": "現在のモード · ",
-    "strictCI": "厳密 CI",
-    "pointEst": "点推定",
-    "licUnknown": "ライセンス不明",
-    "preliminary": "Preliminary（暫定）",
-    "autoEval": "AutoEval（自動評価）",
-    "pareto": "パレートフロンティア",
-    "dominated": "支配された",
-    "kpiScore": "Arena スコア",
-    "kpiCost": "Cost / Task（P50）",
-    "kpiRatio": "スコア / $",
-    "kpiExcess": "超過スコア / $",
-    "kpiBaseline": "ベースライン ",
-    "kpiVotes": "票数",
-    "kpiApi": "API 価格 $/M",
-    "kpiEffPin": "実効入力価格（ヒット ",
-    "kpiEffPinMid": "%",
-    "kpiEst": "·推定",
-    "kpiList": "）· 定価 ",
-    "kpiInOut": "入力 / 出力",
-    "kpiCtx": "コンテキスト",
-    "kpiRank": "全体順位",
-    "listNoAdj": "定価（時間/キャッシュ補正なし）",
-    "ptsPerDollar": "pt/$",
-    "verdict": "<b>結論：</b>しきい値 <span class=\"mono\">T = {hi}</span>（範囲 <span class=\"mono\">[{lo}, {hi}]</span>）以下では、<span class=\"em\">{name}</span> が<b>能力ハードルをクリアする最安モデル</b>です。<br>スコア範囲 <span class=\"mono\">[{cov0}, {cov1}]</span> を支配 —— この範囲内では、より高スコアのモデルはすべてより高く、より安いモデルはすべてより低スコアです（互いに支配しない）。<br>",
-    "degraded": "<span class=\"warn\">⚠ しきい値 {hi} はこのデータセットの最高スコア {smax} を超えています。条件を満たすモデルはありません —— 以下は最強の（相対的に最安の）モデルです。</span><br>",
-    "bandNotOk": "<span class=\"warn\">⚠ スコア {s} は下限 {lo} を下回っています：[{lo}, {hi}] にはパレート最適なモデルが存在しません。より強いTierはより高く、より安いTierはより低スコアだからです。これは範囲型問題の死角 —— しきい値モードに必要なのは1つの T だけです。</span><br>",
-    "swing": "<b>週間価格変動：</b>このチャンピオン自身のコストは {loDow} {loHr}:00 UTC に <span class=\"mono\">{lo}</span> まで下がり、{hiDow} {hiHr}:00 UTC に <span class=\"mono\">{hi}</span> まで上がります（差 {spread}×）。タスクをオフピーク時間帯に配すれば、このしきい値で実質 <b>{pct}%</b> の無料割引になります。<br>",
-    "nextUp": "<b>↑ 次Tier：</b>{name}（{pts} pt、{cost}）→ <b class=\"mono\">{dc}</b> の追加支払いで <b class=\"mono\">+{ds}</b> pt；限界価格 <span class=\"mono\">{per}/pt</span>。",
-    "nextUpExpensive": " <span class=\"warn\">このTierは高価です —— 本当にその能力が必要な場合のみ価値があります。</span>",
-    "nextUpBargain": " <span class=\"em\">このアップグレードはお買い得です。</span>",
-    "nextUpNormal": " —— 通常の範囲です。",
-    "nextUpNone": "<b>↑ 次Tier：</b>ありません —— すでにこのデータセットの能力天井です。<br>",
-    "downOne": "<b>↓ 一つ下のTier：</b>{name}（{pts} pt、{cost}）→ <span class=\"mono\">{dc}</span> の節約ですが <span class=\"mono\">{ds}</span> pt 失います；つまり 1 ドルの節約あたり <span class=\"mono\">{per}</span> pt の放棄。",
-    "downTooMuch": " <span class=\"warn\">失う能力が大きすぎます —— この節約の価値はありません。</span>",
-    "downAcceptable": " 予算が厳しければ、このTierは許容範囲です。",
-    "verdictRatio": "<b>結論：</b>スコア範囲 <span class=\"mono\">[{lo}, {hi}]</span> 内（{n} モデルが範囲内）で、{basis}で順位付けしたところ、トップは <span class=\"em\">{name}</span> = <b class=\"mono\">{val}</b>。",
-    "basisRatio": "スコア÷コスト",
-    "basisBaseline": "(スコア−{base})÷コスト",
-    "noInBand": " <span class=\"warn\">注意：範囲内に適合モデルなし。この結果は全範囲からのものです。</span>",
-    "butNote": "<b>ただし注意：</b>{name} はより高スコア（{s}）で、限界価格は <span class=\"mono\">{per}/pt</span>。「スコアあたり $」のトップモデルは、必ずしも使うべきモデルではありません —— ポイントあたり最安なだけで、絶対能力が不足している可能性があります。<br>",
-    "biasedWarn": "<span class=\"warn\">⚠ モード②③には体系的な偏りがあります：</span>Arena スコアは Bradley-Terry 型評価で ~1000+ のベースラインオフセットを持ち、②「スコアあたり $」はほぼ常に安いモデルを選びます；③は実用的な 1200 の下限を引いてオフセットを消し、真の限界価値に近づけます。",
-    "reliability": "<br><b>信頼性：</b><span class=\"{cl}\">{rel}</span>（{votes} 票、CI ±{ci}）。",
-    "rel_low": "低",
-    "rel_mid": "中",
-    "rel_high": "高",
-    "lowSampleWarn": " <span class=\"warn\">サンプルが小さすぎます —— この「コスパチャンピオン」は純粋なノイズかもしれません。購入判断に使わないでください。</span>",
-    "costMissing": "<br><span class=\"warn\">Cost/Task なし</span> —— Arena はこのモデルのタスク中央コストを公表していないため、コスパ比較に参加できません。"
-  },
-  "scatter": {
-    "needTwo": "コストデータのあるモデルが最低2つ必要です",
-    "yAxis": "Cost / Task（P50）· 対数軸",
-    "xAxis": "Arena スコア（強い → 右）",
-    "dotTitle": "{name}\nスコア {s} (+{u}/-{d})\nCost/Task {c}\n票数 {v}\nAPI {api}\n{pareto}\nクリック = スコア範囲の上限をこのモデルに設定",
-    "dotPareto": "◆ パレートフロンティア（非支配）",
-    "dotDominated": "支配された：より高スコアでより安いモデルが存在",
-    "dotApiNA": "N/A"
-  },
+  "export": {
+   "summary": "エクスポートとデータ拡張",
+   "h2": "エクスポート / データ拡張",
+   "csv": "CSV エクスポート（現在のテーブル）",
+   "tiers": "Tier ラダー CSV エクスポート",
+   "copyLink": "状態リンクをコピー",
+   "hint": "別のリーダーボードを追加する場合（例：<span class=\"mono\">code/terminal</span>、<span class=\"mono\">text</span>、<span class=\"mono\">vision</span>）：arena.ai の該当ボードページを開き、テーブルを選択・コピーして、下に貼り付けてください（列は自動検出）。",
+   "pastePh": "arena.ai リーダーボードの markdown / テーブルテキストを貼り付け…",
+   "namePh": "新しいデータセット名（任意）",
+   "add": "追加"
+  }
+ },
+ "charts": {
   "steps": {
-    "modeOnly": "階段チャートは①しきい値モードでのみ存在 —— まさに「しきい値 T → そのTierの最安モデル」の曲線です",
-    "noCost": "フロンティアにコストデータのあるモデルがありません",
-    "xAxisNarrow": "しきい値 T → 最安 Cost/Task",
-    "xAxis": "しきい値 T（「少なくともこれだけ強い」）→ T をクリアする最安モデルの Cost/Task",
-    "yAxis": "Cost / Task · 対数",
-    "segTitle": "スコア範囲 [{lo}, {up}]\n勝者：{name}\nスコア {s} (+{u}/-{d})\nCost/Task {c} · {v} 票\nクリック = スコア範囲をこのTierに設定"
+   "ttl": "① 階段チャート：しきい値 T → T をクリアする最安モデル（あなたが求めた「各Tierの勝者」）",
+   "lg": "各段 = そのスコア範囲を支配するモデル · どの段でもクリックでジャンプ"
   },
-  "tiers": {
-    "count": "{n} Tier · しきい値フロンティア{strict}",
-    "countStrict": " · 厳密 CI",
-    "modeOnly": "（①しきい値モードでのみ構築）",
-    "modeOnlyCell": "①しきい値モードに切り替えると完全なラダーが表示されます：しきい値を高→低へドラッグすると勝者はこれらのモデルです",
-    "notesPre": "Preliminary（暫定） ",
-    "notesLow": "低サンプル ",
-    "notesFrontier": "◆フロンティア",
-    "rowTitle": "クリック = スコア範囲をこのTierに設定"
-  },
-  "table": {
-    "count": "{n} / {total} モデル · ヘッダークリックでソート · 薄い行 = 範囲外"
+  "scat": {
+   "ttl": "② 散布図：スコア（x）× Cost/Task（y、対数）",
+   "lg": "◆ パレートフロンティア · 灰色ドット = 支配された · 縦線 = CI · 影 = 現在のスコア帯 · 金色破線 = しきい値 T（ドラッグ可）"
   },
   "tl": {
-    "noQualifies": "しきい値 T={t} で適合するモデルがありません（フィルターアウト、またはこのスコア以上にコストデータなし）。しきい値を下げるかフィルターを緩めてください。",
-    "noQualifiesChart": "現在のしきい値で適合モデルなし",
-    "perTask": "/タスク",
-    "peakLegend": "ピーク時間帯 = 平日 01:00–04:00 & 06:00–10:00 UTC（灰色）；週末はすべてオフピーク",
-    "listPrice": "定価 ",
-    "now": "現在",
-    "noteHead": "しきい値 <b class=\"mono\">T={t}</b> · 1週間168時間のうち <b>{peakH}</b> 時間がピーク · 現在 {dow} {hr}:00 UTC → <b style=\"color:var(--accent)\">{c}</b>、トップ <b>{champ}</b>{diff}<br>",
-    "hourSuffix": " 時間",
-    "diffPricier": "（定価 {base}、{pct}% 高い）",
-    "diffCheaper": "（定価 {base}、{pct}% 安い）",
-    "diffSame": "（定価と同じ）",
-    "weekParts": "1週間の C(T)：",
-    "cacheOn": "<br><span style=\"color:var(--dim2)\">キャッシュ割引オン（ヒット {h}%）：キャッシュは入力トークンのみに適用され、絶対水準とピーク/オフピーク振幅の両方が圧縮されます。</span>"
-  },
-  "cache": {
-    "off": "オフ → すべての入力トークンが<b>キャッシュミス価格</b>で課金されます —— まさに <b>Arena リーダーボードの Cost/Task 基準</b>です。",
-    "hitHead": "ヒット率 <b class=\"mono\">{h}%</b>：入力トークンの {h}% はキャッシュ読取価格で、{m}% は（書き込み倍率込みの）ミス価格で課金；<b>出力トークンは決して割引されません</b>ので、100% ヒットでもゼロにはなりません。",
-    "srcCounts": "候補セットの {pub} モデルは公表済みキャッシュ価格を使用、{est} は10%で推定{na}。",
-    "srcNa": "、{na} は公表価格なし（N/A）",
-    "wmNote": "Anthropic / OpenAI はキャッシュ書き込みを別課金（= 入力価格の 1.25×）し、ミス分は書き込み価格で支払います；他社は書き込み料金なし。",
-    "missBasis": "<br><b>注</b>：Arena の Cost/Task は<b>キャッシュミス価格</b>で計算されています（Agent ボードから逆算された $4/$20 定価が証拠）。したがってキャッシュ割引を有効にするのは仮定 ——「あなたのワークロードが本当にこの頻度でヒットするなら」—— であって、ボード本来の意味ではありません。",
-    "pillPeak": "ピーク（2×）",
-    "pillOff": "オフピーク（½ 価格）",
-    "pillOff2": "オフ",
-    "osHintHead": "出力比率は「単価変化」を「Cost/Task 変化」にどう変換するかを決めます。デフォルト <b class=\"mono\">8%</b> = 入力:出力 11:1、14 Agent ボードモデルの実測推論より（比率 3.8–17.9×）。",
-    "osHintOff": "キャッシュ割引オフのとき、DeepSeek のピーク/オフピークは入出力に<b>比例的に</b>作用するため、このスライダーは<b>無効</b>です；GLM の入力 ×3 / 出力 ×2.8 のような補正でのみ意味を持ちます。",
-    "osHintOn": "<b>キャッシュ割引オンでは、このスライダーが重要になります</b>：キャッシュは入力のみ割引するため、出力比率が高いほど割引は薄くなります。同じ 95% ヒット率で、DeepSeek-20261017 は w=2% で 86%、w=8%（デフォルト）で 68%、w=15% で 55%、w=25% で 40%、w=40% でわずか 25% 節約。",
-    "adjAllOff": "<span style=\"color:var(--dim2)\">すべての補正オフ → 掲載どおり。上のルールにチェックを入れると時間効果が見られます。</span>",
-    "adjNone": "現在の候補セットに、有効化された補正の影響を受けるモデルはありません（{rules}）。",
-    "adjHead": "<b>{peak} · {dow} {hr}:00 UTC</b>：候補セットの <b>{n}</b> モデルが書き換えられ → ",
-    "evModels": " モデル",
-    "evSource": "出典：",
-    "verified": "検証済み",
-    "uncertain": "不確実",
-    "costCellTitle": "定価 {raw} → 現在のシナリオ {cur}",
-    "costCellWhy": "キャッシュヒット {h}%：読取価格 {pc}/M（{src}）、書き込み倍率 {wm}×",
-    "costCellSrcEst": "入力価格の10%で推定",
-    "costCellSrcPub": "公表価格",
-    "costCellTotal": "合計 ×{scale}",
-    "listPrice": "定価"
-  },
-  "ev": {
-    "ds_tod": {
-      "name": "DeepSeek ピーク/オフピーク価格",
-      "desc": "ピーク = 平日 01:00–04:00 と 06:00–10:00 UTC；その他の時間帯（週末含む）は半額。ボードは 20261017 をオフピーク、20260910 と V4-Pro ファミリーをピークで掲載 —— 同一ファミリーで2つの基準が1つの表に混在。",
-      "src": "DeepSeek 公式価格ページ；datacamp / justinmckelvey / felloai / okamomedia の4独立ソースで確認"
-    },
-    "gem_dec1": {
-      "name": "Gemini 4 Carbon/Argon 12-01 値上げ（発表済み）",
-      "desc": "introductory 価格 $2/$10 は 2026-11-30 に終了；12-01 からは $4/$20、キャッシュ読取価格は $0.10 → $0.20。ボード（11-11 スナップショット）は introductory 価格のまま。価格設定日を12月にドラッグすると、Carbon が overall_all フロンティアから外れるのが見られます。",
-      "src": "Google Gemini API 価格ページ（benchlm.ai / munderdiffl.in / datastudios.org の3ソースが一致；2026-11-12/13 に確認）"
-    },
-    "ds_v4flash": {
-      "name": "DeepSeek V4-Flash もピーク/オフピークに分かれるか？（不確実）",
-      "desc": "V4-Flash は退役済み；公開ソースが確認しているのは V4.1-Flash と V4-Pro のピーク/オフピークのみ。デフォルトオフ —— 感度分析専用。",
-      "src": "証拠不十分"
-    },
-    "suspect2x": {
-      "name": "第三者インデックスとの差が 2×、プロモの説明なし（不確実）",
-      "desc": "Mistral Medium 3.5（$0.75/$3.75 vs インデックス $1.50/$7.50）と GPT-6 Sol（$1/$5 vs $2/$10）は、ある第三者インデックスのちょうど半分で掲載。プロモの可能性も、インデックスが古い可能性も。デフォルトオフ。",
-      "src": "benchr.org/pricing 比較"
-    },
-    "glm53flash_nov": {
-      "name": "GLM-5.3-Flash $0.02/$0.07 は公式 $0.15/$0.50 を大きく下回る、プロモ告知なし（不確実）",
-      "desc": "11-20 のボードは $0.02/$0.07。Z.ai の料金ページ（$0.15/$0.50、2026-11-22 確認）より 87%/86% 低い。プロモ告知も終了日も anywhere に存在せず、公開ブログは $0.045/task (discounted) に触れるのみ。$0.02/$0.07 は OpenRouter の batch 階層（$0.023/$0.068）とほぼ一致し、誤取得階層か短期無告知プロモの可能性。デフォルトはオフ。",
-      "src": "docs.z.ai/guides/overview/pricing + z.ai/blog/glm-5.3-flash（2026-11-22 確認）；openrouter.ai/api/v1/models"
-    },
-    "glm47_nov": {
-      "name": "GLM-4.7 $0.40/$1.75 は公式・アグリゲータのどちらとも不一致（不確実）",
-      "desc": "11-20 のボードは $0.40/$1.75。しかし Z.ai の料金ページは $0.60/$2.20 のまま（2026-11-22 確認）で、OpenRouter も $0.60/$2.20。ボード価格は両方より 33%/20% 低く、プロモ告知・終了日なし。デフォルトはオフ。",
-      "src": "docs.z.ai/guides/overview/pricing（2026-11-22 確認）；openrouter.ai/api/v1/models"
-    },
-    "qwen35_channel": {
-      "name": "Qwen3.5-397B-A17B は Alibaba 公式 $0.60/$3.60 を下回る表示（不確実）",
-      "desc": "ボードは $0.60/$3.60 → $0.45/$3.00 に変動。しかし Alibaba Cloud Model Studio 国際サイトの qwen3.5-397b-a17b は $0.6/$3.6 のまま（0–256K、2026-11-22 確認）で、値下げ告知はない。$0.45/$3.00 は OpenRouter の表示と完全一致 — ベンダー調整ではなくチャネル切り替えの可能性。デフォルトはオフ。",
-      "src": "alibabacloud.com/help/en/model-studio/model-pricing（2026-11-22 確認）；openrouter.ai/api/v1/models"
-    },
-    "kimi27_channel": {
-      "name": "Kimi K2.7 Code は Moonshot 公式 $0.95/$4.00 を下回る表示（不確実）",
-      "desc": "ボードは $0.60/$3.50 → $0.60/$3.00。しかし Moonshot 公式の kimi-k2.7-code は $0.95/$4.00 のまま（2026-11-22 確認）で、K2 シリーズは 2026 年 12 月末で退役予定と告知済み。ボード価格は OpenRouter（$0.60/$3.00）と完全一致 — 公式より 37%/25% 低いチャネル価格、プロモ告知なし。デフォルトはオフ。",
-      "src": "platform.kimi.ai/docs/pricing/chat（2026-11-22 確認）；openrouter.ai/api/v1/models"
-    },
-    "mimo25_retired": {
-      "name": "MiMo-V2.5-Pro は Xiaomi が提供終了、ボード価格に公式の基準なし（不確実）",
-      "desc": "Xiaomi は 2026-10-21 に MiMo-V2.5-Pro API を正式提供終了（V2.6 への切替を告知）。ボード価格は $0.43/$0.87 → $0.48/$1.80 に跳躍。旧価格は公式海外レート（$0.435/$0.87、公開ブログは価格据え置きを約束、現行は mimo-v2.6-pro が継承）と一致、新価格はサードパーティホスティング（OpenRouter $0.48/$1.80）にのみ存在。デフォルトはオフ。",
-      "src": "mimo.mi.com/docs/price/pay-as-you-go + platform.xiaomimimo.com の提供終了バナー（2026-11-22 確認）；mimo.xiaomi.com/mimo-v2-5-pro"
-    },
-    "hy3p_channel": {
-      "name": "Hy3 preview は Tencent 公式 $0.18/$0.60 を下回る表示（不確実）",
-      "desc": "ボードの Hy3 preview は $0.18/$0.60 → $0.14/$0.58。Tencent Cloud の Hy3 preview 従量課金は 100万トークンあたり ¥1.2/¥4〜（≈$0.17/$0.56）で、サードパーティ追跡の公式 USD レートは $0.18/$0.60（旧ボード価格）。新価格は Hy3 正式版レート・OpenRouter の表示と一致 — Tencent が無告知で preview を正式版に合わせたか、ボードが両エントリを統合した可能性。デフォルトはオフ。",
-      "src": "cloud.tencent.com Hy Token Plan 記事 2676264 + activepieces.com Tencent 料金追跡（2026-11-22 確認）；openrouter.ai/api/v1/models"
-    }
-  },
-  "peakTag": {
-    "peak": "ピーク",
-    "off": "オフピーク",
-    "afterPromo": "プロモ後",
-    "promo": "プロモ期間",
-    "inEffect": "発効",
-    "notYet": "未発効"
-  },
-  "interact": {
-    "play": "▶ Play：しきい値を最高から最低へスイープ",
-    "pause": "⏸ 一時停止",
-    "stop": "停止",
-    "sweeping": "スイープ中",
-    "modeHintPareto": "<b>あなたの元のアイデア。</b>しきい値 T を固定し、スコア ≥ T の中で最安のモデルを取る。T を下へスイープすると、勝者列は <b>パレート下包絡</b>になります。数学的に自己無矛盾な唯一の定義（= コスト制約下の能力最大化）。",
-    "modeHintRatio": "<b>スコア ÷ コスト。</b>Arena スコアは ~1200 のベースラインオフセットを持つため（分子が人為的に膨らむ）、安いモデルに強く偏ります。大まかな比較専用。",
-    "modeHintBaseline": "<b>(スコア − 1200) ÷ コスト。</b>Arena BT スコアには ~1200 の実用的な床があります（それ以下 ≈ ランダム）；引くことで「1ドルでどれだけの実質能力向上を買えるか」が得られます。まだ安いモデルに偏ります —— だからこそしきい値モードが意思決定グレードの定義なのです。",
-    "alertTiers": "先に①しきい値モードに切り替えてください",
-    "copied": "✓ コピーしました",
-    "copyLink": "状態リンクをコピー",
-    "promptCopy": "手動でコピーしてください：",
-    "pasteFirst": "<span style=\"color:var(--bad)\">先にテーブルテキストを貼り付けてください</span>",
-    "tooFewRows": "<span style=\"color:var(--bad)\">{n} 行しか解析できませんでした —— arena.ai のリーダーボード表か確認してください（スコア / Cost/Task 列が必要）</span>",
-    "customBoard": "自作ボード",
-    "userPaste": " モデル · ユーザー貼付",
-    "customNote": "このセッションで貼り付けたデータより",
-    "noCostParsed": "<span style=\"color:var(--bad)\">⚠ {n} モデルを解析しましたが、Cost/Task 列が丸ごと空です</span> —— コストがなければコスパ分析はできません（arena.ai の WebDev · HTML ボードがまさにこれ）。データセットは追加されました：スコア順位は見られますが、フロンティアは空です。",
-    "addedOk": "<span style=\"color:var(--good)\">✓ {n} モデルを追加しました</span>（{wc} にコストデータあり）。自作データセットはリロードで失われます ——「CSV エクスポート」で保存してください。"
-  },
-  "method": {
-    "title": "手法とデータソース — Arena リーダーボード コスパ分析ツール",
-    "desc": "arena.ai WebDev リーダーボードからコスト-品質パレートフロンティアをどう計算するか：データソース、価格検証、ピーク/オフピークルール、キャッシュモデル、限界。"
-  },
-  "boot": {
-    "methodBody": "PLACEHOLDER_BOOT",
-    "sourceBody": "PLACEHOLDER_BOOT"
-  },
-  "tabs": {
-    "rank": "安い順ランキング",
-    "rankT": "いきなり答え：品質バー＋日常タスクプロファイルで、1回最安なのはどれか、何点差、いくらの $",
-    "deep": "階段・グラフ",
-    "deepT": "勝者カード、階段グラフ、散布図、週間コスト曲線、階層テーブルと全モデル表"
-  },
-  "rank": {
-    "ctrlH2": "ランキング条件",
-    "capability": "能力ボード",
-    "threshold": "品質バー",
-    "ge": "≥ ",
-    "period": "価格帯",
-    "pkNow": "現在",
-    "pkPeak": "ピーク",
-    "pkOff": "オフピーク",
-    "profile": "日常タスクプロファイル",
-    "presetLight": "軽量QA",
-    "presetLightT": "1回 ≈2k 入力 / 0.5k 出力 token",
-    "presetDev": "日常開発",
-    "presetDevT": "1回 ≈20k 入力 / 2k 出力 token",
-    "presetHeavy": "重たいagent",
-    "presetHeavyT": "1回 ≈120k 入力 / 12k 出力 token",
-    "presetBoard": "渌定値",
-    "presetBoardT": "Arena 実測のタスク当たりコスト中央値をそのまま",
-    "inTok": "入力 k",
-    "outTok": "出力 k",
-    "perDay": "回/日",
-    "tblH2": "安い順ランキング",
-    "c1": "#",
-    "c2": "モデル",
-    "c3": "スコア",
-    "c4": "1位比け",
-    "c5": "1回$",
-    "c6": "倍率",
-    "c7": "月額$",
-    "tblNote": "バーを越したモデルを安い順に。* = 現在のピーク/オフ・キャッシュ条件で修正済み。行をクリックするとバーがそのモデルに移動。",
-    "count": "{n} モデルがクリア · コストあり計 {all}",
-    "more": "残り {n} 件を表示",
-    "fewer": "上位20のみ",
-    "rowTitle": "{name} · スコア {s} · 1回 {c} · API {api} · {v} 票",
-    "still": "バー：スコア ≥ ",
-    "empty": "このボードにスコア ≥ {t} のモデルなし（最高 {smax}）— バーを下げて。",
-    "standards": "条件：スコア ≥ {t} · {cap} · {prof} · {period}",
-    "profileTag": "プロファイル {in}k入/{out}k出",
-    "measured": "Arena 実測コスト",
-    "perImage": "1枚当たり（実測）",
-    "perTask": "/回",
-    "kpiPer": "1回",
-    "kpiMonth": "月額",
-    "kpiMonthTail": "日 {n} 回 × 30",
-    "upSell": "バー内最高スコア：{name}（{s} pts）— 1回 +{dc}（{mult}×）で +{ds} pts。",
-    "upExpensive": "アップグレードは高い—必要なところのみ。",
-    "upOk": "安いアップグレード。余裕が欲しければ。",
-    "topIsChamp": "最安値がそのまま最高スコア — アップグレード不要。",
-    "adjNote": "渌定コスト {board}、現在のピーク/オフ・キャッシュ条件で修正済み。",
-    "swing": "週間幅：{lo} – {hi}（オフピークで {pct}% 安）。",
-    "unitHint": "画像生成ボードは1枚当たり課金：ランキングは Arena 実測の1枚当たりコスト中央値。token のピーク/オフ価格は適用外。",
-    "hint": "プロファイルコスト = 入力 token × 入力単価（{ch}% キャッシュ割引込）+ 出力 token × 出力単価。ピーク/オフ・促販で修正。キャッシュ率は左の「価格シナリオ」で調整。"
+   "ttl": "③ 1週間168時間：しきい値 T での最低コスト <span class=\"mono\">C(T)</span> の時間変化",
+   "lg": "灰色 = ピーク時間帯 · 折線のジャンプ = トップ交代 · 金色破線 = 選択中の時刻 · どこでもクリックでその時刻へジャンプ"
   }
+ },
+ "tables": {
+  "tier": {
+   "h2": "Tier ラダー",
+   "c1": "#",
+   "c2": "スコア範囲",
+   "c3": "範囲内の勝者",
+   "c4": "スコア",
+   "c5": "Cost/Task",
+   "c6": "↑ 次Tierへの限界コスト（$/pt）",
+   "c7": "票数",
+   "c8": "備考"
+  },
+  "model": {
+   "h2": "モデル一覧",
+   "boardNo": "板内 #",
+   "overallNo": "全体 #",
+   "model": "モデル",
+   "score": "スコア",
+   "ci": "±CI",
+   "cost": "Cost/Task",
+   "pts": "pt/$",
+   "excess": "超過スコア/$",
+   "votes": "票数",
+   "pin": "$/M 入力",
+   "pout": "$/M 出力",
+   "ctx": "コンテキスト",
+   "lic": "ライセンス"
+  }
+ },
+ "bottom": {
+  "method": "手法：このアプローチは成り立つのか？（結論：成り立つ —— ただし5つの補正が必要）",
+  "sources": "データソース・手法・免責事項"
+ },
+ "footer": {
+  "html": "静的ビルド · ランタイム依存ゼロ · データはビルド時に arena.ai スナップショットから埋め込み（<span class=\"mono\">/api/*</span> エンドポイントは 403 を返すためリアルタイム照会は不可能 —— これは<b>時点スナップショット</b>です）。Arena 公式パレート表示：<a href=\"https://arena.ai/leaderboard/code/webdev/pareto\" target=\"_blank\" rel=\"noopener\">arena.ai/leaderboard/code/webdev/pareto</a>。<br>リーダーボードデータ © LMArena (arena.ai)、スナップショット %CAPTURED% · 価格は各ベンダーの価格ページから、2026-11-14 時点で確認 · <a href=\"%METHOD%\">手法</a> · <a href=\"/data/v1/all.json\">JSON</a> · <a href=\"/llms.txt\">llms.txt</a> · <a href=\"/sitemap.xml\">サイトマップ</a>"
+ },
+ "data": {
+  "licAll": "全ライセンス · ",
+  "licOS": "オープンソースのみ · ",
+  "optTail": " モデル · スコア ",
+  "dsNote": "{meta} · <b style=\"color:var(--dim)\">{note}</b><br>スコア範囲 <span class=\"mono\">{min}–{max}</span> · Cost/Task <span class=\"mono\">{cmin}–{cmax}</span> · コストデータあり <span class=\"mono\">{wc}/{n}</span>",
+  "emptyNoCost": "このボードには Cost/Task データがありません —— コスト列が丸ごと空ではコスパ分析はできません（arena.ai の WebDev · HTML ボードがまさにこれです）。コスト列のあるボードを選んでください。",
+  "emptyFiltered": "現在のフィルターを通るモデルがありません ——「最小票数」「Cost/Task 上限」「Preliminary を除外」を緩めてください。"
+ },
+ "badges": {
+  "models": " モデル",
+  "withCost": " Cost/Task あり",
+  "inRange": " 範囲内",
+  "frontier": "パレートフロンティア：",
+  "frontierTiers": " Tier",
+  "peak": "ピーク",
+  "offpeak": "オフピーク",
+  "timeAdj": "時間補正済み価格：",
+  "timeAdjTail": " モデル",
+  "listPrice": "定価（時間補正なし）",
+  "cacheOff": "キャッシュ割引：オフ",
+  "cacheHit": "キャッシュヒット ",
+  "strict": "厳密 CI モード"
+ },
+ "winner": {
+  "modeName": {
+   "pareto": "しきい値：スコア ≥ T の最安モデル",
+   "ratio": "最大 スコア/$",
+   "baseline": "最大 超過スコア/$"
+  },
+  "currentMode": "現在のモード · ",
+  "strictCI": "厳密 CI",
+  "pointEst": "点推定",
+  "licUnknown": "ライセンス不明",
+  "preliminary": "Preliminary（暫定）",
+  "autoEval": "AutoEval（自動評価）",
+  "pareto": "パレートフロンティア",
+  "dominated": "支配された",
+  "kpiScore": "Arena スコア",
+  "kpiCost": "Cost / Task（P50）",
+  "kpiRatio": "スコア / $",
+  "kpiExcess": "超過スコア / $",
+  "kpiBaseline": "ベースライン ",
+  "kpiVotes": "票数",
+  "kpiApi": "API 価格 $/M",
+  "kpiEffPin": "実効入力価格（ヒット ",
+  "kpiEffPinMid": "%",
+  "kpiEst": "·推定",
+  "kpiList": "）· 定価 ",
+  "kpiInOut": "入力 / 出力",
+  "kpiCtx": "コンテキスト",
+  "kpiRank": "全体順位",
+  "listNoAdj": "定価（時間/キャッシュ補正なし）",
+  "ptsPerDollar": "pt/$",
+  "verdict": "<b>結論：</b>しきい値 <span class=\"mono\">T = {hi}</span>（範囲 <span class=\"mono\">[{lo}, {hi}]</span>）以下では、<span class=\"em\">{name}</span> が<b>能力ハードルをクリアする最安モデル</b>です。<br>スコア範囲 <span class=\"mono\">[{cov0}, {cov1}]</span> を支配 —— この範囲内では、より高スコアのモデルはすべてより高く、より安いモデルはすべてより低スコアです（互いに支配しない）。<br>",
+  "degraded": "<span class=\"warn\">⚠ しきい値 {hi} はこのデータセットの最高スコア {smax} を超えています。条件を満たすモデルはありません —— 以下は最強の（相対的に最安の）モデルです。</span><br>",
+  "bandNotOk": "<span class=\"warn\">⚠ スコア {s} は下限 {lo} を下回っています：[{lo}, {hi}] にはパレート最適なモデルが存在しません。より強いTierはより高く、より安いTierはより低スコアだからです。これは範囲型問題の死角 —— しきい値モードに必要なのは1つの T だけです。</span><br>",
+  "swing": "<b>週間価格変動：</b>このチャンピオン自身のコストは {loDow} {loHr}:00 UTC に <span class=\"mono\">{lo}</span> まで下がり、{hiDow} {hiHr}:00 UTC に <span class=\"mono\">{hi}</span> まで上がります（差 {spread}×）。タスクをオフピーク時間帯に配すれば、このしきい値で実質 <b>{pct}%</b> の無料割引になります。<br>",
+  "nextUp": "<b>↑ 次Tier：</b>{name}（{pts} pt、{cost}）→ <b class=\"mono\">{dc}</b> の追加支払いで <b class=\"mono\">+{ds}</b> pt；限界価格 <span class=\"mono\">{per}/pt</span>。",
+  "nextUpExpensive": " <span class=\"warn\">このTierは高価です —— 本当にその能力が必要な場合のみ価値があります。</span>",
+  "nextUpBargain": " <span class=\"em\">このアップグレードはお買い得です。</span>",
+  "nextUpNormal": " —— 通常の範囲です。",
+  "nextUpNone": "<b>↑ 次Tier：</b>ありません —— すでにこのデータセットの能力天井です。<br>",
+  "downOne": "<b>↓ 一つ下のTier：</b>{name}（{pts} pt、{cost}）→ <span class=\"mono\">{dc}</span> の節約ですが <span class=\"mono\">{ds}</span> pt 失います；つまり 1 ドルの節約あたり <span class=\"mono\">{per}</span> pt の放棄。",
+  "downTooMuch": " <span class=\"warn\">失う能力が大きすぎます —— この節約の価値はありません。</span>",
+  "downAcceptable": " 予算が厳しければ、このTierは許容範囲です。",
+  "verdictRatio": "<b>結論：</b>スコア範囲 <span class=\"mono\">[{lo}, {hi}]</span> 内（{n} モデルが範囲内）で、{basis}で順位付けしたところ、トップは <span class=\"em\">{name}</span> = <b class=\"mono\">{val}</b>。",
+  "basisRatio": "スコア÷コスト",
+  "basisBaseline": "(スコア−{base})÷コスト",
+  "noInBand": " <span class=\"warn\">注意：範囲内に適合モデルなし。この結果は全範囲からのものです。</span>",
+  "butNote": "<b>ただし注意：</b>{name} はより高スコア（{s}）で、限界価格は <span class=\"mono\">{per}/pt</span>。「スコアあたり $」のトップモデルは、必ずしも使うべきモデルではありません —— ポイントあたり最安なだけで、絶対能力が不足している可能性があります。<br>",
+  "biasedWarn": "<span class=\"warn\">⚠ モード②③には体系的な偏りがあります：</span>Arena スコアは Bradley-Terry 型評価で ~1000+ のベースラインオフセットを持ち、②「スコアあたり $」はほぼ常に安いモデルを選びます；③は実用的な 1200 の下限を引いてオフセットを消し、真の限界価値に近づけます。",
+  "reliability": "<br><b>信頼性：</b><span class=\"{cl}\">{rel}</span>（{votes} 票、CI ±{ci}）。",
+  "rel_low": "低",
+  "rel_mid": "中",
+  "rel_high": "高",
+  "lowSampleWarn": " <span class=\"warn\">サンプルが小さすぎます —— この「コスパチャンピオン」は純粋なノイズかもしれません。購入判断に使わないでください。</span>",
+  "costMissing": "<br><span class=\"warn\">Cost/Task なし</span> —— Arena はこのモデルのタスク中央コストを公表していないため、コスパ比較に参加できません。"
+ },
+ "scatter": {
+  "needTwo": "コストデータのあるモデルが最低2つ必要です",
+  "yAxis": "Cost / Task（P50）· 対数軸",
+  "xAxis": "Arena スコア（強い → 右）",
+  "dotTitle": "{name}\nスコア {s} (+{u}/-{d})\nCost/Task {c}\n票数 {v}\nAPI {api}\n{pareto}\nクリック = スコア範囲の上限をこのモデルに設定",
+  "dotPareto": "◆ パレートフロンティア（非支配）",
+  "dotDominated": "支配された：より高スコアでより安いモデルが存在",
+  "dotApiNA": "N/A"
+ },
+ "steps": {
+  "modeOnly": "階段チャートは①しきい値モードでのみ存在 —— まさに「しきい値 T → そのTierの最安モデル」の曲線です",
+  "noCost": "フロンティアにコストデータのあるモデルがありません",
+  "xAxisNarrow": "しきい値 T → 最安 Cost/Task",
+  "xAxis": "しきい値 T（「少なくともこれだけ強い」）→ T をクリアする最安モデルの Cost/Task",
+  "yAxis": "Cost / Task · 対数",
+  "segTitle": "スコア範囲 [{lo}, {up}]\n勝者：{name}\nスコア {s} (+{u}/-{d})\nCost/Task {c} · {v} 票\nクリック = スコア範囲をこのTierに設定"
+ },
+ "tiers": {
+  "count": "{n} Tier · しきい値フロンティア{strict}",
+  "countStrict": " · 厳密 CI",
+  "modeOnly": "（①しきい値モードでのみ構築）",
+  "modeOnlyCell": "①しきい値モードに切り替えると完全なラダーが表示されます：しきい値を高→低へドラッグすると勝者はこれらのモデルです",
+  "notesPre": "Preliminary（暫定） ",
+  "notesLow": "低サンプル ",
+  "notesFrontier": "◆フロンティア",
+  "rowTitle": "クリック = スコア範囲をこのTierに設定"
+ },
+ "table": {
+  "count": "{n} / {total} モデル · ヘッダークリックでソート · 薄い行 = 範囲外"
+ },
+ "tl": {
+  "noQualifies": "しきい値 T={t} で適合するモデルがありません（フィルターアウト、またはこのスコア以上にコストデータなし）。しきい値を下げるかフィルターを緩めてください。",
+  "noQualifiesChart": "現在のしきい値で適合モデルなし",
+  "perTask": "/タスク",
+  "peakLegend": "ピーク時間帯 = 平日 01:00–04:00 & 06:00–10:00 UTC（灰色）；週末はすべてオフピーク",
+  "listPrice": "定価 ",
+  "now": "現在",
+  "noteHead": "しきい値 <b class=\"mono\">T={t}</b> · 1週間168時間のうち <b>{peakH}</b> 時間がピーク · 現在 {dow} {hr}:00 UTC → <b style=\"color:var(--accent)\">{c}</b>、トップ <b>{champ}</b>{diff}<br>",
+  "hourSuffix": " 時間",
+  "diffPricier": "（定価 {base}、{pct}% 高い）",
+  "diffCheaper": "（定価 {base}、{pct}% 安い）",
+  "diffSame": "（定価と同じ）",
+  "weekParts": "1週間の C(T)：",
+  "cacheOn": "<br><span style=\"color:var(--dim2)\">キャッシュ割引オン（ヒット {h}%）：キャッシュは入力トークンのみに適用され、絶対水準とピーク/オフピーク振幅の両方が圧縮されます。</span>"
+ },
+ "cache": {
+  "off": "オフ → すべての入力トークンが<b>キャッシュミス価格</b>で課金されます —— まさに <b>Arena リーダーボードの Cost/Task 基準</b>です。",
+  "hitHead": "ヒット率 <b class=\"mono\">{h}%</b>：入力トークンの {h}% はキャッシュ読取価格で、{m}% は（書き込み倍率込みの）ミス価格で課金；<b>出力トークンは決して割引されません</b>ので、100% ヒットでもゼロにはなりません。",
+  "srcCounts": "候補セットの {pub} モデルは公表済みキャッシュ価格を使用、{est} は10%で推定{na}。",
+  "srcNa": "、{na} は公表価格なし（N/A）",
+  "wmNote": "Anthropic / OpenAI はキャッシュ書き込みを別課金（= 入力価格の 1.25×）し、ミス分は書き込み価格で支払います；他社は書き込み料金なし。",
+  "missBasis": "<br><b>注</b>：Arena の Cost/Task は<b>キャッシュミス価格</b>で計算されています（Agent ボードから逆算された $4/$20 定価が証拠）。したがってキャッシュ割引を有効にするのは仮定 ——「あなたのワークロードが本当にこの頻度でヒットするなら」—— であって、ボード本来の意味ではありません。",
+  "pillPeak": "ピーク（2×）",
+  "pillOff": "オフピーク（½ 価格）",
+  "pillOff2": "オフ",
+  "osHintHead": "出力比率は「単価変化」を「Cost/Task 変化」にどう変換するかを決めます。デフォルト <b class=\"mono\">8%</b> = 入力:出力 11:1、14 Agent ボードモデルの実測推論より（比率 3.8–17.9×）。",
+  "osHintOff": "キャッシュ割引オフのとき、DeepSeek のピーク/オフピークは入出力に<b>比例的に</b>作用するため、このスライダーは<b>無効</b>です；GLM の入力 ×3 / 出力 ×2.8 のような補正でのみ意味を持ちます。",
+  "osHintOn": "<b>キャッシュ割引オンでは、このスライダーが重要になります</b>：キャッシュは入力のみ割引するため、出力比率が高いほど割引は薄くなります。同じ 95% ヒット率で、DeepSeek-20261017 は w=2% で 86%、w=8%（デフォルト）で 68%、w=15% で 55%、w=25% で 40%、w=40% でわずか 25% 節約。",
+  "adjAllOff": "<span style=\"color:var(--dim2)\">すべての補正オフ → 掲載どおり。上のルールにチェックを入れると時間効果が見られます。</span>",
+  "adjNone": "現在の候補セットに、有効化された補正の影響を受けるモデルはありません（{rules}）。",
+  "adjHead": "<b>{peak} · {dow} {hr}:00 UTC</b>：候補セットの <b>{n}</b> モデルが書き換えられ → ",
+  "evModels": " モデル",
+  "evSource": "出典：",
+  "verified": "検証済み",
+  "uncertain": "不確実",
+  "costCellTitle": "定価 {raw} → 現在のシナリオ {cur}",
+  "costCellWhy": "キャッシュヒット {h}%：読取価格 {pc}/M（{src}）、書き込み倍率 {wm}×",
+  "costCellSrcEst": "入力価格の10%で推定",
+  "costCellSrcPub": "公表価格",
+  "costCellTotal": "合計 ×{scale}",
+  "listPrice": "定価"
+ },
+ "ev": {
+  "ds_tod": {
+   "name": "DeepSeek ピーク/オフピーク価格",
+   "desc": "ピーク = 平日 01:00–04:00 と 06:00–10:00 UTC；その他の時間帯（週末含む）は半額。ボードは 20261017 をオフピーク、20260910 と V4-Pro ファミリーをピークで掲載 —— 同一ファミリーで2つの基準が1つの表に混在。",
+   "src": "DeepSeek 公式価格ページ；datacamp / justinmckelvey / felloai / okamomedia の4独立ソースで確認"
+  },
+  "gem_dec1": {
+   "name": "Gemini 4 Carbon/Argon 12-01 値上げ（発表済み）",
+   "desc": "introductory 価格 $2/$10 は 2026-11-30 に終了；12-01 からは $4/$20、キャッシュ読取価格は $0.10 → $0.20。ボード（11-11 スナップショット）は introductory 価格のまま。価格設定日を12月にドラッグすると、Carbon が overall_all フロンティアから外れるのが見られます。",
+   "src": "Google Gemini API 価格ページ（benchlm.ai / munderdiffl.in / datastudios.org の3ソースが一致；2026-11-12/13 に確認）"
+  },
+  "ds_v4flash": {
+   "name": "DeepSeek V4-Flash もピーク/オフピークに分かれるか？（不確実）",
+   "desc": "V4-Flash は退役済み；公開ソースが確認しているのは V4.1-Flash と V4-Pro のピーク/オフピークのみ。デフォルトオフ —— 感度分析専用。",
+   "src": "証拠不十分"
+  },
+  "suspect2x": {
+   "name": "第三者インデックスとの差が 2×、プロモの説明なし（不確実）",
+   "desc": "Mistral Medium 3.5（$0.75/$3.75 vs インデックス $1.50/$7.50）と GPT-6 Sol（$1/$5 vs $2/$10）は、ある第三者インデックスのちょうど半分で掲載。プロモの可能性も、インデックスが古い可能性も。デフォルトオフ。",
+   "src": "benchr.org/pricing 比較"
+  },
+  "glm53flash_nov": {
+   "name": "GLM-5.3-Flash $0.02/$0.07 は公式 $0.15/$0.50 を大きく下回る、プロモ告知なし（不確実）",
+   "desc": "11-20 のボードは $0.02/$0.07。Z.ai の料金ページ（$0.15/$0.50、2026-11-22 確認）より 87%/86% 低い。プロモ告知も終了日も anywhere に存在せず、公開ブログは $0.045/task (discounted) に触れるのみ。$0.02/$0.07 は OpenRouter の batch 階層（$0.023/$0.068）とほぼ一致し、誤取得階層か短期無告知プロモの可能性。デフォルトはオフ。",
+   "src": "docs.z.ai/guides/overview/pricing + z.ai/blog/glm-5.3-flash（2026-11-22 確認）；openrouter.ai/api/v1/models"
+  },
+  "glm47_nov": {
+   "name": "GLM-4.7 $0.40/$1.75 は公式・アグリゲータのどちらとも不一致（不確実）",
+   "desc": "11-20 のボードは $0.40/$1.75。しかし Z.ai の料金ページは $0.60/$2.20 のまま（2026-11-22 確認）で、OpenRouter も $0.60/$2.20。ボード価格は両方より 33%/20% 低く、プロモ告知・終了日なし。デフォルトはオフ。",
+   "src": "docs.z.ai/guides/overview/pricing（2026-11-22 確認）；openrouter.ai/api/v1/models"
+  },
+  "qwen35_channel": {
+   "name": "Qwen3.5-397B-A17B は Alibaba 公式 $0.60/$3.60 を下回る表示（不確実）",
+   "desc": "ボードは $0.60/$3.60 → $0.45/$3.00 に変動。しかし Alibaba Cloud Model Studio 国際サイトの qwen3.5-397b-a17b は $0.6/$3.6 のまま（0–256K、2026-11-22 確認）で、値下げ告知はない。$0.45/$3.00 は OpenRouter の表示と完全一致 — ベンダー調整ではなくチャネル切り替えの可能性。デフォルトはオフ。",
+   "src": "alibabacloud.com/help/en/model-studio/model-pricing（2026-11-22 確認）；openrouter.ai/api/v1/models"
+  },
+  "kimi27_channel": {
+   "name": "Kimi K2.7 Code は Moonshot 公式 $0.95/$4.00 を下回る表示（不確実）",
+   "desc": "ボードは $0.60/$3.50 → $0.60/$3.00。しかし Moonshot 公式の kimi-k2.7-code は $0.95/$4.00 のまま（2026-11-22 確認）で、K2 シリーズは 2026 年 12 月末で退役予定と告知済み。ボード価格は OpenRouter（$0.60/$3.00）と完全一致 — 公式より 37%/25% 低いチャネル価格、プロモ告知なし。デフォルトはオフ。",
+   "src": "platform.kimi.ai/docs/pricing/chat（2026-11-22 確認）；openrouter.ai/api/v1/models"
+  },
+  "mimo25_retired": {
+   "name": "MiMo-V2.5-Pro は Xiaomi が提供終了、ボード価格に公式の基準なし（不確実）",
+   "desc": "Xiaomi は 2026-10-21 に MiMo-V2.5-Pro API を正式提供終了（V2.6 への切替を告知）。ボード価格は $0.43/$0.87 → $0.48/$1.80 に跳躍。旧価格は公式海外レート（$0.435/$0.87、公開ブログは価格据え置きを約束、現行は mimo-v2.6-pro が継承）と一致、新価格はサードパーティホスティング（OpenRouter $0.48/$1.80）にのみ存在。デフォルトはオフ。",
+   "src": "mimo.mi.com/docs/price/pay-as-you-go + platform.xiaomimimo.com の提供終了バナー（2026-11-22 確認）；mimo.xiaomi.com/mimo-v2-5-pro"
+  },
+  "hy3p_channel": {
+   "name": "Hy3 preview は Tencent 公式 $0.18/$0.60 を下回る表示（不確実）",
+   "desc": "ボードの Hy3 preview は $0.18/$0.60 → $0.14/$0.58。Tencent Cloud の Hy3 preview 従量課金は 100万トークンあたり ¥1.2/¥4〜（≈$0.17/$0.56）で、サードパーティ追跡の公式 USD レートは $0.18/$0.60（旧ボード価格）。新価格は Hy3 正式版レート・OpenRouter の表示と一致 — Tencent が無告知で preview を正式版に合わせたか、ボードが両エントリを統合した可能性。デフォルトはオフ。",
+   "src": "cloud.tencent.com Hy Token Plan 記事 2676264 + activepieces.com Tencent 料金追跡（2026-11-22 確認）；openrouter.ai/api/v1/models"
+  }
+ },
+ "peakTag": {
+  "peak": "ピーク",
+  "off": "オフピーク",
+  "afterPromo": "プロモ後",
+  "promo": "プロモ期間",
+  "inEffect": "発効",
+  "notYet": "未発効"
+ },
+ "interact": {
+  "play": "▶ Play：しきい値を最高から最低へスイープ",
+  "pause": "⏸ 一時停止",
+  "stop": "停止",
+  "sweeping": "スイープ中",
+  "modeHintPareto": "<b>あなたの元のアイデア。</b>しきい値 T を固定し、スコア ≥ T の中で最安のモデルを取る。T を下へスイープすると、勝者列は <b>パレート下包絡</b>になります。数学的に自己無矛盾な唯一の定義（= コスト制約下の能力最大化）。",
+  "modeHintRatio": "<b>スコア ÷ コスト。</b>Arena スコアは ~1200 のベースラインオフセットを持つため（分子が人為的に膨らむ）、安いモデルに強く偏ります。大まかな比較専用。",
+  "modeHintBaseline": "<b>(スコア − 1200) ÷ コスト。</b>Arena BT スコアには ~1200 の実用的な床があります（それ以下 ≈ ランダム）；引くことで「1ドルでどれだけの実質能力向上を買えるか」が得られます。まだ安いモデルに偏ります —— だからこそしきい値モードが意思決定グレードの定義なのです。",
+  "alertTiers": "先に①しきい値モードに切り替えてください",
+  "copied": "✓ コピーしました",
+  "copyLink": "状態リンクをコピー",
+  "promptCopy": "手動でコピーしてください：",
+  "pasteFirst": "<span style=\"color:var(--bad)\">先にテーブルテキストを貼り付けてください</span>",
+  "tooFewRows": "<span style=\"color:var(--bad)\">{n} 行しか解析できませんでした —— arena.ai のリーダーボード表か確認してください（スコア / Cost/Task 列が必要）</span>",
+  "customBoard": "自作ボード",
+  "userPaste": " モデル · ユーザー貼付",
+  "customNote": "このセッションで貼り付けたデータより",
+  "noCostParsed": "<span style=\"color:var(--bad)\">⚠ {n} モデルを解析しましたが、Cost/Task 列が丸ごと空です</span> —— コストがなければコスパ分析はできません（arena.ai の WebDev · HTML ボードがまさにこれ）。データセットは追加されました：スコア順位は見られますが、フロンティアは空です。",
+  "addedOk": "<span style=\"color:var(--good)\">✓ {n} モデルを追加しました</span>（{wc} にコストデータあり）。自作データセットはリロードで失われます ——「CSV エクスポート」で保存してください。"
+ },
+ "method": {
+  "title": "手法とデータソース — Arena リーダーボード コスパ分析ツール",
+  "desc": "arena.ai WebDev リーダーボードからコスト-品質パレートフロンティアをどう計算するか：データソース、価格検証、ピーク/オフピークルール、キャッシュモデル、限界。"
+ },
+ "boot": {
+  "methodBody": "PLACEHOLDER_BOOT",
+  "sourceBody": "PLACEHOLDER_BOOT"
+ },
+ "tabs": {
+  "rank": "安い順ランキング",
+  "rankT": "いきなり答え：品質バー＋日常タスクプロファイルで、1回最安なのはどれか、何点差、いくらの $",
+  "deep": "階段・グラフ",
+  "deepT": "勝者カード、階段グラフ、散布図、週間コスト曲線、階層テーブルと全モデル表"
+ },
+ "rank": {
+  "ctrlH2": "ランキング条件",
+  "capability": "能力ボード",
+  "threshold": "品質バー",
+  "ge": "≥ ",
+  "period": "価格帯",
+  "pkNow": "現在",
+  "pkPeak": "ピーク",
+  "pkOff": "オフピーク",
+  "profile": "日常タスクプロファイル",
+  "presetLight": "軽量QA",
+  "presetLightT": "1回 ≈2k 入力 / 0.5k 出力 token",
+  "presetDev": "日常開発",
+  "presetDevT": "1回 ≈20k 入力 / 2k 出力 token",
+  "presetHeavy": "重たいagent",
+  "presetHeavyT": "1回 ≈120k 入力 / 12k 出力 token",
+  "presetBoard": "渌定値",
+  "presetBoardT": "Arena 実測のタスク当たりコスト中央値をそのまま",
+  "inTok": "入力 k",
+  "outTok": "出力 k",
+  "perDay": "回/日",
+  "tblH2": "安い順ランキング",
+  "c1": "#",
+  "c2": "モデル",
+  "c3": "スコア",
+  "c4": "1位比け",
+  "c5": "1回$",
+  "c6": "倍率",
+  "c7": "月額$",
+  "tblNote": "バーを越したモデルを安い順に。* = 現在のピーク/オフ・キャッシュ条件で修正済み。行をクリックするとバーがそのモデルに移動。",
+  "count": "{n} モデルがクリア · コストあり計 {all}",
+  "more": "残り {n} 件を表示",
+  "fewer": "上位20のみ",
+  "rowTitle": "{name} · スコア {s} · 1回 {c} · API {api} · {v} 票",
+  "still": "バー：スコア ≥ ",
+  "empty": "このボードにスコア ≥ {t} のモデルなし（最高 {smax}）— バーを下げて。",
+  "standards": "条件：スコア ≥ {t} · {cap} · {prof} · {period}",
+  "profileTag": "プロファイル {in}k入/{out}k出",
+  "measured": "Arena 実測コスト",
+  "perImage": "1枚当たり（実測）",
+  "perTask": "/回",
+  "kpiPer": "1回",
+  "kpiMonth": "月額",
+  "kpiMonthTail": "日 {n} 回 × 30",
+  "upSell": "バー内最高スコア：{name}（{s} pts）— 1回 +{dc}（{mult}×）で +{ds} pts。",
+  "upExpensive": "アップグレードは高い—必要なところのみ。",
+  "upOk": "安いアップグレード。余裕が欲しければ。",
+  "topIsChamp": "最安値がそのまま最高スコア — アップグレード不要。",
+  "adjNote": "渌定コスト {board}、現在のピーク/オフ・キャッシュ条件で修正済み。",
+  "swing": "週間幅：{lo} – {hi}（オフピークで {pct}% 安）。",
+  "unitHint": "画像生成ボードは1枚当たり課金：ランキングは Arena 実測の1枚当たりコスト中央値。token のピーク/オフ価格は適用外。",
+  "hint": "プロファイルコスト = 入力 token × 入力単価（{ch}% キャッシュ割引込）+ 出力 token × 出力単価。ピーク/オフ・促販で修正。キャッシュ率は左の「価格シナリオ」で調整。"
+ },
+ "scene": {
+  "codingT": "コーディング最安",
+  "codingD": "入力2万＋出力2千トークン · オフピーク料金でランキング",
+  "agentT": "Agent大量処理",
+  "agentD": "入力12万＋出力1.2万トークン · 現在時刻の実価格でランキング",
+  "offT": "深夜割引で節約",
+  "offD": "軽量タスク（2k＋0.5k）· DeepSeek式の半額時間帯"
+ },
+ "faq": [
+  {
+   "q": "リーダーボードの料金が実際のコストと違うのはなぜ？",
+   "a": "掲載料金はキャッシュヒット0%を仮定し、ピーク/オフピークの記法も一つの表に混在しています。本ツールは設定したキャッシュヒット率（既定95%）と選択した時間帯、各モデル公表の読み比率と書き込み倍率に基づき、実際のタスク単位コストを再計算します。"
+  },
+  {
+   "q": "DeepSeek式のオフピーク半額はどう計算される？",
+   "a": "各モデルのコストは、ベンダー公表のピーク/オフピーク時間帯（UTC）から168時間の週次コスト曲線として描画されます。ランキングは「現在・ピーク・オフピーク」を切り替えられ、夜間バッチは夜間料金で計算されます。"
+  },
+  {
+   "q": "「厳密なCIマージ」とは？",
+   "a": "Arenaスコアには統計的ノイズがあります：厳密モードでは95%信頼区間が重なるティアを統合し、データが裏付けできない順位差に上乗せを払わないようにします。"
+  }
+ ]
 }
