@@ -109,13 +109,10 @@ n_hf=$(echo "$zhhome" | grep -o 'rel="alternate" hreflang=' | wc -l | tr -d ' ')
 [[ "$zhhome" == *'<html lang="zh">'* ]] || { echo "❌ /zh/ html lang 非 zh"; fail=1; }
 
 # ⑧ SEO 静态化抽检（构建期落地，搜索引擎可直接抓）：日期 + JSON-LD + 场景卡
-echo "$zhhome" | grep -q 'id="scraped">20[0-9][0-9]-[0-9][0-9]' \
-  || { echo "❌ /zh/ 抓取日期未静态落地（应为构建期注入的日期）"; fail=1; }
-echo "$zhhome" | grep -q 'application/ld+json' \
-  || { echo "❌ /zh/ 缺 JSON-LD 结构化数据"; fail=1; }
-echo "$zhhome" | grep -q 'FAQPage' \
-  || { echo "❌ /zh/ JSON-LD 缺 FAQPage"; fail=1; }
-echo "$home" | grep -q 'data-scene="coding"' \
-  || { echo "❌ 首页缺首屏场景卡（data-scene）"; fail=1; }
+# ⚠️ 用 [[ == *…* ]] 不用 echo|grep -q：zhhome ~116KB > 管道缓冲，pipefail 下 grep -q 早退 → SIGPIPE 误报（同 24ff09d）
+[[ "$zhhome" == *'id="scraped">20'* ]] || { echo "❌ /zh/ 抓取日期未静态落地（应为构建期注入的日期）"; fail=1; }
+[[ "$zhhome" == *'application/ld+json'* ]] || { echo "❌ /zh/ 缺 JSON-LD 结构化数据"; fail=1; }
+[[ "$zhhome" == *'FAQPage'* ]] || { echo "❌ /zh/ JSON-LD 缺 FAQPage"; fail=1; }
+[[ "$home" == *'data-scene="coding"'* ]] || { echo "❌ 首页缺首屏场景卡（data-scene）"; fail=1; }
 
 [[ $fail -eq 0 ]] && echo "🎉 冒烟全过" || { echo "💥 冒烟有失败项"; exit 1; }
