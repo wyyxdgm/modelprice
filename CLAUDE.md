@@ -12,7 +12,7 @@
 - `src/templates/index.html` 页面骨架（`__DATA__` 构建时填充）
 - `src/js/01~11-*.js` 模块按文件名序加载（11=计算器，10=排行榜页签）；`src/css/` 桌面/平板/手机三档响应式
 - `src/i18n/` 5 语言字典（350 keys ×5，**key 集必须一致——test 强制**；改 en.json 必须同步其余 4 语言）+ boot/source/method 长文
-- `data/datasets.json` 数字本体；`scripts/` 抓取/构建/部署管线；`test/`（build.py + cases.js）
+- `data/datasets.json` 数字本体；`scripts/` 抓取/构建/部署管线；`test/`（build.py + cases.js 主站 83 条 + test_price_drops.py 调价页 12 条）
 - 全部构建命令经 `scripts/deploy.sh`，不要单独手跑构建段
 
 ## 构建 + 部署（一条命令）

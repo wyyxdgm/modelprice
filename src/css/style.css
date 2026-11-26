@@ -249,3 +249,16 @@ input[type=range]{accent-color:var(--accent)}
   .hidemid{display:none}
   .tabs button{padding:10px 6px;font-size:12.5px}
 }
+
+/* ===== /price-drops 静态调价页（构建期直出，build_seo_pages.py） ===== */
+.pd td,.pd th{white-space:normal;vertical-align:top}
+.pd-ev td{background:var(--panel2);font-size:12.5px;line-height:1.5}
+.pd-badge{display:inline-block;border:1px solid var(--line2);border-radius:6px;
+  padding:0 6px;font-size:11px;color:var(--dim);margin-left:6px}
+.pd-src{color:var(--dim);font-size:11.5px}
+.pd-on{color:var(--good)}
+.pd-off{color:var(--bad)}
+.pd-headline{background:var(--panel2);border-left:3px solid var(--accent);
+  padding:8px 12px;border-radius:0 8px 8px 0;font-size:14px;margin:10px 0}
+.pd-note{font-size:12px;border-top:1px dashed var(--line2);padding-top:8px}
+.pd-empty{padding:10px 0}

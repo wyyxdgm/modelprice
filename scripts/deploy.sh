@@ -141,4 +141,26 @@ s3=$(smoke_curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$B/zh/best-llm-
 n_sm=$(smoke_curl -s --max-time 20 "$B/sitemap.xml" | grep -c 'alternatives/\|best-llm-for-' || true)
 [[ "$n_sm" -ge 40 ]] || { echo "❌ sitemap 缺 SEO 子页条目: $n_sm (期望 ≥40)"; fail=1; }
 
+# ⑩ W1 /price-drops 静态调价页（2026-11-26）：5 语言 200 + 表格直出（禁 JS 后内容仍在）
+#    + canonical/og/twitter + sitemap/llms.txt 含新页 + 数据新鲜度脚注
+p1=$(smoke_curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$B/price-drops.html")
+p2=$(smoke_curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$B/zh/price-drops.html")
+p3=$(smoke_curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$B/ja/price-drops.html")
+[[ "$p1" == "200" && "$p2" == "200" && "$p3" == "200" ]] || { echo "❌ price-drops 状态码: en=$p1 zh=$p2 ja=$p3"; fail=1; }
+pd=$(smoke_curl -s --max-time 20 "$B/price-drops.html")
+[[ "$pd" == *'<link rel="canonical" href="https://modelprice.damolabs.app/price-drops.html">'* ]] || { echo "❌ price-drops 缺 canonical"; fail=1; }
+[[ "$pd" == *'property="og:image"'* && "$pd" == *'name="twitter:card"'* ]] || { echo "❌ price-drops 缺 og:image/twitter:card"; fail=1; }
+n_pd=$(echo "$pd" | grep -c 'data-pd-row' || true)
+[[ "$n_pd" -ge 10 ]] || { echo "❌ price-drops 表格行数异常: $n_pd (期望 ≥10 调价行)"; fail=1; }
+[[ "$pd" == *'pd-on'* || "$pd" == *'pd-off'* ]] || { echo "❌ price-drops 缺结论列判定（pd-on/pd-off）"; fail=1; }
+[[ "$pd" == *'Data as of 20'* && "$pd" == *'generated 20'* ]] || { echo "❌ price-drops 缺 Data as of/generated 脚注"; fail=1; }
+[[ "$pd" == *'src="/analytics.js"'* ]] || { echo "❌ price-drops 缺 analytics.js"; fail=1; }
+pdz=$(smoke_curl -s --max-time 20 "$B/zh/price-drops.html")
+[[ "$pdz" == *'降价与调价'* ]] || { echo "❌ /zh/price-drops title 非 中文"; fail=1; }
+[[ "$pdz" == *'<html lang="zh">'* ]] || { echo "❌ /zh/price-drops html lang 非 zh"; fail=1; }
+n_pdsm=$(smoke_curl -s --max-time 20 "$B/sitemap.xml" | grep -c 'price-drops' || true)
+[[ "$n_pdsm" -ge 5 ]] || { echo "❌ sitemap 缺 price-drops 条目: $n_pdsm (期望 ≥5 语言)"; fail=1; }
+ll=$(smoke_curl -s --max-time 20 "$B/llms.txt")
+[[ "$ll" == *'/price-drops.html'* ]] || { echo "❌ llms.txt 缺 price-drops 条目"; fail=1; }
+
 [[ $fail -eq 0 ]] && echo "🎉 冒烟全过" || { echo "💥 冒烟有失败项"; exit 1; }

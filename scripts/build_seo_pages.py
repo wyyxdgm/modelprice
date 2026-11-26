@@ -10,6 +10,7 @@
 
 用法：python3 scripts/build_seo_pages.py [domain]     # 在 build_site.py 之后跑（读 all.json、追加 sitemap.xml）
 """
+import datetime
 import json, pathlib, re, sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -58,6 +59,35 @@ L10N = {
                "agent": "Agent runs are token-hungry: large contexts in, long outputs out. The tiers below are ranked by board price per task — the interactive calculator adds cache-hit and time-of-day corrections.",
                "offpeak": "Several vendors price off-peak hours at a steep discount (DeepSeek: exactly ×0.5). The tiers below are the board-price baseline; open the calculator's weekly 168-hour curve to see the nightly drops."},
   "sc_cta": "Open the {scene} scenario in the calculator",
+  # —— /price-drops 静态调价页（构建期从 src/js/03-pricing.js 提取事件 + all.json 前沿算法自动判结论）——
+  "pd_title": "LLM price drops & changes (2026) — tracked moves with value verdicts",
+  "pd_desc": "Every tracked LLM API price change behind the Arena WebDev board: old → new $/M token prices, effective dates, vendor sources, and an auto-computed verdict — does the model stay on the price-performance Pareto frontier after the change?",
+  "pd_h1": "LLM price drops & changes — tracked, sourced, priced",
+  "pd_intro": "Vendors reprice constantly; the Arena board snapshots prices periodically and can lag or mix channel tiers. Below is every price move we track: verified vendor announcements, plus flags where the board price and the official price disagree. Each row is re-scored at build time — we recompute every board's cost-quality Pareto frontier with the post-change price and report whether the model stays on it.",
+  "pd_headline": "Largest tracked change: {model} input ${bin} → ${ain} ({pct}%), {eff}",
+  "pd_verified_h2": "Verified price changes (vendor-announced)",
+  "pd_unverified_h2": "Unverified flags — board price vs. official price",
+  "pd_badge_v": "verified",
+  "pd_badge_u": "unverified",
+  "pd_col_model": "Model",
+  "pd_col_change": "Price change ($/M in/out)",
+  "pd_col_eff": "Effective",
+  "pd_col_verdict": "Value verdict (after change)",
+  "pd_verdict_on": "On frontier",
+  "pd_verdict_off": "Off frontier",
+  "pd_boards": "{on}/{total} boards",
+  "pd_empty": "No tracked price changes in this section for the current snapshot.",
+  "pd_eff_date": "from {date}",
+  "pd_eff_future": "announced — from {date}",
+  "pd_eff_tod": "off-peak: weekdays {w} UTC (+weekends)",
+  "pd_change_tod": "peak ${pki}/${pko} · off-peak ${ofi}/${ofo}",
+  "pd_change_duo": "board ${bi}/${bo} vs official ${ai}/${ao}",
+  "pd_change_mv": "${bi}/${bo} → ${ai}/${ao}",
+  "pd_note": "Prices are USD per 1M tokens (input/output). “After change” = the price this event moves the model to: the announced new price for verified events, the vendor-verified price for flags. The verdict recomputes each board's threshold Pareto frontier (cheapest model at every quality bar) with the post-change price — the same algorithm that powers the leaderboard.",
+  "pd_source": "Source",
+  "pd_cta_btn": "Open the interactive calculator",
+  "pd_cta_line": "All numbers here are static board-price baselines. The interactive calculator reprices every model at your cache-hit rate and hour of day.",
+  "pd_dataasof": "Data as of {captured} · generated {gen} (UTC)",
  },
  "zh": {
   "alt_title": "{model} 平替（2026）— 更便宜的替代品与同分数段对比",
@@ -94,6 +124,34 @@ L10N = {
                "agent": "Agent 运行吃 token：长上下文进、长输出出。下表按榜面单任务成本排列——交互计算器可叠加缓存命中与时段修正。",
                "offpeak": "多家厂商在错峰时段大幅降价（DeepSeek：恰好半价）。下表是榜面价基线；打开交互计算器的 168 小时周成本曲线可看夜间降价窗口。"},
   "sc_cta": "在计算器中打开「{scene}」场景",
+  "pd_title": "大模型降价与调价事件（2026）— 每次调价自动判性价比",
+  "pd_desc": "Arena WebDev 榜背后的每一次大模型 API 调价：旧价 → 新价（$/M token）、生效日期、厂商来源，以及自动计算的性价比结论——调价后该模型还在不在「分数段最优价」帕累托前沿上。",
+  "pd_h1": "大模型降价与调价 — 有追踪、有出处、有结论",
+  "pd_intro": "厂商频繁调价，Arena 榜面价是周期性快照，可能滞后或混入渠道价。下面是我们追踪的全部调价：已核实的厂商官宣，以及「榜面价与官方价不符」的待核实标记。每行结论在构建期自动重算——用调价后价格重算各榜单的成本-质量帕累托前沿，报告该模型是否仍在前沿。",
+  "pd_headline": "最大已追踪调价：{model} 输入 ${bin} → ${ain}（{pct}%），{eff}",
+  "pd_verified_h2": "已核实的调价（厂商官宣）",
+  "pd_unverified_h2": "待核实标记 — 榜面价 vs 官方价",
+  "pd_badge_v": "已核实",
+  "pd_badge_u": "待核实",
+  "pd_col_model": "模型",
+  "pd_col_change": "价格变化（$/M 输入/输出）",
+  "pd_col_eff": "生效",
+  "pd_col_verdict": "性价比结论（调价后）",
+  "pd_verdict_on": "仍在前沿",
+  "pd_verdict_off": "跌出前沿",
+  "pd_boards": "{on}/{total} 个榜单",
+  "pd_empty": "当前快照中该节没有追踪到的调价事件。",
+  "pd_eff_date": "{date} 起",
+  "pd_eff_future": "已官宣 — {date} 起",
+  "pd_eff_tod": "错峰时段：工作日 {w} UTC（周末全天适用）",
+  "pd_change_tod": "峰 ${pki}/${pko} · 谷 ${ofi}/${ofo}",
+  "pd_change_duo": "榜面 ${bi}/${bo} vs 官方 ${ai}/${ao}",
+  "pd_change_mv": "${bi}/${bo} → ${ai}/${ao}",
+  "pd_note": "价格单位：美元 / 百万 token（输入/输出）。「调价后」= 该事件把模型调向的价格：已核实事件用官宣新价，待核实标记用厂商核验价。结论列用调价后价格重算每个榜单的门槛制帕累托前沿（每个质量档位的最便宜模型）——与排行榜同一算法。",
+  "pd_source": "来源",
+  "pd_cta_btn": "打开交互计算器",
+  "pd_cta_line": "本页全部数字是静态榜面价基线。交互计算器可按你设置的缓存命中率与时段对每个模型重算成本。",
+  "pd_dataasof": "数据截至 {captured} · 生成于 {gen}（UTC）",
  },
  "ja": {
   "alt_title": "{model} の安い代替（2026）— Arenaスコア × 実コスト比較",
@@ -130,6 +188,34 @@ L10N = {
                "agent": "Agentは長文入力・長文出力でトークンを消費します。以下はボード価格順——計算機でキャッシュ・時間帯補正を追加できます。",
                "offpeak": "複数ベンダーはオフピークに大幅割引（DeepSeek：ちょうど半額）。以下はボード価格の基準；計算機の168時間週次曲線で夜間の下がり幅を確認できます。"},
   "sc_cta": "計算機で「{scene}」シナリオを開く",
+  "pd_title": "LLM 価格改定・値下げトラッカー（2026）— 各改定のコスパ判定つき",
+  "pd_desc": "Arena WebDev ボードの背後にある LLM API の価格改定をすべて掲載：旧→新の $/M トークン価格、発効日、ベンダー出典、そして自動判定 — 改定後もそのモデルは価格性能パレート最前線に残るか。",
+  "pd_h1": "LLM の値下げ・価格改定 — 追跡し、出典を示し、判定する",
+  "pd_intro": "ベンダーは頻繁に価格を変え、Arena ボードは定期的なスナップショットのため遅れたりチャネル価格を混ぜることがあります。以下は追跡中のすべての価格変動：確認済みのベンダー公式発表と、ボード価格と公式価格が食い違っている未確認フラグ。各行の判定はビルド時に自動再計算 — 改定後の価格で各ボードのコスト品質パレート最前線を再計算し、モデルが最前線に残るかを報告します。",
+  "pd_headline": "最大の追跡変更：{model} 入力 ${bin} → ${ain}（{pct}%）、{eff}",
+  "pd_verified_h2": "確認済みの価格改定（ベンダー公式発表）",
+  "pd_unverified_h2": "未確認フラグ — ボード価格 vs 公式価格",
+  "pd_badge_v": "確認済み",
+  "pd_badge_u": "未確認",
+  "pd_col_model": "モデル",
+  "pd_col_change": "価格変化（$/M 入力/出力）",
+  "pd_col_eff": "発効",
+  "pd_col_verdict": "コスパ判定（改定後）",
+  "pd_verdict_on": "最前線に残留",
+  "pd_verdict_off": "最前線から脱落",
+  "pd_boards": "{on}/{total} ボード",
+  "pd_empty": "現在のスナップショットではこのセクションに追跡中の価格変更はありません。",
+  "pd_eff_date": "{date} から",
+  "pd_eff_future": "発表済み — {date} から",
+  "pd_eff_tod": "オフピーク：平日 {w} UTC（週末は終日）",
+  "pd_change_tod": "ピーク ${pki}/${pko} · オフピーク ${ofi}/${ofo}",
+  "pd_change_duo": "ボード ${bi}/${bo} vs 公式 ${ai}/${ao}",
+  "pd_change_mv": "${bi}/${bo} → ${ai}/${ao}",
+  "pd_note": "価格は 100 万トークンあたりの USD（入力/出力）。「改定後」= このイベントがモデルを向かわせる価格：確認済みは発表された新価格、フラグはベンダー照合済みの価格。判定は改定後の価格で各ボードのしきい値パレート最前線（各品質ハードルの最安モデル）を再計算 — リーダーボードと同じアルゴリズムです。",
+  "pd_source": "出典",
+  "pd_cta_btn": "インタラクティブ計算機を開く",
+  "pd_cta_line": "本ページの数値はすべて静的なボード価格の基準値です。インタラクティブ計算機はヒット率と時間帯で各モデルを再計算します。",
+  "pd_dataasof": "データ基準日 {captured} · 生成 {gen}（UTC）",
  },
  "ko": {
   "alt_title": "{model} 저렴한 대안 (2026) — Arena 점수 × 실비용 비교",
@@ -166,6 +252,34 @@ L10N = {
                "agent": "Agent는 긴 입력·긴 출력으로 토큰을 많이 씁니다. 아래는 게시 가격순 — 계산기에서 캐시·시간대 보정을 추가할 수 있습니다.",
                "offpeak": "여러 벤더가 심야 시간대에 큰 폭으로 할인합니다(DeepSeek: 정확히 반값). 아래는 게시 가격 기준; 계산기의 168시간 주간 곡선에서 야간 하락 폭을 확인하세요."},
   "sc_cta": "계산기에서 '{scene}' 시나리오 열기",
+  "pd_title": "LLM 가격 인하·인상 트래커 (2026) — 변경별 가성비 판정 포함",
+  "pd_desc": "Arena WebDev 보드 뒤의 모든 LLM API 가격 변경: 기존 → 신규 $/M 토큰 가격, 발효일, 벤더 출처, 그리고 자동 판정 — 변경 후에도 그 모델이 가격성능 파레토 경계에 남는지.",
+  "pd_h1": "LLM 가격 인하·인상 — 추적, 출처, 판정",
+  "pd_intro": "벤더는 가격을 자주 바꾸고 Arena 보드는 주기적 스냅샷이라 뒤처지거나 채널 가격이 섞일 수 있습니다. 아래는 추적 중인 모든 가격 변동: 확인된 벤더 공식 발표와, 보드 가격과 공식 가격이 어긋난 미확인 플래그. 각 행의 판정은 빌드 시점에 자동 재계산 — 변경 후 가격으로 각 보드의 비용-품질 파레토 경계를 다시 계산해 모델이 경계에 남는지 보고합니다.",
+  "pd_headline": "최대 추적 변경: {model} 입력 ${bin} → ${ain}({pct}%), {eff}",
+  "pd_verified_h2": "확인된 가격 변경(벤더 공식 발표)",
+  "pd_unverified_h2": "미확인 플래그 — 보드 가격 vs 공식 가격",
+  "pd_badge_v": "확인됨",
+  "pd_badge_u": "미확인",
+  "pd_col_model": "모델",
+  "pd_col_change": "가격 변화($/M 입력/출력)",
+  "pd_col_eff": "발효",
+  "pd_col_verdict": "가성비 판정(변경 후)",
+  "pd_verdict_on": "경계 유지",
+  "pd_verdict_off": "경계 이탈",
+  "pd_boards": "{on}/{total} 보드",
+  "pd_empty": "현재 스냅샷의 이 섹션에는 추적된 가격 변경이 없습니다.",
+  "pd_eff_date": "{date}부터",
+  "pd_eff_future": "발표됨 — {date}부터",
+  "pd_eff_tod": "오프피크: 평일 {w} UTC(주말 종일)",
+  "pd_change_tod": "피크 ${pki}/${pko} · 오프피크 ${ofi}/${ofo}",
+  "pd_change_duo": "보드 ${bi}/${bo} vs 공식 ${ai}/${ao}",
+  "pd_change_mv": "${bi}/${bo} → ${ai}/${ao}",
+  "pd_note": "가격 단위: 토큰 100만 개당 USD(입력/출력). 「변경 후」= 이 이벤트가 모델을 향하게 하는 가격: 확인된 이벤트는 발표된 신규 가격, 플래그는 벤더 대조 검증 가격. 판정은 변경 후 가격으로 각 보드의 임계값 파레토 경계(각 품질 기준의 최저가 모델)를 재계산 — 리더보드와 같은 알고리즘입니다.",
+  "pd_source": "출처",
+  "pd_cta_btn": "대화형 계산기 열기",
+  "pd_cta_line": "이 페이지의 모든 수치는 정적 보드 가격 기준입니다. 대화형 계산기는 히트율과 시간대로 각 모델을 다시 계산합니다.",
+  "pd_dataasof": "데이터 기준 {captured} · 생성 {gen}(UTC)",
  },
  "fr": {
   "alt_title": "Alternatives moins chères à {model} (2026) — score Arena × coût réel",
@@ -202,6 +316,34 @@ L10N = {
                "agent": "Les agents consomment beaucoup de tokens : longs contextes en entrée, longues sorties. Les paliers ci-dessous sont classés au prix affiché — le calculateur ajoute cache et heure.",
                "offpeak": "Plusieurs vendeurs appliquent de forts rabais en heures creuses (DeepSeek : exactement ×0,5). Le tableau est la base prix affiché ; la courbe hebdomadaire 168 h du calculateur montre les chutes nocturnes."},
   "sc_cta": "Ouvrir le scénario « {scene} » dans le calculateur",
+  "pd_title": "Baisses et changements de prix LLM (2026) — verdicts de valeur par changement",
+  "pd_desc": "Chaque changement de prix LLM API suivi derrière le classement Arena WebDev : anciens → nouveaux prix $/M tokens, dates d'entrée en vigueur, sources vendeurs, et un verdict calculé automatiquement — le modèle reste-t-il sur la frontière de Pareto prix-performance après le changement ?",
+  "pd_h1": "Baisses et changements de prix LLM — suivis, sourcés, évalués",
+  "pd_intro": "Les vendeurs revisent leurs prix en permanence ; le classement Arena est un instantané périodique qui peut être en retard ou mélanger des prix de canal. Voici chaque mouvement de prix que nous suivons : annonces officielles vérifiées, plus les signaux où le prix du classement et le prix officiel divergent. Chaque ligne est réévaluée à la construction — nous recalculons la frontière de Pareto coût-qualité de chaque classement avec le prix post-changement et indiquons si le modèle s'y maintient.",
+  "pd_headline": "Plus grand changement suivi : {model} entrée ${bin} → ${ain} ({pct} %), {eff}",
+  "pd_verified_h2": "Changements de prix vérifiés (annoncés par le vendeur)",
+  "pd_unverified_h2": "Signaux non vérifiés — prix du classement vs prix officiel",
+  "pd_badge_v": "vérifié",
+  "pd_badge_u": "non vérifié",
+  "pd_col_model": "Modèle",
+  "pd_col_change": "Changement de prix ($/M entrée/sortie)",
+  "pd_col_eff": "Effet",
+  "pd_col_verdict": "Verdict de valeur (après changement)",
+  "pd_verdict_on": "Sur la frontière",
+  "pd_verdict_off": "Hors frontière",
+  "pd_boards": "{on}/{total} classements",
+  "pd_empty": "Aucun changement de prix suivi dans cette section pour l'instantané actuel.",
+  "pd_eff_date": "à partir du {date}",
+  "pd_eff_future": "annoncé — à partir du {date}",
+  "pd_eff_tod": "heures creuses : jours ouvrés {w} UTC (+ week-ends)",
+  "pd_change_tod": "pointe ${pki}/${pko} · creux ${ofi}/${ofo}",
+  "pd_change_duo": "classement ${bi}/${bo} vs officiel ${ai}/${ao}",
+  "pd_change_mv": "${bi}/${bo} → ${ai}/${ao}",
+  "pd_note": "Prix en USD par million de tokens (entrée/sortie). « Après changement » = le prix vers lequel cet événement déplace le modèle : le nouveau prix annoncé pour les événements vérifiés, le prix vérifié chez le vendeur pour les signaux. Le verdict recalcule la frontière de Pareto à seuil de chaque classement (modèle le moins cher à chaque barreau de qualité) avec le prix post-changement — le même algorithme que le classement.",
+  "pd_source": "Source",
+  "pd_cta_btn": "Ouvrir le calculateur interactif",
+  "pd_cta_line": "Tous les chiffres ici sont des bases statiques au prix du classement. Le calculateur interactif reprécise chaque modèle à votre taux de cache et à l'heure choisie.",
+  "pd_dataasof": "Données au {captured} · généré le {gen} (UTC)",
  },
 }
 
@@ -229,10 +371,26 @@ def locale_prefix(lc):
     return "/" if lc == "en" else f"/{lc}/"
 
 
-def head(lc, title, desc, canonical_path):
-    links = "".join(f'<link rel="alternate" hreflang="{x}" href="{locale_url(x, "index.html" if x!="en" else "")}">' for x in LOCALES)
-    links += f'<link rel="alternate" hreflang="x-default" href="{DOMAIN}/">'
-    links += f'<link rel="canonical" href="{locale_url(lc, canonical_path)}">'
+def head(lc, title, desc, canonical_path, alt_path=None, og=False):
+    # hreflang 互指：alt_path=None 时保持旧行为（互指各语言首页），传子页路径时互指该页各语言版
+    if alt_path:
+        links = "".join(f'<link rel="alternate" hreflang="{x}" href="{locale_url(x, alt_path)}">' for x in LOCALES)
+        links += f'<link rel="alternate" hreflang="x-default" href="{locale_url("en", alt_path)}">'
+    else:
+        links = "".join(f'<link rel="alternate" hreflang="{x}" href="{locale_url(x, "index.html" if x!="en" else "")}">' for x in LOCALES)
+        links += f'<link rel="alternate" hreflang="x-default" href="{DOMAIN}/">'
+    canonical = locale_url(lc, canonical_path)
+    links += f'<link rel="canonical" href="{canonical}">'
+    ogmeta = ""
+    if og:
+        ogmeta = (f'<meta property="og:title" content="{title}">\n'
+                  f'<meta property="og:description" content="{desc}">\n'
+                  f'<meta property="og:type" content="article">\n'
+                  f'<meta property="og:url" content="{canonical}">\n'
+                  f'<meta property="og:image" content="{DOMAIN}/assets/og.png">\n'
+                  f'<meta property="og:image:width" content="1200">\n'
+                  f'<meta property="og:image:height" content="630">\n'
+                  f'<meta name="twitter:card" content="summary_large_image">')
     return f"""<!DOCTYPE html>
 <html lang="{lc}">
 <head>
@@ -241,6 +399,7 @@ def head(lc, title, desc, canonical_path):
 <title>{title}</title>
 <meta name="description" content="{desc}">
 {links}
+{ogmeta}
 <style>{STYLE}</style>
 </head>
 <body><div class="wrap" style="max-width:860px">"""
@@ -356,6 +515,317 @@ def build_scene(lc, t, scene, entry, captured):
     return html, canon
 
 
+# ==================== /price-drops 静态调价页 ====================
+# 数据源：src/js/03-pricing.js 的 PRICE_EVENTS（JS 单一事实源，交互器与静态页读同一份，
+# 不建第三份拷贝）。构建期提取 → 展开成行 → 用 dist/data/v1/all.json 的榜单数据 +
+# 与 build_site.frontier_of / 主站 04-core.js buildTiers 同口径的门槛制前沿算法，
+# 对「调价后」价格自动判该模型是否仍在前沿。严禁客户端 JS 拉数据。
+
+OUT_SHARE = 1 / 12   # 输出 token 占比（与主站 03-pricing.js S.outShare 同值，agent 榜实测 in/out ≈ 11×）
+PRICE_TOD_WINDOWS_LABEL = "{w}"
+
+
+def blend(pin, pout):
+    """加权单价（与主站 03-pricing.js blend 同式）：Cost/Task 换算按单价比例缩放。"""
+    return pin * (1 - OUT_SHARE) + pout * OUT_SHARE
+
+
+def _split_js_literal(lit):
+    """字符串感知切段：返回 [(is_string, text)]。
+    str 段已做 JS 单引号 → JSON 双引号（保留 \\n 等转义；\\' → '；\\" → \\"）；
+    code 段已剥掉 /* */ 与 // 注释。"""
+    parts, code_buf, i, n = [], [], 0, len(lit)
+    while i < n:
+        c = lit[i]
+        if c in "\"'":
+            q = c
+            j = i + 1
+            s = ['"']
+            while j < n:
+                if lit[j] == "\\" and j + 1 < n:
+                    nxt = lit[j + 1]
+                    s.append("'" if nxt == "'" else ('\\"' if nxt == '"' else lit[j:j + 2]))
+                    j += 2
+                    continue
+                if lit[j] == q:
+                    break
+                s.append(lit[j])
+                j += 1
+            s.append('"')
+            if code_buf:
+                parts.append((False, "".join(code_buf)))
+                code_buf = []
+            parts.append((True, "".join(s)))
+            i = j + 1
+            continue
+        if lit[i:i + 2] == "/*":
+            e = lit.find("*/", i + 2)
+            i = (e + 2) if e >= 0 else n
+            continue
+        if lit[i:i + 2] == "//":
+            e = lit.find("\n", i)
+            i = e if e >= 0 else n
+            continue
+        code_buf.append(c)
+        i += 1
+    if code_buf:
+        parts.append((False, "".join(code_buf)))
+    return parts
+
+
+def js_price_events():
+    """从 src/js/03-pricing.js 提取 PRICE_EVENTS 数组字面量 → python list。
+    解析 = 字符串感知的去注释 + 单引号转双引号 + 裸键加引号（只对字符串外的 code 段）；
+    json.loads 校验，失败直接 raise（构建挂掉好过静默错数）。"""
+    src = (ROOT / "src" / "js" / "03-pricing.js").read_text(encoding="utf-8")
+    i = src.index("const PRICE_EVENTS=")
+    j = src.index("[", i)
+    # 字符串感知的方括号配对扫描（字符串里的 // /* 不算注释，] 不算闭合）
+    depth, k, in_str, q = 0, j, False, ""
+    while k < len(src):
+        c = src[k]
+        if in_str:
+            if c == "\\":
+                k += 2
+                continue
+            if c == q:
+                in_str = False
+        elif c in "\"'":
+            in_str, q = True, c
+        elif c == "[":
+            depth += 1
+        elif c == "]":
+            depth -= 1
+            if depth == 0:
+                break
+        k += 1
+    lit = src[j:k + 1]
+    out = []
+    for is_str, seg in _split_js_literal(lit):
+        if is_str:
+            out.append(seg)
+        else:
+            seg = re.sub(r"([{,]\s*)([A-Za-z_$][\w$]*)(\s*:)", r'\1"\2"\3', seg)
+            seg = re.sub(r",\s*([}\]])", r"\1", seg)
+            out.append(seg)
+    events = json.loads("".join(out))
+    if not isinstance(events, list) or not events:
+        raise ValueError("PRICE_EVENTS extraction produced no events")
+    for ev in events:
+        for f in ("id", "conf", "entries"):
+            if f not in ev:
+                raise ValueError(f"event missing field {f}: {ev.get('id')}")
+    return events
+
+
+def frontier_membership(rows, target):
+    """门槛制前沿判定（与 build_site.frontier_of / 04-core.js buildTiers 同口径）：
+    分数降序扫，只有严格比「已见的所有更强模型」都便宜时才成为一档。
+    rows = [(name, score, cost)]；返回 target 是否在前沿。"""
+    costed = [(s, c, n) for (n, s, c) in rows if s is not None and c is not None]
+    costed.sort(key=lambda x: (-x[0], x[1]))
+    best = None
+    for s, c, n in costed:
+        if best is None or c < best - 1e-12:
+            best = c
+            if n == target:
+                return True
+    return False
+
+
+def verdict_after_change(name, after_pin, after_pout, boards):
+    """结论列：用调价后价格重算该模型出现的每个文本榜（unit=task）的前沿。
+    调价后成本 = 榜面实测 cost × blend(after价)/blend(榜面价)（用量不随价变，按单价比例缩放）。
+    返回 (on, total)；模型不在任何可判定榜 → None。"""
+    on = total = 0
+    for b in boards:
+        if b.get("unit") == "image":
+            continue
+        tgt = None
+        for m in b["models"]:
+            if (m["model"] == name and m["score"] is not None
+                    and m["cost_per_task_p50_usd"] is not None
+                    and m["price_in_per_m_usd"] and m["price_out_per_m_usd"]):
+                tgt = m
+                break
+        if tgt is None:
+            continue
+        base = blend(tgt["price_in_per_m_usd"], tgt["price_out_per_m_usd"])
+        if base <= 0:
+            continue
+        cost_after = tgt["cost_per_task_p50_usd"] * blend(after_pin, after_pout) / base
+        rows = [(m["model"], m["score"],
+                 cost_after if m["model"] == name else m["cost_per_task_p50_usd"])
+                for m in b["models"]]
+        total += 1
+        if frontier_membership(rows, name):
+            on += 1
+    return (on, total) if total else None
+
+
+URL_RE = re.compile(r"\b((?:[a-z0-9-]+\.)+[a-z]{2,}(?:/[^\s;,)\]]*)?)", re.I)
+
+
+def source_links(src_text):
+    """事件 src 文本 → 可点来源链接（只转文本里已出现的 URL 形态 token，不新增不猜测）。
+    无 URL token → 返回 []（调用方回退为纯文本展示）。"""
+    links, seen = [], set()
+    for m in URL_RE.finditer(src_text):
+        u = m.group(1).rstrip(".")
+        host = u.split("/")[0].lower()
+        if host in seen:
+            continue
+        seen.add(host)
+        links.append(f'<a href="https://{u}" rel="nofollow noopener" target="_blank">{host}</a>')
+    return links
+
+
+def fmt_price(p):
+    return f"{p:.4f}".rstrip("0").rstrip(".") if p < 1 else f"{p:.2f}"
+
+
+def family_of(names):
+    """entries 多个模型名 → 最长公共前缀（截到最后完整 token）作事件主体名。"""
+    if len(names) == 1:
+        return names[0]
+    pre = names[0]
+    for x in names[1:]:
+        while not x.startswith(pre):
+            pre = pre[:-1]
+    pre = pre.rstrip(" -(（")
+    return pre or names[0]
+
+
+def pd_after_price(ev, e):
+    """「调价后」价格：date 事件 = after（官宣新价/核验价）；
+    tod 事件 = off（错峰可达最低价，peak/off 两档并存）。"""
+    if ev["kind"] == "tod":
+        return e["off"]
+    return e["after"]
+
+
+def pd_moves(events):
+    """页头传播句候选：每个 official 事件的 |输入价变化幅度|（date=before→after，tod=off vs peak）。"""
+    moves = []
+    for ev in events:
+        if ev.get("conf") != "official":
+            continue
+        names = list(ev["entries"].keys())
+        for nm, e in ev["entries"].items():
+            if ev["kind"] == "tod":
+                pct = (e["off"][0] / e["peak"][0] - 1) * 100
+                eff = "tod"
+            else:
+                pct = (e["after"][0] / e["before"][0] - 1) * 100
+                eff = ev.get("date", "")
+            moves.append({"model": family_of(names), "pct": pct,
+                          "bin": e["before" if ev["kind"] != "tod" else "peak"][0],
+                          "ain": e["off" if ev["kind"] == "tod" else "after"][0],
+                          "eff": eff, "ev": ev})
+    return moves
+
+
+def build_price_drops(lc, t, events, leaderboards, captured, gen_now):
+    canon = "price-drops.html"
+    # 页头传播句：|pct| 最大的 official 事件（数据实算，不手写）
+    moves = pd_moves(events)
+    head_line = ""
+    if moves:
+        mv = max(moves, key=lambda x: abs(x["pct"]))
+        eff_lbl = (t["pd_eff_tod"].format(w="01:00–04:00 & 06:00–10:00") if mv["eff"] == "tod"
+                   else t["pd_eff_future"].format(date=mv["eff"]))
+        head_line = t["pd_headline"].format(
+            model=mv["model"], bin=fmt_price(mv["bin"]), ain=fmt_price(mv["ain"]),
+            pct=f"{mv['pct']:+.0f}", eff=eff_lbl)
+
+    def verdict_cell(name, e, ev):
+        after = pd_after_price(ev, e)
+        v = verdict_after_change(name, after[0], after[1], leaderboards)
+        if v is None:
+            return "—", after
+        on, total = v
+        word = t["pd_verdict_on"] if on else t["pd_verdict_off"]
+        detail = t["pd_boards"].format(on=on, total=total)
+        tip = (f"after ${fmt_price(after[0])}/${fmt_price(after[1])} per M "
+               f"(in/out) — {on} of {total} task boards still frontier")
+        cls = "pd-on" if on else "pd-off"
+        return (f'<span class="{cls}" title="{tip}"><b>{word}</b> · {detail}</span>', after)
+
+    def eff_cell(ev):
+        if ev["kind"] == "tod":
+            ws = " & ".join(f"{w[0]:02d}:00–{w[1]:02d}:00" for w in ev["windows"])
+            return t["pd_eff_tod"].format(w=ws)
+        d = ev.get("date", "")
+        return (t["pd_eff_future"] if ev.get("future") else t["pd_eff_date"]).format(date=d)
+
+    def change_cell(ev, e):
+        if ev["kind"] == "tod":
+            return t["pd_change_tod"].format(pki=fmt_price(e["peak"][0]), pko=fmt_price(e["peak"][1]),
+                                             ofi=fmt_price(e["off"][0]), ofo=fmt_price(e["off"][1]))
+        if ev.get("conf") != "official":
+            return t["pd_change_duo"].format(bi=fmt_price(e["before"][0]), bo=fmt_price(e["before"][1]),
+                                             ai=fmt_price(e["after"][0]), ao=fmt_price(e["after"][1]))
+        return t["pd_change_mv"].format(bi=fmt_price(e["before"][0]), bo=fmt_price(e["before"][1]),
+                                        ai=fmt_price(e["after"][0]), ao=fmt_price(e["after"][1]))
+
+    def event_table(group_events):
+        if not group_events:
+            return f'<p class="hint pd-empty">{t["pd_empty"]}</p>'
+        bodies = []
+        n_rows = 0
+        for ev in group_events:
+            badge = t["pd_badge_v"] if ev.get("conf") == "official" else t["pd_badge_u"]
+            links = source_links(ev.get("src", ""))
+            src_html = (" ".join(links) if links
+                        else (ev.get("src", "") or "").split(";")[0].strip())
+            head_row = (f'<tr class="pd-ev"><td colspan="4"><b>{ev["name"]}</b> '
+                        f'<span class="pd-badge">{badge}</span><br>'
+                        f'<span class="pd-src">{t["pd_source"]}: {src_html}</span></td></tr>')
+            rows = []
+            for nm, e in ev["entries"].items():
+                vtxt, _ = verdict_cell(nm, e, ev)
+                rows.append(f'<tr class="pd-row" data-pd-row><td class="nm"><b>{nm}</b></td>'
+                            f'<td>{change_cell(ev, e)}</td>'
+                            f'<td>{eff_cell(ev)}</td>'
+                            f'<td>{vtxt}</td></tr>')
+                n_rows += 1
+            bodies.append(f"<tbody>{head_row}{''.join(rows)}</tbody>")
+        return (f'<table class="ranktbl pd" data-pd-count="{n_rows}">'
+                f'<thead><tr><th>{t["pd_col_model"]}</th><th>{t["pd_col_change"]}</th>'
+                f'<th>{t["pd_col_eff"]}</th><th>{t["pd_col_verdict"]}</th></tr></thead>'
+                f'{"".join(bodies)}</table>')
+
+    official = [e for e in events if e.get("conf") == "official"]
+    uncertain = [e for e in events if e.get("conf") != "official"]
+
+    html = head(lc, t["pd_title"], t["pd_desc"], canon,
+                alt_path=canon, og=True)
+    html += lang_nav(lc)
+    html += f'<h1 style="margin-top:10px">{t["pd_h1"]}</h1>'
+    if head_line:
+        html += f'<p class="pd-headline">{head_line}</p>'
+    html += f'<p class="hint">{t["pd_intro"]}</p>'
+    html += f'<p class="hint pd-note">{t["pd_note"]}</p>'
+    html += f'<div class="panel" style="margin-top:12px"><h2>{t["pd_verified_h2"]}</h2>{event_table(official)}</div>'
+    html += (f'<div class="panel" style="margin-top:12px"><h2>{t["pd_unverified_h2"]}</h2>'
+             f'{event_table(uncertain)}</div>')
+    calc_href = locale_prefix(lc)
+    html += (f'<div class="panel" style="margin-top:12px"><p class="hint">{t["pd_cta_line"]}</p>'
+             f'<p style="margin-top:8px"><a class="btn primary" href="{calc_href}">{t["pd_cta_btn"]}</a></p></div>')
+    html += (f'<p class="hint" style="margin-top:18px">{t["pd_dataasof"].format(captured=captured, gen=gen_now)} '
+             f'<a href="{locale_prefix(lc)}method.html">{t["method"]}</a> · '
+             f'<a href="{locale_prefix(lc)}">{t["back"]}</a></p></div>\n'
+             f'<script src="/analytics.js" defer></script>\n</body>\n</html>')
+    return html, canon
+
+
+def append_llms(line):
+    """往 dist/llms.txt 的 Pages 段追加一行（build_seo_pages 在 build_site 之后跑）。"""
+    f = OUT / "llms.txt"
+    s = f.read_text(encoding="utf-8")
+    f.write_text(s.rstrip("\n") + "\n" + line + "\n", encoding="utf-8")
+
+
 def append_sitemap(entries):
     """往 dist/sitemap.xml 追加 SEO 页条目（build_seo_pages 在 build_site 之后跑）。"""
     smf = OUT / "sitemap.xml"
@@ -380,10 +850,13 @@ def append_sitemap(entries):
 def main():
     data = json.loads(ALL.read_text(encoding="utf-8"))
     captured = data["meta"].get("captured") or data["meta"].get("scraped", "")
+    captured_scraped = data["meta"].get("scraped") or captured
     entry = next(b for b in data["leaderboards"] if b["id"] == "overall_os")
     tiers = entry["frontier"]
     n_pages, n_urls = 0, 0
     entries = []
+    gen_now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M")
+    events = js_price_events()
     for lc in LOCALES:
         t = L10N[lc]
         od = (OUT / lc / "alternatives") if lc != "en" else (OUT / "alternatives")
@@ -402,8 +875,15 @@ def main():
             f.write_text(html, encoding="utf-8")
             entries.append((lc, canon))
             n_pages += 1
+        # /price-drops 静态调价页（数据 = 03-pricing.js PRICE_EVENTS + all.json 前沿）
+        html, canon = build_price_drops(lc, t, events, data["leaderboards"], captured_scraped, gen_now)
+        f = (OUT / lc / canon) if lc != "en" else (OUT / canon)
+        f.write_text(html, encoding="utf-8")
+        entries.append((lc, canon))
+        n_pages += 1
     n_canon, n_urls = append_sitemap(entries)
-    print(f"seo pages: wrote {n_pages} files ({n_canon} canonical paths, sitemap +{n_urls} urls, frontier={len(tiers)}, locales={len(LOCALES)})")
+    append_llms(f"- [Price drops & changes]({DOMAIN}/price-drops.html): every tracked LLM price move — old → new $/M prices, effective dates, sources, and an auto-computed verdict of whether each model stays on its board's Pareto frontier after the change.")
+    print(f"seo pages: wrote {n_pages} files ({n_canon} canonical paths, sitemap +{n_urls} urls, frontier={len(tiers)}, locales={len(LOCALES)}, price_events={len(events)})")
 
 
 if __name__ == "__main__":
