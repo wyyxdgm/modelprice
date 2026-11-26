@@ -150,7 +150,8 @@ p3=$(smoke_curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$B/ja/price-dro
 pd=$(smoke_curl -s --max-time 20 "$B/price-drops.html")
 [[ "$pd" == *'<link rel="canonical" href="https://modelprice.damolabs.app/price-drops.html">'* ]] || { echo "❌ price-drops 缺 canonical"; fail=1; }
 [[ "$pd" == *'property="og:image"'* && "$pd" == *'name="twitter:card"'* ]] || { echo "❌ price-drops 缺 og:image/twitter:card"; fail=1; }
-n_pd=$(echo "$pd" | grep -c 'data-pd-row' || true)
+n_pd=$(echo "$pd" | grep -o 'data-pd-row' | wc -l | tr -d ' ')
+# ⚠️ 用 grep -o|wc -l 不用 grep -c：grep -c 数物理行，整页表格可能挤在一行 → 假性不足
 [[ "$n_pd" -ge 10 ]] || { echo "❌ price-drops 表格行数异常: $n_pd (期望 ≥10 调价行)"; fail=1; }
 [[ "$pd" == *'pd-on'* || "$pd" == *'pd-off'* ]] || { echo "❌ price-drops 缺结论列判定（pd-on/pd-off）"; fail=1; }
 [[ "$pd" == *'Data as of 20'* && "$pd" == *'generated 20'* ]] || { echo "❌ price-drops 缺 Data as of/generated 脚注"; fail=1; }
