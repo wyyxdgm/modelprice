@@ -408,7 +408,8 @@
   "rank": "Classement éco",
   "rankT": "Réponse directe : à votre barre de qualité et profil de tâche quotidien — qui coûte le moins par tâche, de combien de points, pour combien de $",
   "deep": "Paliers & graphiques",
-  "deepT": "Carte du gagnant, escalier, nuage de points, courbe hebdo, tableaux des paliers et des modèles"
+  "deepT": "Carte du gagnant, escalier, nuage de points, courbe hebdo, tableaux des paliers et des modèles",
+  "calc": "Abonnement vs API"
  },
  "rank": {
   "ctrlH2": "Critères du classement",
@@ -476,6 +477,40 @@
   "copy": "Copier le lien",
   "copiedHint": "Collez-le n'importe où — le lien contient tout l'état de votre analyse"
  },
+ "calc": {
+  "h2": "Abonnement vs API — votre facture",
+  "intro": "Entrez votre abonnement et votre usage quotidien : l'outil le compare à l'API la moins chère au-dessus de votre barre de qualité, avec le scénario heures pleines/créuses et cache en cours.",
+  "fee": "Frais mensuels",
+  "curUsd": "$ USD",
+  "curCny": "¥ CNY",
+  "tasks": "Tâches par jour",
+  "barFlagship": "Flagship (top 10)",
+  "barMid": "Équilibré",
+  "barMin": "Sans filtre",
+  "barHint": "Par défaut = seuil flagship : le 10e score du classement. Baissez la barre pour admettre des alternatives moins chères.",
+  "barDefaultTag": "flagship par défaut",
+  "go": "Calculer ma facture",
+  "placeholder": "Réglez le tarif et l'usage ci-dessous, puis cliquez sur Calculer. La carte de verdict se copie et s'exporte en image.",
+  "concApi": "À {n} tâches/jour, l'abonnement à {fee} coûte {diff}/mois de plus que l'API de {model} — la même charge revient à {api}/mois en API, soit ~{perDay}/jour récupérés.",
+  "concSub": "À {n} tâches/jour, l'abonnement à {fee} gagne : la même charge en API (la moins chère est {model}, {score} pts, {perTask}/tâche) coûterait {api}/mois — l'abonnement économise {diff}/mois.",
+  "concTie": "À {n} tâches/jour, quasi égalité : abonnement {fee}/mois vs API {api}/mois ({model}).",
+  "beLow": "Le seuil de rentabilité de l'abonnement est {be} tâches/jour — vous êtes en dessous.",
+  "beHigh": "Vous êtes au-dessus du seuil de rentabilité : rentable dès {be} tâches/jour ; vous êtes à {n}.",
+  "perDay": "/jour",
+  "kpiPlan": "Abonnement / mois",
+  "kpiApi": "API / mois",
+  "kpiDiff": "Abonnement − API",
+  "kpiBe": "Rentabilité",
+  "excluded": "{n} modèles au-dessus de la barre n'affichent pas de prix API et sont exclus de la comparaison.",
+  "none": "Aucun modèle de ce classement n'atteint un score ≥ {bar}. Baissez la barre ou changez de classement.",
+  "basis": "Base : {profile} · API la moins chère à score ≥ {bar} sur {board} · prix du {date} · scénario heures pleines/créuses et cache en cours",
+  "disclaimer": "Estimation — quotas d'abonnement, limites de débit et bridage non modélisés. Vérifiez les conditions actuelles de chaque fournisseur.",
+  "cnyNote": "¥ converti à {rate} ¥/$ (fixe, 2026-11).",
+  "copyText": "Copier le verdict",
+  "export": "Exporter l'image",
+  "imgTitle": "Abonnement vs API — votre facture",
+  "imgFooter": "Estimation · quotas non modélisés · prix du {date} · modelprice.damolabs.app"
+ },
  "faq": [
   {
    "q": "Pourquoi le prix du classement ne correspond-il pas à mon coût réel ?",
@@ -488,6 +523,10 @@
   {
    "q": "Que signifie « fusion CI stricte » ?",
    "a": "Les scores Arena comportent du bruit statistique : en mode strict, les paliers dont les intervalles de confiance à 95 % se chevauchent sont fusionnés, pour ne pas payer un écart de classement que les données ne soutiennent pas."
+  },
+  {
+   "q": "Mon abonnement à 20 $/mois est-il moins cher que le paiement au token ?",
+   "a": "Cela dépend de votre volume. Le calculateur de rentabilité compare votre abonnement à l'API la moins chère au-dessus d'une barre de qualité, selon vos tâches par jour — heures pleines/créuses et remises de cache incluses. Seuil = abonnement ÷ coût API par tâche, en tâches/jour."
   }
  ]
 }

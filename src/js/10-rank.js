@@ -174,11 +174,13 @@ function renderRank(){
     [...$('#tabs').children].forEach(x=>x.classList.toggle('on',x.dataset.tab===S.tab));
     $('#rankView').style.display=S.tab==='rank'?'':'none';
     $('#deepView').style.display=S.tab==='deep'?'':'none';
+    $('#calcView').style.display=S.tab==='calc'?'':'none';
   }
   $('#tabs').onclick=e=>{ const b=e.target.closest('button'); if(!b)return;
     S.tab=b.dataset.tab;
     applyTabUI();
     if(S.tab==='deep') recompute();     // 隐藏容器里量不到宽度，切回来重渲图表
+    if(S.tab==='calc'&&typeof calcApplyUI==='function') calcApplyUI();   // 首次进计算器页签先落输入框默认值
   };
   /* 初始按 S.tab 显隐。⚠️ 本文件先于 09-boot 加载：此时 URL 还没恢复，
      tab=deep 的显隐由 boot 恢复后回调 applyTabUI 补上（不补 = 深链停在排行榜页）。 */

@@ -408,7 +408,8 @@
   "rank": "Best value",
   "rankT": "Direct answer: at your quality bar and daily-task profile — who is cheapest per task, by how many points, for how many $",
   "deep": "Tiers & charts",
-  "deepT": "Winner card, step chart, scatter, weekly cost curve, tier & model tables"
+  "deepT": "Winner card, step chart, scatter, weekly cost curve, tier & model tables",
+  "calc": "Plan vs API"
  },
  "rank": {
   "ctrlH2": "Ranking standard",
@@ -476,6 +477,40 @@
   "copy": "Copy link",
   "copiedHint": "Paste it anywhere — the link carries your full analysis state"
  },
+ "calc": {
+  "h2": "Plan vs API — your bill",
+  "intro": "Enter your plan fee and daily usage: the tool compares the plan with the cheapest API above your quality bar, at the current peak/off-peak & cache scenario.",
+  "fee": "Monthly plan fee",
+  "curUsd": "$ USD",
+  "curCny": "¥ CNY",
+  "tasks": "Tasks per day",
+  "barFlagship": "Flagship (top 10)",
+  "barMid": "Balanced",
+  "barMin": "Anything goes",
+  "barHint": "Default = flagship cut: the 10th-highest score on the board. Lower the bar to admit cheaper alternatives.",
+  "barDefaultTag": "flagship cut",
+  "go": "Calculate my bill",
+  "placeholder": "Set your plan fee and usage below, then hit Calculate. The verdict card is copy-ready and exports as a shareable image.",
+  "concApi": "At {n} tasks/day, the {fee} plan costs {diff}/mo more than {model}'s API — the same workload runs {api}/mo on API, about {perDay}/day back in your pocket.",
+  "concSub": "At {n} tasks/day the {fee} plan wins: the same workload on API (cheapest is {model}, {score} pts, {perTask}/task) would run {api}/mo — the plan saves {diff}/mo.",
+  "concTie": "About a wash at {n} tasks/day: plan {fee}/mo vs API {api}/mo on {model}.",
+  "beLow": "Break-even for the plan is {be} tasks/day — you are below it.",
+  "beHigh": "You are above the plan's break-even: it pays off from {be} tasks/day; you are at {n}.",
+  "perDay": "/day",
+  "kpiPlan": "Plan / month",
+  "kpiApi": "API / month",
+  "kpiDiff": "Plan − API",
+  "kpiBe": "Break-even",
+  "excluded": "{n} models clearing the bar list no API prices and are excluded from the comparison.",
+  "none": "No model on this board reaches score ≥ {bar}. Lower the bar or pick another board.",
+  "basis": "Basis: {profile} · cheapest API at score ≥ {bar} on {board} · {date} board prices · current peak/off-peak & cache scenario",
+  "disclaimer": "Estimate only: subscription quotas, rate limits and throttling are not modeled. Check each provider's current terms.",
+  "cnyNote": "CNY converted at {rate} CNY/USD (fixed, 2026-11).",
+  "copyText": "Copy verdict",
+  "export": "Export image",
+  "imgTitle": "Plan vs API — your bill",
+  "imgFooter": "Estimate · quotas not modeled · {date} board prices · modelprice.damolabs.app"
+ },
  "faq": [
   {
    "q": "Why doesn't the leaderboard price match my real cost?",
@@ -488,6 +523,10 @@
   {
    "q": "What does \"strict CI merging\" mean?",
    "a": "Arena scores carry statistical noise: tiers whose 95% confidence intervals overlap are merged in strict mode, so you don't pay a premium for a ranking difference the data can't support."
+  },
+  {
+   "q": "Is my $20/month plan cheaper than paying per token?",
+   "a": "It depends on your volume. The break-even calculator compares your plan fee with the cheapest API above a quality bar at your daily task count, including peak/off-peak pricing and cache discounts. Break-even = plan fee divided by API per-task cost, expressed in tasks per day."
   }
  ]
 }

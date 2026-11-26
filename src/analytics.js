@@ -11,8 +11,10 @@
 // Until window.umami exists every call is a no-op, so this site never waits on or breaks for it.
 // Privacy: aggregate-only, cookieless, no personal data.
 // Events (EXP-006 判读指标，见 autorev EXPERIMENTS.md §EXP-006):
-//   mp_share_click    — 分享栏（X / Reddit / Copy state link）点击，props.channel = x|reddit|copy
-//   mp_calc_complete  — W1 包月 vs API 计算器完成测算时上报（现留桩，见下方 mpCalcComplete）
+//   mp_share_click    — 分享栏（X / Reddit / Copy state link）+ 计算器「复制结论/导出图」点击，
+//                       props.channel = x|reddit|copy|copy-verdict|export-image
+//   mp_calc_complete  — 计算器「算这笔账」提交时上报一次（W1 已接入，触发点 src/js/11-calculator.js calcTrack；
+//                       直接加载 / 切页签 / 深链还原不触发，只有用户显式提交算一次）
 (function () {
   'use strict';
 
@@ -25,11 +27,10 @@
   }
   window.mpTrack = track;
 
-  /* W1 接入点（autorev docs/modelprice-plan.md §W1「包月 vs API 回本计算器」）：
-     计算器完成一次测算（用户拿到结论卡）时调用：
-       window.mpCalcComplete({ preset: 'dev', monthly: 20 });
-     现阶段计算器未上线，此函数为预留桩 —— 先定义事件名与调用面，W1 只需在
-     结论卡渲染处补一次调用，事件名即与 EXP-006 预注册一致（mp_calc_complete）。 */
+  /* W1 接入点（autorev docs/modelprice-plan.md §W1「包月 vs API 回本计算器」，2026-11-26 已接线）：
+     计算器完成一次测算（用户点「算这笔账」）时由 11-calculator.js 调用：
+       window.mpCalcComplete({ preset, board, bar, fee, tasks_per_day, api_month, winner, dir });
+     事件名与 EXP-006 预注册一致（mp_calc_complete）。 */
   window.mpCalcComplete = function (props) {
     track('mp_calc_complete', props);
   };

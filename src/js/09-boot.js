@@ -27,7 +27,7 @@ $('#sourceBody').innerHTML=bootSub(T('boot.sourceBody'));
   if(p.get('ev')!=null){ const on=new Set(p.get('ev').split(',').filter(Boolean));
     PRICE_EVENTS.forEach(e=>{ S.evState[e.id]=on.has(e.id); }); }
   /* —— 排行榜页签状态（tab=rank|deep；rk=画像预设；ri/ro=画像 in/out k；rd=每天次数；rt=质量门槛；rp=时段快捷） —— */
-  if(p.get('tab')==='deep'||p.get('tab')==='rank'){ S.tab=p.get('tab');
+  if(p.get('tab')==='deep'||p.get('tab')==='rank'||p.get('tab')==='calc'){ S.tab=p.get('tab');
     /* 10-rank 的初始显隐在更早加载时就按默认 rank 落了 DOM；URL 改了 S.tab 必须重 apply，
        且要在下方 rAF 首渲之前 —— 深视图容器隐藏时量不到宽度。 */
     if(typeof applyTabUI==='function') applyTabUI(); }
@@ -42,9 +42,18 @@ $('#sourceBody').innerHTML=bootSub(T('boot.sourceBody'));
     else { S.hour=12; S.dow=6; }
   }
   if(p.get('rt')!=null){ S.rankT=+p.get('rt')||0; S.rankTSet=true; }
+  /* —— 计算器状态（11-calculator）：cb=板块 cc=币种 cf=月费 cn=每日任务 cp=画像 ct=门槛 —— */
+  if(p.get('cb')&&DATASETS[p.get('cb')]&&DATASETS[p.get('cb')].unit!=='image') S.calc.board=p.get('cb');
+  if(p.get('cc')==='usd'||p.get('cc')==='cny') S.calc.cur=p.get('cc');
+  if(p.get('cf')!=null) S.calc.fee=Math.max(0,+p.get('cf')||0);
+  if(p.get('cn')!=null) S.calc.tasks=Math.max(1,Math.round(+p.get('cn')||1));
+  if(p.get('cp')&&RANK_PRESETS[p.get('cp')]) S.calc.profile=p.get('cp');
+  if(p.get('ct')!=null){ S.calc.bar=+p.get('ct')||0; S.calc.barSet=true; }
   /* 一键场景（与首屏卡片共用 SCENARIOS/applyScene）：?scene=coding|agent|offpeak */
   if(p.get('scene')) applyScene(p.get('scene'));
   syncPriceUI();
+  /* 计算器深链（?tab=calc）：boot 在此同步 UI + 静默首算（不发 mp_calc_complete） */
+  if(S.tab==='calc'&&typeof calcBoot==='function') calcBoot();
   if(p.get('lo')&&p.get('hi')){ S.lo=+p.get('lo'); S.hi=+p.get('hi'); }
   /* 首渲延到首帧（布局稳定后再量容器宽）：fresh navigation 下同步首渲会在预布局期量错宽度。
      图表宽渲染在 render 内部，recompute 的数据计算不依赖布局，rAF 只挪渲染时机。 */

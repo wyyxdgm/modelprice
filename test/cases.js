@@ -898,6 +898,155 @@ TC('分享链路：og/twitter 齐全 + 分享栏三键各发一条 mp_share_clic
   return 'og:image(1200×630)/twitter:card/shareBar 在位；x→reddit→copy 各发 mp_share_click（channel 区分）';
 });
 
+/* ==================== W1 包月 vs API 回本计算器（2026-11-26，src/js/11-calculator.js） ==================== */
+/* 测试统一走「榜面快照」情景（reset() = offTime），与 33 条历史结论同一口径，可复现。 */
+function calcReset(){ reset(); S.tab='calc';
+  S.calc={cur:'usd',fee:20,tasks:30,profile:'dev',board:'overall_all',
+          bar:null,barSet:false,computed:false,noPrice:0,result:null}; }
+TC('计算器：默认旗舰门槛 = 榜10位分数（数据实算）+ 冠军 = 门槛内带价模型暴力最小', ()=>{
+  calcReset();
+  const d=DATASETS.overall_all;
+  calcCompute(false);
+  const sdesc=d.models.map(m=>m.s).filter(x=>x!=null).sort((a,b)=>b-a);
+  const cut=sdesc[Math.min(9,sdesc.length-1)];
+  if(S.calc.bar!==cut) throw new Error('旗舰默认门槛应为第10名分数 '+cut+'，实际 '+S.calc.bar);
+  const r=S.calc.result;
+  if(!r) throw new Error('默认状态应有结果');
+  const bruteBest=d.models.filter(m=>m.s!=null&&m.s>=cut&&m.pin!=null&&m.pout!=null)
+    .map(m=>({m,per:calcTaskCost(m,20,2)})).filter(x=>x.per!=null)
+    .sort((a,b)=>a.per-b.per||b.m.s-a.m.s)[0];
+  if(bruteBest.m.n!==r.model.n) throw new Error('冠军应='+bruteBest.m.n+'，实际 '+r.model.n);
+  if(Math.abs(bruteBest.per-r.perTask)>1e-12) throw new Error('单任务成本不一致');
+  if(r.apiMonth!==r.perTask*30*S.calc.tasks) throw new Error('月成本=单任务×次数×30 不符');
+  return `门槛 ${cut}（榜10位）→ 冠军 ${r.model.n} ${fmt$(r.perTask)}/task，API 月账 ${fmt$(r.apiMonth)}（暴力一致）`;
+});
+TC('计算器：两方向判定 + 盈亏平衡点互逆（be×单任务×30=月费）+ 平局带', ()=>{
+  calcReset();
+  const d=DATASETS.overall_all;
+  S.calc.barSet=true; S.calc.bar=d.stats.score_max-5; calcCompute(false);
+  const per=S.calc.result.perTask;
+  if(!(per>0)) throw new Error('perTask 应>0');
+  S.calc.fee=2000; calcCompute(false);
+  if(!(S.calc.result.diff>0)) throw new Error('fee=2000 应判「API 更省」（diff>0）');
+  const be=S.calc.result.be;
+  if(Math.abs(be*per*30-2000)>1e-6) throw new Error('盈亏平衡互逆失败: be×per×30='+be*per*30+' ≠ 2000');
+  if(Math.abs(be-2000/(per*30))>1e-9) throw new Error('be 公式不符: be='+be+' 期望 '+2000/(per*30));
+  S.calc.fee=0.01; calcCompute(false);
+  if(!(S.calc.result.diff<0)) throw new Error('fee=0.01 应判「包月划算」（diff<0）');
+  S.calc.fee=Math.round(S.calc.result.apiMonth*100)/100; calcCompute(false);
+  if(!S.calc.result.tie) throw new Error('fee=API 月成本应判平局');
+  return `perTask=${fmt$(per)} · 平衡点 ${fmtR(be,1)}/天 · API省/包月划算/平局 三方向判定 OK`;
+});
+TC('计算器：无公布价模型剔除明示（noPrice 计数）+ 全无价 → 空态不编数', ()=>{
+  calcReset();
+  /* 合成「全无价」板块：pin/pout 双无 → 引擎必须拒绝给出冠军（红线：算不完整不参与对比） */
+  DATASETS.__calc_empty={unit:'task',license:'all',label:'no-price test',meta:'',note:'',
+    stats:{n:1,with_cost:0,score_min:1000,score_max:1010,cost_min:null,cost_max:null},
+    models:[{n:'NoPrice-1',s:1005,sLo:1004,sHi:1006,c:0.1,cRaw:0.1,pin:null,pout:null}]};
+  S.calc.board='__calc_empty'; calcCompute(false);
+  if(S.calc.noPrice!==1) throw new Error('noPrice 应=1，实际 '+S.calc.noPrice);
+  if(S.calc.result!==null) throw new Error('全无价板块应无结果（不编数）');
+  const html=$('#calcCard').children.map(c=>c.textContent||c.innerHTML||'').join(' ');
+  if(html.indexOf(T('calc.none').slice(0,6))<0) throw new Error('空态文案未上卡: '+html.slice(0,120));
+  if(html.indexOf(fmtN(1005))<0) throw new Error('空态应回显门槛数值');
+  delete DATASETS.__calc_empty;
+  /* 真实榜：达标集里无公布价模型的剔除计数 */
+  S.calc.board='overall_all'; calcCompute(false);
+  const d=DATASETS.overall_all, cut=S.calc.bar;
+  const exp=d.models.filter(m=>m.s!=null&&m.s>=cut&&(m.pin==null||m.pout==null)).length;
+  if(S.calc.noPrice!==exp) throw new Error('noPrice 计数不符: '+S.calc.noPrice+' vs '+exp);
+  return '合成全无价榜 → 空态明示；overall_all 门槛内剔除 '+S.calc.noPrice+' 个无价模型';
+});
+TC('计算器：¥ 折算（CALC_USD_CNY）+ stateUrl 深链 6 参数 round-trip', ()=>{
+  calcReset();
+  S.calc.cur='cny'; S.calc.fee=140; S.calc.tasks=30; S.calc.profile='heavy';
+  S.calc.barSet=true; S.calc.bar=1700;
+  calcCompute(false);
+  const feeUSD=140/CALC_USD_CNY;
+  if(Math.abs(S.calc.result.fee-feeUSD)>1e-9) throw new Error('¥140 应折算 '+feeUSD+'，实际 '+S.calc.result.fee);
+  const winnerBefore=S.calc.result.model.n;
+  const u=stateUrl();
+  const q={}; u.split('?')[1].split('&').forEach(kv=>{const [k,v]=kv.split('=');q[k]=decodeURIComponent(v);});
+  if(q.tab!=='calc') throw new Error('深链应带 tab=calc');
+  if(q.cb!=='overall_all'||q.cc!=='cny'||q.cf!=='140'||q.cn!=='30'||q.cp!=='heavy'||q.ct!=='1700')
+    throw new Error('深链参数缺失/不符: '+JSON.stringify(q));
+  /* 与 09-boot 同规则回填 → 复算 → 冠军一致（深链可复算） */
+  calcReset();
+  S.calc.board=q.cb; S.calc.cur=q.cc; S.calc.fee=+q.cf; S.calc.tasks=+q.cn;
+  S.calc.profile=q.cp; S.calc.bar=+q.ct; S.calc.barSet=true;
+  calcCompute(false);
+  if(S.calc.result.model.n!==winnerBefore) throw new Error('深链复算冠军漂移: '+winnerBefore+' → '+S.calc.result.model.n);
+  /* 币种换算已经由上方 ¥140→feeUSD 断言覆盖（切换 UI 逻辑走 calcCur seg，浏览器侧手测） */
+  return `¥140→${fmt$(feeUSD)} · 深链 6 参数齐全 · 复算冠军 ${winnerBefore} 一致`;
+});
+TC('计算器：提交测算发一次 mp_calc_complete（payload 带 preset/board/bar/dir/winner）', ()=>{
+  calcReset();
+  const evs=[];
+  global.window={mpCalcComplete:p=>evs.push(p)};
+  try{
+    calcCompute(true);                    // 「算这笔账」路径（fire=true）
+    if(evs.length!==1) throw new Error('应发 1 次事件，实际 '+evs.length);
+    const p=evs[0];
+    if(p.preset!==S.calc.profile||p.board!=='overall_all'||!p.winner||!p.dir||!(p.bar>0))
+      throw new Error('payload 不全: '+JSON.stringify(p));
+    if(!['api','plan','tie'].includes(p.dir)) throw new Error('dir 非法: '+p.dir);
+    calcCompute(false);                   // 情景微调（fire=false）不得再发
+    calcCompute(false);
+    if(evs.length!==1) throw new Error('fire=false 不应发事件，实际 '+evs.length);
+  } finally { delete global.window; }
+  return '事件 1 次 · preset='+evs[0].preset+' dir='+evs[0].dir+' winner='+evs[0].winner+'；微调不发';
+});
+TC('计算器：结论卡渲染（数字/口径/免责在卡上）+ 复制文本含链接 + 无 canvas 导出安全跳过', ()=>{
+  calcReset();
+  const m0=I18N_MISSING.length;
+  calcCompute(false);
+  const r=S.calc.result;
+  const txt=$('#calcCard').children.map(c=>c.textContent||c.innerHTML||'').join(' ');
+  for(const s of [fmt$(r.apiMonth), String(r.model.s), T('calc.disclaimer').slice(0,16), fmtR(r.be,1)])
+    if(txt.indexOf(s)<0) throw new Error('卡上缺: '+s);
+  if(I18N_MISSING.length!==m0) throw new Error('新增缺失 keys: '+I18N_MISSING.slice(m0).join(','));
+  const t=calcText();
+  if(t.indexOf(r.model.n)<0||t.indexOf('http')<0||t.indexOf(T('calc.disclaimer').slice(0,10))<0)
+    throw new Error('复制文本不完整（应含结论+免责+深链）');
+  let ok=false;
+  try{ ok=(calcExport()===false); }catch(e){ throw new Error('无 canvas 环境导出不应抛: '+e.message); }
+  if(!ok) throw new Error('无 canvas 环境导出应返回 false（不抛不崩）');
+  return `卡含数字/口径/免责 · 复制文本 ${t.length} 字符含深链 · fake DOM 导出安全跳过`;
+});
+TC('计算器：applyTabUI 三页签互斥显隐（calc 不串页）', ()=>{
+  calcReset();
+  S.tab='calc'; applyTabUI();
+  if($('#calcView').style.display!=='') throw new Error('calcView 应显示');
+  if($('#rankView').style.display!=='none'||$('#deepView').style.display!=='none') throw new Error('rank/deep 应隐藏');
+  S.tab='rank'; applyTabUI();
+  if($('#calcView').style.display!=='none') throw new Error('calcView 应隐藏');
+  if($('#rankView').style.display!=='') throw new Error('rankView 应显示');
+  S.tab='deep'; applyTabUI();
+  if($('#calcView').style.display!=='none'||$('#deepView').style.display!=='') throw new Error('deep 显隐错');
+  S.tab='rank'; applyTabUI();
+  return 'calc/rank/deep 三页签互斥显隐 OK（boot ?tab=calc 深链可依赖）';
+});
+TC('计算器：五语言切字典渲染结论卡无占位符残留（与全局多 locale 测试同模式）', ()=>{
+  if(typeof I18N_ALL==='undefined'||!I18N_ALL) throw new Error('I18N_ALL 未注入');
+  const save=JSON.parse(JSON.stringify(I18N)); const results=[]; const m0=I18N_MISSING.length;
+  for(const lc of Object.keys(I18N_ALL)){
+    for(const k of Object.keys(I18N)) delete I18N[k];
+    Object.assign(I18N, I18N_ALL[lc]);
+    calcReset(); calcCompute(false);
+    const html=$('#calcCard').children.map(c=>c.textContent||c.innerHTML||'').join(' ');
+    if(!html||html.length<50) throw new Error(lc+': 计算器卡为空');
+    if(/\{(n|fee|diff|api|perDay|model|score|perTask|bar|be|profile|board|date|rate)\}/.test(html))
+      throw new Error(lc+': 结论卡占位符残留');
+    results.push(lc+'✓');
+  }
+  for(const k of Object.keys(I18N)) delete I18N[k];
+  Object.assign(I18N, save);
+  if(I18N_MISSING.length!==m0) throw new Error('多语言渲染新增缺失: '+I18N_MISSING.slice(m0).join(','));
+  calcReset();
+  return results.join(' ')+' — 每语言结论卡渲染一轮，无占位符残留、无缺失 key';
+});
+
+
 let fail=0;
 for(const [n,st,r,ms] of out){ if(st!=='OK')fail++; W((st==='OK'?'✓ ':'✗ ')+n+`  [${ms}ms]\n     `+String(r).slice(0,1500)); }
 W('\n'+(out.length-fail)+'/'+out.length+' passed');

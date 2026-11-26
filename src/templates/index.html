@@ -221,6 +221,7 @@ __HEAD_EXTRA__<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www
     <div class="tabs" id="tabs">
       <button data-tab="rank" class="on">{{tabs.rank}}</button>
       <button data-tab="deep">{{tabs.deep}}</button>
+      <button data-tab="calc">{{tabs.calc}}</button>
     </div>
 
     <!-- —— 页签①实惠排行榜：直接告诉用户「什么标准下谁最实惠、差多少分、用多少$」 —— -->
@@ -320,6 +321,59 @@ __HEAD_EXTRA__<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www
       </div>
     </div>
     </div><!-- /deepView -->
+
+    <!-- —— 页签③包月 vs API 回本计算器（W1，EXP-006）：月费+用量 vs 门槛内最便宜 API —— -->
+    <div id="calcView">
+      <div class="win" id="calcCard"></div>
+
+      <div class="panel" style="margin-top:14px">
+        <h2>{{calc.h2}}</h2>
+        <div class="hint">{{calc.intro}}</div>
+        <label class="fld" style="margin-top:11px">{{calc.fee}}</label>
+        <div class="row" style="gap:10px;flex-wrap:wrap">
+          <div style="flex:1;min-width:128px"><div class="seg" id="calcCur">
+            <button data-v="usd">{{calc.curUsd}}</button>
+            <button data-v="cny">{{calc.curCny}}</button>
+          </div></div>
+          <div style="flex:1;min-width:110px"><input type="number" id="calcFee" min="0" step="1" value="20"></div>
+        </div>
+        <div class="chips" style="margin-top:8px" id="calcFeeChips"></div>
+
+        <div class="row" style="gap:10px;margin-top:13px;flex-wrap:wrap">
+          <div style="flex:1;min-width:110px"><label class="fld">{{calc.tasks}}</label>
+            <input type="number" id="calcTasks" min="1" step="1" value="30"></div>
+          <div style="flex:2;min-width:170px"><label class="fld">{{rank.profile}}</label>
+            <div class="seg" id="calcProf">
+              <button data-v="light" title="{{rank.presetLightT}}">{{rank.presetLight}}</button>
+              <button data-v="dev" class="on" title="{{rank.presetDevT}}">{{rank.presetDev}}</button>
+              <button data-v="heavy" title="{{rank.presetHeavyT}}">{{rank.presetHeavy}}</button>
+            </div></div>
+        </div>
+        <div class="chips" style="margin-top:8px" id="calcTaskChips"></div>
+
+        <label class="fld" style="margin-top:13px">{{rank.capability}}</label>
+        <select id="calcBoard"></select>
+
+        <label class="fld" style="margin-top:13px">{{rank.threshold}} <span class="mono" id="calcBarLab">—</span></label>
+        <input type="range" id="calcBar" min="0" max="100" step="1" style="width:100%;accent-color:var(--accent)">
+        <div class="chips" style="margin-top:8px">
+          <button class="btn" data-cb="flag">{{calc.barFlagship}}</button>
+          <button class="btn" data-cb="mid">{{calc.barMid}}</button>
+          <button class="btn" data-cb="min">{{calc.barMin}}</button>
+        </div>
+        <div class="hint">{{calc.barHint}}</div>
+
+        <div class="calcbar">
+          <button class="btn primary" id="calcGo">{{calc.go}}</button>
+        </div>
+        <div class="row" style="margin-top:10px;flex-wrap:wrap">
+          <button class="btn" id="calcCopyText">{{calc.copyText}}</button>
+          <button class="btn" id="calcCopyLink">{{grp.export.copyLink}}</button>
+          <button class="btn" id="calcExport">{{calc.export}}</button>
+        </div>
+        <div class="hint" id="calcNote"></div>
+      </div>
+    </div><!-- /calcView -->
   </div>
 </div>
 
@@ -349,6 +403,7 @@ __HEAD_EXTRA__<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www
 <script src="/assets/js/07-render.js"></script>
 <script src="/assets/js/08-interact.js"></script>
 <script src="/assets/js/10-rank.js"></script>
+<script src="/assets/js/11-calculator.js"></script>
 <script src="/assets/js/09-boot.js"></script>
 <script src="/analytics.js" defer></script>
 </body>

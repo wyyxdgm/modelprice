@@ -10,7 +10,7 @@
 ## 仓结构（src/ 进 git，dist/ 不进）
 
 - `src/templates/index.html` 页面骨架（`__DATA__` 构建时填充）
-- `src/js/01~10-*.js` 模块按文件名序加载；`src/css/` 桌面/平板/手机三档响应式
+- `src/js/01~11-*.js` 模块按文件名序加载（11=计算器，10=排行榜页签）；`src/css/` 桌面/平板/手机三档响应式
 - `src/i18n/` 5 语言字典（350 keys ×5，**key 集必须一致——test 强制**；改 en.json 必须同步其余 4 语言）+ boot/source/method 长文
 - `data/datasets.json` 数字本体；`scripts/` 抓取/构建/部署管线；`test/`（build.py + cases.js）
 - 全部构建命令经 `scripts/deploy.sh`，不要单独手跑构建段
@@ -31,7 +31,7 @@
 ## 测量
 
 - **umami 已接入**（2026-11-26 P0，autorev `umami-onboard` playbook 适配本仓）：`src/analytics.js`（构建期拷到 `dist/analytics.js`，模板尾注入 `/analytics.js`）+ wd vhost 双精确反代（`/js/script.js` 200、`/api/send` GET 405，见 `docs/deploy/modelprice.damolabs.app.conf`）；与 cozy/games/tools 共用同一 Umami Cloud websiteId（hostname 区分），事件带 `mp_` 前缀
-- 事件（EXP-006 判读指标）：`mp_share_click`（分享栏 X/Reddit/Copy，`props.channel` 区分，触发面在 `08-interact.js`）；`mp_calc_complete` **留桩**——`window.mpCalcComplete()` 已定义（src/analytics.js 注释标 W1 接入点），计算器 W1 上线时在结论卡渲染处补一次调用
+- 事件（EXP-006 判读指标）：`mp_share_click`（分享栏 X/Reddit/Copy + 计算器复制结论/导出图，`props.channel` = x|reddit|copy|copy-verdict|export-image）；`mp_calc_complete` **已接入**（W1，2026-11-26）——唯一触发面 = 计算器「算这笔账」按钮（`11-calculator.js` calcTrack，payload 带 preset/board/bar/fee/tasks/winner/dir）；深链/切页签不触发
 - 冒烟已锁：deploy.sh 检查 og.png 200 / analytics.js 200 / umami 双端点 / og:image+twitter:card+shareBar+无 `--:00`
 - 流量口径: wd nginx vhost 日志（autorev `traffic-baseline.sh` 同族，豁免 IP + bot 过滤）
 

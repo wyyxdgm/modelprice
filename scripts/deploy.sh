@@ -82,6 +82,12 @@ n=$(echo "$home" | grep -c 'src="/assets/js/' || true)
 [[ "$home" == *'id="shareBar"'* ]] || { echo "❌ 首页缺分享栏 shareBar"; fail=1; }
 [[ "$home" != *'--:00'* ]] || { echo "❌ 首页仍含 --:00 占位符（应构建期注入静态默认）"; fail=1; }
 [[ "$home" == *'src="/analytics.js"'* ]] || { echo "❌ 首页缺 analytics.js 引用（umami）"; fail=1; }
+# ②d W1 回本计算器（2026-11-26）：页签 + 容器 + 提交按钮在位，11-calculator.js 外链在列
+[[ "$home" == *'id="calcView"'* ]] || { echo "❌ 首页缺回本计算器容器 calcView（W1）"; fail=1; }
+[[ "$home" == *'data-tab="calc"'* ]] || { echo "❌ 首页缺计算器页签 data-tab=calc"; fail=1; }
+[[ "$home" == *'id="calcGo"'* ]] || { echo "❌ 首页缺计算器提交按钮 calcGo"; fail=1; }
+n11=$(echo "$home" | grep -c '11-calculator.js' || true)
+[[ "$n11" -ge 1 ]] || { echo "❌ 首页缺 11-calculator.js 外链"; fail=1; }
 t2i=$(smoke_curl -s --max-time 20 "$B/data/v1/all.json")
 [[ "$t2i" == *'"id":"t2i"'* ]] || { echo "❌ all.json 缺 t2i 文生图榜"; fail=1; }
 
@@ -118,6 +124,7 @@ n_hf=$(echo "$zhhome" | grep -o 'rel="alternate" hreflang=' | wc -l | tr -d ' ')
 [[ "$n_hf" -ge 6 ]] || { echo "❌ /zh/ hreflang 条数异常: $n_hf (期望 ≥6，5 语言 + x-default)"; fail=1; }
 [[ "$zhhome" == *'id="langNav"'* ]] || { echo "❌ /zh/ 缺语言切换器"; fail=1; }
 [[ "$zhhome" == *'<html lang="zh">'* ]] || { echo "❌ /zh/ html lang 非 zh"; fail=1; }
+[[ "$zhhome" == *'data-tab="calc"'* ]] || { echo "❌ /zh/ 缺计算器页签（W1 i18n）"; fail=1; }
 
 # ⑧ SEO 静态化抽检（构建期落地，搜索引擎可直接抓）：日期 + JSON-LD + 场景卡
 # ⚠️ 用 [[ == *…* ]] 不用 echo|grep -q：zhhome ~116KB > 管道缓冲，pipefail 下 grep -q 早退 → SIGPIPE 误报（同 24ff09d）

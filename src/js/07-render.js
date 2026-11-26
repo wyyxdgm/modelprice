@@ -2,6 +2,7 @@
 function render(){
   renderRank();
   renderWinner(); renderScatter(); renderSteps(); renderTimeline(); renderTiers(); renderTable(); renderBadges(); syncInputs(); renderAdjNote();
+  if(typeof calcRender==='function') calcRender();   // 计算器结论跟随价格情景（峰谷/缓存改了卡上数字同步）
 }
 function renderBadges(){
   const d=DATASETS[S.ds];
