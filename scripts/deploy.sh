@@ -50,6 +50,10 @@ check "$B/" 200 home
 check "$B/assets/style.css" 200 css
 check "$B/assets/js/01-util.js" 200 js-first
 check "$B/assets/js/09-boot.js" 200 js-last
+check "$B/assets/og.png" 200 og-image
+check "$B/analytics.js" 200 analytics
+check "$B/js/script.js" 200 umami-tracker-js
+check "$B/api/send" 405 umami-api-send-get405
 check "$B/method.html" 200 method
 check "$B/data/v1/all.json" 200 alljson
 check "$B/llms.txt" 200 llms
@@ -72,6 +76,12 @@ n=$(echo "$home" | grep -c 'src="/assets/js/' || true)
   || { echo "❌ 首页缺 DATA JSON 块"; fail=1; }
 # ②b 排行榜页签 + 文生图榜（t2i）必须在线
 [[ "$home" == *'id="rankView"'* ]] || { echo "❌ 首页缺排行榜页签容器 rankView"; fail=1; }
+# ②c 分享链路（og/twitter/分享栏，2026-11-26 P0）+ 首屏无 --:00 占位符（构建期静态默认）
+[[ "$home" == *'property="og:image"'* ]] || { echo "❌ 首页缺 og:image"; fail=1; }
+[[ "$home" == *'name="twitter:card"'* ]] || { echo "❌ 首页缺 twitter:card"; fail=1; }
+[[ "$home" == *'id="shareBar"'* ]] || { echo "❌ 首页缺分享栏 shareBar"; fail=1; }
+[[ "$home" != *'--:00'* ]] || { echo "❌ 首页仍含 --:00 占位符（应构建期注入静态默认）"; fail=1; }
+[[ "$home" == *'src="/analytics.js"'* ]] || { echo "❌ 首页缺 analytics.js 引用（umami）"; fail=1; }
 t2i=$(smoke_curl -s --max-time 20 "$B/data/v1/all.json")
 [[ "$t2i" == *'"id":"t2i"'* ]] || { echo "❌ all.json 缺 t2i 文生图榜"; fail=1; }
 

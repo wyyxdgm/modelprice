@@ -7,6 +7,14 @@
 <meta property="og:title" content="{{meta.ogTitle}}">
 <meta property="og:description" content="{{meta.ogDesc}}">
 <meta property="og:type" content="website">
+<meta property="og:url" content="__OG_URL__">
+<meta property="og:image" content="__DOMAIN__/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{meta.ogTitle}}">
+<meta name="twitter:description" content="{{meta.ogDesc}}">
+<meta name="twitter:image" content="__DOMAIN__/assets/og.png">
 <meta name="robots" content="index,follow">
 <title>{{meta.title}}</title>
 __JSONLD__
@@ -23,6 +31,12 @@ __HEAD_EXTRA__<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www
       {{header.tagline}}
     </div>
     <nav class="lang" id="langNav" aria-label="Language">__LANG_NAV__</nav>
+    <div class="share" id="shareBar" aria-label="{{share.label}}">
+      <span class="share-lab">{{share.label}}</span>
+      <button class="btn" id="shareX">X</button>
+      <button class="btn" id="shareReddit">Reddit</button>
+      <button class="btn" id="shareCopy" title="{{share.copiedHint}}">{{share.copy}}</button>
+    </div>
   </div>
   <div class="badge-row" id="topBadges"></div>
 </header>
@@ -118,9 +132,9 @@ __HEAD_EXTRA__<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www
             <option value="0">{{grp.price.d0}}</option>
           </select></div>
       </div>
-      <label class="fld" style="margin-top:9px">{{grp.price.utcHour}} <span class="mono" id="hourUtc">--:00</span>
+      <label class="fld" style="margin-top:9px">{{grp.price.utcHour}} <span class="mono" id="hourUtc">__HOUR_UTC__</span>
         <span class="pill" id="peakPill" style="padding:0 6px">—</span>
-        <span style="color:var(--dim);font-weight:400">{{grp.price.localTime}}  <span class="mono" id="hourLocal">--:00</span></span></label>
+        <span style="color:var(--dim);font-weight:400">{{grp.price.localTime}}  <span class="mono" id="hourLocal">__HOUR_LOCAL__</span></span></label>
       <input type="range" id="hour" min="0" max="23" step="1" value="12" style="width:100%;accent-color:var(--accent)">
       <div class="chips" style="margin-top:8px">
         <button class="btn" data-pk="now">{{grp.price.now}}</button>
@@ -336,5 +350,6 @@ __HEAD_EXTRA__<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www
 <script src="/assets/js/08-interact.js"></script>
 <script src="/assets/js/10-rank.js"></script>
 <script src="/assets/js/09-boot.js"></script>
+<script src="/analytics.js" defer></script>
 </body>
 </html>

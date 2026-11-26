@@ -471,6 +471,11 @@
   "offT": "Aubaines heures creuses",
   "offD": "Tâches légères (2k + 0,5k) · heures à demi-tarif façon DeepSeek"
  },
+ "share": {
+  "label": "Partager",
+  "copy": "Copier le lien",
+  "copiedHint": "Collez-le n'importe où — le lien contient tout l'état de votre analyse"
+ },
  "faq": [
   {
    "q": "Pourquoi le prix du classement ne correspond-il pas à mon coût réel ?",

@@ -102,16 +102,36 @@ $('#expTiers').onclick=()=>{
   });
   dl(`arena_${S.ds}_tiers.csv`,[head.join(','),...rows.map(r=>r.join(','))].join('\n'));
 };
-$('#copyLink').onclick=()=>{
+/* ---------- state link / share ----------
+   state link（含全部分析状态）由 stateUrl() 单一来源产出：export 区的 Copy state link
+   与页头分享栏（X / Reddit / Copy）共用同一链接，不漂移。 */
+function stateUrl(){
   const onIds=PRICE_EVENTS.filter(e=>S.evState[e.id]).map(e=>e.id);
   const p=new URLSearchParams({ds:S.ds,mode:S.mode,ci:S.ci,lo:S.lo,hi:S.hi,mv:S.minVotes,pre:S.exPrelim?1:0,
     hr:S.hour,dow:S.dow,date:S.dateISO,os:Math.round(S.outShare*100),tz:S.tz,ev:onIds.join(','),
     ch:Math.round(S.cacheHit*100),cs:S.cacheSrc,
     tab:S.tab,rk:S.rankPreset,ri:S.rankIn,ro:S.rankOut,rd:S.rankPerDay,rt:S.rankT,rp:S.rankPk});
-  const u=location.origin+location.pathname+'?'+p;
-  (navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(()=>{$('#copyLink').textContent=T('interact.copied');setTimeout(()=>$('#copyLink').textContent=T('interact.copyLink'),1500);})
+  return location.origin+location.pathname+'?'+p;
+}
+function copyStateLink(btn,restoreKey){
+  const u=stateUrl();
+  (navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(()=>{btn.textContent=T('interact.copied');setTimeout(()=>btn.textContent=T(restoreKey),1500);})
    .catch(()=>prompt(T('interact.promptCopy'),u));
-};
+}
+$('#copyLink').onclick=()=>copyStateLink($('#copyLink'),'interact.copyLink');
+/* 分享栏（EXP-006 判读指标 mp_share_click 的触发面）：X / Reddit 一键 + Copy。
+   mpTrack 由 /analytics.js（umami）定义；未加载时静默跳过，分享功能不受影响。 */
+function shareClick(net){
+  if(typeof mpTrack==='function') mpTrack('mp_share_click',{channel:net});
+}
+function shareOpen(url){
+  const a=el('a'); a.href=url; a.target='_blank'; a.rel='noopener'; a.click();
+}
+$('#shareX').onclick=()=>{ shareClick('x');
+  shareOpen('https://x.com/intent/post?text='+encodeURIComponent(T('meta.ogTitle'))+'&url='+encodeURIComponent(stateUrl())); };
+$('#shareReddit').onclick=()=>{ shareClick('reddit');
+  shareOpen('https://www.reddit.com/submit?url='+encodeURIComponent(stateUrl())+'&title='+encodeURIComponent(T('meta.ogTitle'))); };
+$('#shareCopy').onclick=()=>{ shareClick('copy'); copyStateLink($('#shareCopy'),'share.copy'); };
 
 /* ---------- paste new dataset ---------- */
 function parsePasted(text){

@@ -110,7 +110,7 @@
    "csv": "Export CSV (current table)",
    "tiers": "Export tier-ladder CSV",
    "copyLink": "Copy state link",
-   "hint": "To add another board (e.g.  <span class=\"mono\">code/terminal</span>、<span class=\"mono\">text</span>、<span class=\"mono\">vision</span>): open the board's page on arena.ai, select the table, copy, and paste below (columns are auto-detected).",
+   "hint": "To add another board (e.g. <span class=\"mono\">code/terminal</span>, <span class=\"mono\">text</span>, <span class=\"mono\">vision</span>): open the board's page on arena.ai, select the table, copy, and paste below (columns are auto-detected).",
    "pastePh": "Paste an arena.ai leaderboard's markdown / table text…",
    "namePh": "New dataset name (optional)",
    "add": "Add"
@@ -470,6 +470,11 @@
   "agentD": "120k in + 12k out tokens · ranked at current-hour prices",
   "offT": "Off-peak steals",
   "offD": "Light tasks (2k + 0.5k) · DeepSeek-style half-price hours"
+ },
+ "share": {
+  "label": "Share",
+  "copy": "Copy link",
+  "copiedHint": "Paste it anywhere — the link carries your full analysis state"
  },
  "faq": [
   {

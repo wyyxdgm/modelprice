@@ -123,6 +123,14 @@ def render(lc, domain, i18n):
     html = tpl.replace("__LANG__", lc)
     html = html.replace("__HEAD_EXTRA__", head_extra(lc, domain))
     html = html.replace("__LANG_NAV__", lang_nav(lc))
+    # og/twitter 绝对 URL token（og:url 按 locale；og:image 全语言共用一张英文 og.png）
+    html = html.replace("__DOMAIN__", domain).replace("__OG_URL__", domain + locale_path(lc))
+    # 时区/小时的静态默认（周三 12:00 UTC = 谷时代表值，locale 感知星期名）：爬虫/无 JS 首屏
+    # 不再出现 --:00 占位符；JS 加载后 06-scenarios.syncPriceUI() 立刻用真实「now」覆盖，
+    # 静态值只服务首帧前与 no-JS 场景。本地时默认 tz=0 → 与 UTC 同值。
+    dows = str(i18n.get("dows", "Sun,Mon,Tue,Wed,Thu,Fri,Sat")).split(",")
+    html = html.replace("__HOUR_UTC__", f"{dows[3] if len(dows) > 3 else 'Wed'} 12:00")
+    html = html.replace("__HOUR_LOCAL__", "12:00")
     html = re.sub(r"\{\{([\w.]+)\}\}", sub, html)
     # 路径 token：在字典值替换后再做一轮（字典值里可以引用站内路径）
     html = html.replace("%METHOD%", locale_path(lc, "method.html"))
@@ -159,6 +167,14 @@ def main():
     for css in (ROOT / "src" / "css").glob("*.css"):
         shutil.copy2(css, ASSETS / css.name)
     shutil.copytree(ROOT / "src" / "js", ASSETS / "js")
+    # analytics.js（umami 第一方埋点）放站点根：绝对路径 /analytics.js，locale 子目录同样命中
+    aj = ROOT / "src" / "analytics.js"
+    if aj.exists():
+        shutil.copy2(aj, OUT / "analytics.js")
+    # og 分享图（1200×630，构建期从数据集生成）；依赖 PIL+DejaVu，缺失则显式报错不静默
+    sys.path.insert(0, str(ROOT / "scripts"))
+    from gen_og_image import gen_og
+    gen_og(raw, ASSETS / "og.png")
 
     for lc in LOCALES:
         flat = load_dict(lc)

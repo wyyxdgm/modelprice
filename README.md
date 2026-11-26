@@ -27,13 +27,14 @@ src/                    ← editable sources (git-tracked)
   js/0N-*.js              app modules in load order (all locales share one copy; user-visible strings go through T()/TF() against the inline I18N dict):
     01-util.js    02-data.js    03-pricing.js    04-core.js    05-timeline.js
     06-scenarios.js    07-render.js    08-interact.js    10-rank.js    09-boot.js
+  analytics.js            umami first-party tracking (copied to dist/ root at build; events mp_share_click / mp_calc_complete — see "Measurement")
 data/datasets.json      parse.py output (the numbers)
 raw/*.md                scrape provenance — arena.ai tables as captured (source of truth)
-scripts/build_page.py   src/ + data → dist/index.html (en) + dist/<locale>/index.html ×5 + dist/assets/
+scripts/build_page.py   src/ + data → dist/index.html (en) + dist/<locale>/index.html ×5 + dist/assets/ (incl. og.png 1200×630 via scripts/gen_og_image.py)
 build_site.py [domain]  dist/data/v1/all.json + method.html ×5 + llms.txt + robots.txt + sitemap.xml (全语言互指)
 parse.py                raw/*.md → data/datasets.json
 scripts/deploy.sh       build → rsync dist/ → wd → smoke checks
-test/                   64 regression cases (see below)
+test/                   75 regression cases (see below)
 dist/                   build output (gitignored — rebuild with scripts/build_page.py)
 docs/deploy/            nginx vhost (CSP: script-src 'self', JS/CSS are external files)
 ```
@@ -42,7 +43,7 @@ docs/deploy/            nginx vhost (CSP: script-src 'self', JS/CSS are external
 
 ```bash
 # One-shot (2026-11-22): scrape arena.ai via the real browser (Cloudflare-safe) → raw/*.md →
-# parse → diff report → build → 64-case regression → auto-commit → deploy → smoke.
+# parse → diff report → build → 75-case regression → auto-commit → deploy → smoke.
 # Exit 0 = clean, 2 = green but price changes detected (PRICE_EVENTS need review), 1 = failed.
 scripts/refresh-data.sh            # add --no-deploy / --no-commit to skip stages
 ```
@@ -67,7 +68,11 @@ python3 -m http.server 8080 -d dist    # Ctrl-C when done
 
 ## Test suite
 
-`python3 test/build.py` assembles `test/run.js` by taking the served page (HTTP `127.0.0.1:8080` first, `dist/index.html` fallback), extracting the `<script id="DATA">` block and the `/assets/js/*.js` files in reference order, then concatenating fake-DOM harness + app + cases. The 64 cases assert: brute-force winner verification over every integer threshold on all 8 boards (3347 thresholds, t2i included), tier-boundary continuity (25971 per-threshold judgments), strict-CI merging, peak/off-peak + promo + future-hike price engine, cache arithmetic vs. hand-computed formula, the best-value ranking profile formula (write-multiplier 1.25×, cache 95%, DeepSeek off-peak exactly ×0.5), JS `parsePasted()` ≡ Python `parse.py` cross-check (6832 cells over 427 rows), and full render-chain smoke tests. **Any UI/render change must keep all 64 green.**
+`python3 test/build.py` assembles `test/run.js` by taking the served page (HTTP `127.0.0.1:8080` first, `dist/index.html` fallback), extracting the `<script id="DATA">` block and the `/assets/js/*.js` files in reference order, then concatenating fake-DOM harness + app + cases. The 75 cases assert: brute-force winner verification over every integer threshold on all 8 boards (3347 thresholds, t2i included), tier-boundary continuity (25971 per-threshold judgments), strict-CI merging, peak/off-peak + promo + future-hike price engine, cache arithmetic vs. hand-computed formula, the best-value ranking profile formula (write-multiplier 1.25×, cache 95%, DeepSeek off-peak exactly ×0.5), JS `parsePasted()` ≡ Python `parse.py` cross-check (6832 cells over 427 rows), and full render-chain smoke tests, plus static-HTML hygiene (en page zero CJK punctuation, no `--:00` placeholder in any locale, og/twitter/share-bar present, share buttons fire `mp_share_click`). **Any UI/render change must keep all 75 green.**
+
+## Measurement
+
+First-party, cookieless analytics via Umami Cloud (same playbook/website as the other damolabs sites, distinguished by hostname; reverse-proxied same-origin in the wd vhost so CSP stays `'self'` and ad-blockers don't strip it): `src/analytics.js` → `dist/analytics.js`, injected before `</body>`. Events (EXP-006 reading): `mp_share_click` fired by the share bar (X / Reddit / Copy, `channel` prop), `mp_calc_complete` stubbed at `window.mpCalcComplete()` for the W1 monthly-vs-API calculator. Pageviews are automatic. Smoke checks cover both proxy endpoints + the script tag.
 
 ## Deploy
 

@@ -856,6 +856,48 @@ TC('首屏场景卡：applyScene 三场景参数展开（与 URL ?scene= 同映�
   return 'coding→dev+谷时 / agent→heavy+此刻 / offpeak→light+谷时；冠军=暴力解';
 });
 
+/* ==================== P0 传播链路（2026-11-26）：静态 HTML 卫生 + 分享栏 ==================== */
+/* 英文页里混入 CJK 标点（顿号/全角括号）是上一轮实站核查抓到的信任瑕疵 —— 这里把「en 渲染文本
+   零 CJK 标点」锁成回归断言。ja 的 、。（） 是该语言规范标点，不在检查范围。 */
+TC('静态卫生：英文页渲染文本零 CJK 标点', ()=>{
+  const fs=require('fs'), P=require('path');
+  const s=fs.readFileSync(P.join(__dirname,'..','dist','index.html'),'utf8');
+  const body=s.replace(/<script[\s\S]*?<\/script>/g,'').replace(/<style[\s\S]*?<\/style>/g,'').replace(/<[^>]+>/g,'');
+  const CJKP=/[、，。．（）【】《》「」『』！？；：～]/;
+  const hits=[...body].filter(ch=>CJKP.test(ch));
+  if(hits.length) throw new Error('命中 '+hits.length+' 处: '+[...new Set(hits)].join(' '));
+  return 'en 首页渲染文本 0 处 CJK 标点（顿号修复已锁定）';
+});
+TC('静态卫生：全 locale 首页无 --:00 占位符（构建期注入静态小时）', ()=>{
+  const fs=require('fs'), P=require('path'), ROOT=P.join(__dirname,'..');
+  const pages=[['en','dist/index.html'],['zh','dist/zh/index.html'],['ja','dist/ja/index.html'],['ko','dist/ko/index.html'],['fr','dist/fr/index.html']];
+  const bad=[];
+  for(const [lc,rel] of pages){
+    const f=P.join(ROOT,rel); if(!fs.existsSync(f)){ bad.push(rel+' 缺文件'); continue; }
+    const s=fs.readFileSync(f,'utf8');
+    if(s.includes('--:00')) bad.push(rel+' 仍有 --:00');
+    if(!/id="hourUtc">[^<]* 12:00</.test(s)) bad.push(rel+' hourUtc 无静态默认');
+    if(!/id="hourLocal">12:00</.test(s)) bad.push(rel+' hourLocal 无静态默认');
+  }
+  if(bad.length) throw new Error(bad.join(' | '));
+  return pages.length+' 个 locale 首页全部构建期注入「周三 12:00 UTC」静态默认（locale 感知星期名）';
+});
+TC('分享链路：og/twitter 齐全 + 分享栏三键各发一条 mp_share_click', ()=>{
+  const fs=require('fs'), P=require('path');
+  const s=fs.readFileSync(P.join(__dirname,'..','dist','index.html'),'utf8');
+  for(const mark of ['property="og:image"','property="og:image:width" content="1200"','name="twitter:card"','id="shareBar"'])
+    if(!s.includes(mark)) throw new Error('dist/index.html 缺 '+mark);
+  const calls=[];
+  global.mpTrack=(n,p)=>calls.push([n,p&&p.channel]);
+  reset();
+  $('#shareX').onclick(); $('#shareReddit').onclick(); $('#shareCopy').onclick();
+  delete global.mpTrack;
+  if(calls.length!==3) throw new Error('触发 '+calls.length+' 次（期望 3）');
+  const got=calls.map(c=>c.join(':')).join(',');
+  if(got!=='mp_share_click:x,mp_share_click:reddit,mp_share_click:copy') throw new Error('事件流 '+got);
+  return 'og:image(1200×630)/twitter:card/shareBar 在位；x→reddit→copy 各发 mp_share_click（channel 区分）';
+});
+
 let fail=0;
 for(const [n,st,r,ms] of out){ if(st!=='OK')fail++; W((st==='OK'?'✓ ':'✗ ')+n+`  [${ms}ms]\n     `+String(r).slice(0,1500)); }
 W('\n'+(out.length-fail)+'/'+out.length+' passed');
