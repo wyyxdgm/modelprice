@@ -31,7 +31,8 @@
 ## 测量
 
 - **umami 已接入**（2026-11-26 P0，autorev `umami-onboard` playbook 适配本仓）：`src/analytics.js`（构建期拷到 `dist/analytics.js`，模板尾注入 `/analytics.js`）+ wd vhost 双精确反代（`/js/script.js` 200、`/api/send` GET 405，见 `docs/deploy/modelprice.damolabs.app.conf`）；与 cozy/games/tools 共用同一 Umami Cloud websiteId（hostname 区分），事件带 `mp_` 前缀
-- 事件（EXP-006 判读指标）：`mp_share_click`（分享栏 X/Reddit/Copy + 计算器复制结论/导出图，`props.channel` = x|reddit|copy|copy-verdict|export-image）；`mp_calc_complete` **已接入**（W1，2026-11-26）——唯一触发面 = 计算器「算这笔账」按钮（`11-calculator.js` calcTrack，payload 带 preset/board/bar/fee/tasks/winner/dir）；深链/切页签不触发
+- 事件（EXP-006 判读指标）：`mp_share_click`（分享栏 X/Reddit/Copy + 计算器复制结论/导出图，`props.channel` = x|reddit|copy|copy-verdict|export-image）；`mp_calc_complete` **已接入**（W1 2026-11-26，W2 2026-11-27 payload 升级）——唯一触发面 = 计算器「算这笔账」按钮（`11-calculator.js` calcTrack，payload 带 preset/board/bar/tasks_per_day/spend/blend_month/winner/flagship/dir，dir = save|over|tie|estimate）；深链/切页签不触发
+- 页签③ = **AI 月度账单体检与混搭配置器**（W2，2026-11-27 重构自 W1 包月 vs API）：真实账单勾选（ChatGPT Plus/Claude Pro/Cursor Pro 各 $20 + 国产包月 ¥140 + 中转充值 ¥）→ 双币实时汇总；主力场景单选（映射 light/dev/heavy 画像 + 默认频次）；引擎 = 80% 常规用门槛内最便宜赢家 + 20% 攻坚用高一档旗舰（分数严格更高者中最便宜，榜首则退化并明示）；结果卡对比账单 vs 直连混搭给每月省/多花 + 盈亏平衡 + 勾了中转时追加「缓存盲区」提示；Canvas 导出改账单体检样式；深链参数 = cb/bl(账单逗号串)/cr(中转¥)/cn/cp/ct（旧 cf/cc 兼容忽略）
 - 冒烟已锁：deploy.sh 检查 og.png 200 / analytics.js 200 / umami 双端点 / og:image+twitter:card+shareBar+无 `--:00`
 - 流量口径: wd nginx vhost 日志（autorev `traffic-baseline.sh` 同族，豁免 IP + bot 过滤）
 

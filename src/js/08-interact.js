@@ -111,9 +111,11 @@ function stateUrl(){
     hr:S.hour,dow:S.dow,date:S.dateISO,os:Math.round(S.outShare*100),tz:S.tz,ev:onIds.join(','),
     ch:Math.round(S.cacheHit*100),cs:S.cacheSrc,
     tab:S.tab,rk:S.rankPreset,ri:S.rankIn,ro:S.rankOut,rd:S.rankPerDay,rt:S.rankT,rp:S.rankPk});
-  /* 计算器状态（11-calculator）：cb=板块 cc=币种 cf=月费 cn=每日任务 cp=画像 ct=门槛（默认切点不带，boot 自算） */
+  /* 计算器状态（11-calculator，W2 账单体检）：cb=板块 bl=勾选账单 cr=中转充值¥ cn=每日任务 cp=场景 ct=门槛（默认切点不带，boot 自算） */
   if(S.calc){
-    p.set('cb',S.calc.board); p.set('cc',S.calc.cur); p.set('cf',S.calc.fee);
+    p.set('cb',S.calc.board);
+    p.set('bl',CALC_BILLS.filter(b=>S.calc.bills[b.id]).map(b=>b.id).join(','));
+    p.set('cr',S.calc.relay||0);
     p.set('cn',S.calc.tasks); p.set('cp',S.calc.profile);
     if(S.calc.barSet) p.set('ct',S.calc.bar);
   }

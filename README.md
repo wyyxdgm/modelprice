@@ -4,7 +4,7 @@ Public, static, single-page tool answering one question with arena.ai (LMArena) 
 
 > **Given the minimum Arena Score I can accept, which model is the cheapest that clears it — and how much does the next tier cost per point?**
 
-Two tabs: **① Best value ranking** (default — direct ranking + verdict card under your quality bar & daily-task profile: who is cheapest per task, by how many points, for how many $; switch peak/off-peak and capability boards incl. per-image Text-to-Image) and **② Tiers & charts** (winner card, step chart, scatter, weekly curve, tier & model tables).
+Three tabs: **① Best value ranking** (default — direct ranking + verdict card under your quality bar & daily-task profile: who is cheapest per task, by how many points, for how many $; switch peak/off-peak and capability boards incl. per-image Text-to-Image), **② Tiers & charts** (winner card, step chart, scatter, weekly curve, tier & model tables), and **③ AI bill check-up** (tick the subscriptions/relay top-ups you actually pay — auto-totals in $ and ¥ — pick a main scenario, then compare your real monthly spend against an 80/20 blend: 80% of calls on the cheapest model above your bar, 20% on the next tier up, with a break-even point and a cache-blind-spot warning for third-party relays).
 
 Interactive: https://modelprice.damolabs.app · Method: `/method.html` · Machine-readable export for AI agents: `/data/v1/all.json` + `/llms.txt`
 
@@ -72,7 +72,7 @@ python3 -m http.server 8080 -d dist    # Ctrl-C when done
 
 ## Measurement
 
-First-party, cookieless analytics via Umami Cloud (same playbook/website as the other damolabs sites, distinguished by hostname; reverse-proxied same-origin in the wd vhost so CSP stays `'self'` and ad-blockers don't strip it): `src/analytics.js` → `dist/analytics.js`, injected before `</body>`. Events (EXP-006 reading): `mp_share_click` fired by the share bar (X / Reddit / Copy, `channel` prop), `mp_calc_complete` stubbed at `window.mpCalcComplete()` for the W1 monthly-vs-API calculator. Pageviews are automatic. Smoke checks cover both proxy endpoints + the script tag.
+First-party, cookieless analytics via Umami Cloud (same playbook/website as the other damolabs sites, distinguished by hostname; reverse-proxied same-origin in the wd vhost so CSP stays `'self'` and ad-blockers don't strip it): `src/analytics.js` → `dist/analytics.js`, injected before `</body>`. Events (EXP-006 reading): `mp_share_click` fired by the share bar (X / Reddit / Copy, `channel` prop), `mp_calc_complete` fired at `window.mpCalcComplete()` by the W2 AI bill check-up calculator (tab ③ "Run the numbers" only; payload carries scenario, board, bar, tasks/day, current spend, blend cost, winner + flagship and a save/over/tie/estimate direction). Pageviews are automatic. Smoke checks cover both proxy endpoints + the script tag.
 
 ## Deploy
 

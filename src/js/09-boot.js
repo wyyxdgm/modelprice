@@ -42,12 +42,13 @@ $('#sourceBody').innerHTML=bootSub(T('boot.sourceBody'));
     else { S.hour=12; S.dow=6; }
   }
   if(p.get('rt')!=null){ S.rankT=+p.get('rt')||0; S.rankTSet=true; }
-  /* —— 计算器状态（11-calculator）：cb=板块 cc=币种 cf=月费 cn=每日任务 cp=画像 ct=门槛 —— */
+  /* —— 计算器状态（11-calculator，W2 账单体检）：cb=板块 bl=勾选账单 cr=中转充值¥ cn=每日任务 cp=场景 ct=门槛 —— */
   if(p.get('cb')&&DATASETS[p.get('cb')]&&DATASETS[p.get('cb')].unit!=='image') S.calc.board=p.get('cb');
-  if(p.get('cc')==='usd'||p.get('cc')==='cny') S.calc.cur=p.get('cc');
-  if(p.get('cf')!=null) S.calc.fee=Math.max(0,+p.get('cf')||0);
-  if(p.get('cn')!=null) S.calc.tasks=Math.max(1,Math.round(+p.get('cn')||1));
+  if(p.get('bl')!=null){ const on=new Set(p.get('bl').split(',').filter(Boolean));
+    CALC_BILLS.forEach(b=>{ S.calc.bills[b.id]=on.has(b.id); }); }
+  if(p.get('cr')!=null) S.calc.relay=Math.max(0,+p.get('cr')||0);
   if(p.get('cp')&&RANK_PRESETS[p.get('cp')]) S.calc.profile=p.get('cp');
+  if(p.get('cn')!=null) S.calc.tasks=Math.max(1,Math.round(+p.get('cn')||1));
   if(p.get('ct')!=null){ S.calc.bar=+p.get('ct')||0; S.calc.barSet=true; }
   /* 一键场景（与首屏卡片共用 SCENARIOS/applyScene）：?scene=coding|agent|offpeak */
   if(p.get('scene')) applyScene(p.get('scene'));

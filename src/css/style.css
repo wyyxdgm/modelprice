@@ -76,6 +76,7 @@ textarea{font-family:var(--mono);font-size:11px;line-height:1.45;resize:vertical
 .btn{background:var(--panel2);border:1px solid var(--line2);color:var(--text);padding:7px 12px;
   border-radius:8px;cursor:pointer;font-size:12.5px;font-family:inherit;white-space:nowrap}
 .btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.on{background:var(--line2);border-color:var(--gold);color:var(--text)}
 .btn.primary{background:#123a4a;border-color:#1d5f77;color:#a9e9ff}
 .btn.primary:hover{background:#164a5e;color:#fff}
 .btn:disabled{opacity:.4;cursor:not-allowed}
